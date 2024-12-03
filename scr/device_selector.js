@@ -38,6 +38,7 @@
                     backdrop-filter: blur(10px) !important;
                     -webkit-backdrop-filter: blur(10px) !important;
                     z-index: 999 !important;
+                    transition: all 0.3s ease !important;
                 }
                 .navigation__link {
                     padding: 8px !important;
@@ -45,10 +46,6 @@
                 .navigation__link.active {
                     background: rgba(255,255,255,0.2) !important;
                     border-radius: 15px !important;
-                }
-                .navigation__body {
-                    display: flex !important;
-                    justify-content: center !important;
                 }
             `;
 
@@ -59,8 +56,14 @@
                     left: 50% !important;
                     transform: translateX(-50%) !important;
                     width: auto !important;
+                    height: auto !important;
                     border-radius: 20px !important;
                     padding: 10px 20px !important;
+                }
+                .navigation__body {
+                    display: flex !important;
+                    flex-direction: row !important;
+                    justify-content: center !important;
                 }
                 .navigation__link {
                     margin: 0 15px !important;
@@ -71,20 +74,36 @@
             const landscapeStyles = `
                 .navigation {
                     top: 50% !important;
+                    bottom: auto !important;
                     right: 20px !important;
+                    left: auto !important;
                     transform: translateY(-50%) !important;
+                    width: auto !important;
+                    height: auto !important;
                     border-radius: 20px !important;
                     padding: 20px 10px !important;
                 }
                 .navigation__body {
+                    display: flex !important;
                     flex-direction: column !important;
+                    justify-content: center !important;
+                    align-items: center !important;
                 }
                 .navigation__link {
                     margin: 10px 0 !important;
+                    width: auto !important;
                 }
             `;
 
-            style.textContent = baseStyles + (orientation === 'portrait' ? portraitStyles : landscapeStyles);
+            // Принудительно сбрасываем все возможные стили позиционирования
+            const resetStyles = `
+                .navigation {
+                    max-width: none !important;
+                    min-width: 0 !important;
+                }
+            `;
+
+            style.textContent = resetStyles + baseStyles + (orientation === 'portrait' ? portraitStyles : landscapeStyles);
             
             // Удаляем старые стили
             const oldStyle = document.getElementById('navbar-iphone-style');
@@ -93,6 +112,15 @@
             // Добавляем новые стили
             style.id = 'navbar-iphone-style';
             document.head.appendChild(style);
+
+            // Принудительно обновляем DOM
+            const navigation = document.querySelector('.navigation');
+            if (navigation) {
+                navigation.style.display = 'none';
+                setTimeout(() => {
+                    navigation.style.display = '';
+                }, 0);
+            }
         } else {
             // Удаляем стили если выбран дефолтный режим
             const oldStyle = document.getElementById('navbar-iphone-style');
