@@ -49,12 +49,13 @@
             const baseStyles = `
                 .navigation-bar {
                     position: fixed !important;
+                    bottom: 0 !important;
+                    right: 0 !important;
+                    z-index: 11 !important;
                     background: rgba(0,0,0,0.85) !important;
                     backdrop-filter: blur(20px) !important;
                     -webkit-backdrop-filter: blur(20px) !important;
-                    z-index: 999 !important;
                     transition: all 0.3s ease !important;
-                    border: 1px solid rgba(255, 255, 255, 0.1) !important;
                 }
                 .navigation-bar__content {
                     display: flex !important;
@@ -72,54 +73,47 @@
                     border-radius: 15px !important;
                     color: #fff !important;
                 }
-                .navigation-bar__icon {
-                    font-size: 1.5em !important;
-                }
-                .navigation-bar__text {
-                    color: inherit !important;
-                }
             `;
 
             // Стили для портретного режима
             const portraitStyles = `
-                .navigation-bar {
+                body:not(.orientation--landscape) .navigation-bar {
                     bottom: 20px !important;
                     left: 50% !important;
                     transform: translateX(-50%) !important;
                     border-radius: 20px !important;
-                    padding: 10px !important;
+                    padding: 10px 20px !important;
+                    width: auto !important;
                 }
-                .navigation-bar__content {
+                body:not(.orientation--landscape) .navigation-bar__content {
                     flex-direction: row !important;
                     justify-content: center !important;
                     align-items: center !important;
                 }
-                .navigation-bar__item {
+                body:not(.orientation--landscape) .navigation-bar__item {
                     margin: 0 10px !important;
                 }
             `;
 
             // Стили для ландшафтного режима
             const landscapeStyles = `
-                .navigation-bar {
-                    top: 50% !important;
+                body.true--mobile.orientation--landscape .navigation-bar {
+                    top: 0 !important;
+                    left: auto !important;
+                    display: flex !important;
+                    padding: 1.5em !important;
+                    padding-left: 0 !important;
                     right: 0 !important;
-                    transform: translateY(-50%) !important;
-                    border-radius: 20px 0 0 20px !important;
-                    padding: 20px 10px !important;
-                    height: auto !important;
                 }
-                .navigation-bar__content {
+                body.true--mobile.orientation--landscape .navigation-bar__content {
                     flex-direction: column !important;
-                    justify-content: center !important;
+                    justify-content: flex-start !important;
                     align-items: center !important;
+                    padding: 10px !important;
                 }
-                .navigation-bar__item {
+                body.true--mobile.orientation--landscape .navigation-bar__item {
                     margin: 10px 0 !important;
                     width: 60px !important;
-                }
-                .navigation-bar__icon {
-                    margin-bottom: 5px !important;
                 }
             `;
 
