@@ -1,48 +1,69 @@
-!function() {
+(function () {
     'use strict';
 
-    // Force iPhone Pro Max interface
+    // Добавляем настройку в интерфейс
+    Lampa.SettingsApi.addParam({
+        component: 'interface',
+        param: {
+            name: 'iphone_interface',
+            type: 'toggle',
+            default: true
+        },
+        field: {
+            name: 'iPhone Pro Max интерфейс',
+            description: 'Всегда использовать интерфейс iPhone Pro Max'
+        }
+    });
+
+    // Функция для применения стилей iPhone Pro Max
     function applyIPhoneProMaxStyles() {
-        // Set device type to iPhone Pro Max
-        Lampa.Storage.set('device_type', 'iphone');
-        
-        // Set screen dimensions for iPhone Pro Max
-        //Lampa.Storage.set('screen_width', 428);
-        //Lampa.Storage.set('screen_height', 926);
-        
-        // Add settings to interface section
-        Lampa.SettingsApi.addParam({
-            component: 'interface',
-            param: {
-                name: 'force_iphone_interface',
-                type: 'toggle',
-                default: true
-            },
-            field: {
-                name: 'Интерфейс iPhone Pro Max',
-                description: 'Всегда использовать интерфейс iPhone Pro Max'
-            },
-            onChange: function(value) {
-                if (value) {
-                    applyIPhoneProMaxStyles();
-                } else {
-                    // Reset to default device detection
-                    Lampa.Storage.remove('device_type');
-                    //Lampa.Storage.remove('screen_width');
-                    //Lampa.Storage.remove('screen_height');
-                }
-                // Reload interface
-                location.reload();
+        // Добавляем CSS стили для имитации интерфейса iPhone Pro Max
+        const style = document.createElement('style');
+        style.textContent = `
+            .navigation {
+                padding-bottom: env(safe-area-inset-bottom, 34px);
+                background: rgba(0,0,0,0.3);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
             }
-        });
+            
+            .navigation__body {
+                padding-bottom: 0;
+                padding-top: 0.5em;
+            }
+            
+            .navigation__split {
+                padding: 0.5em 0;
+            }
+            
+            .navigation__button {
+                padding: 0.3em 0.5em;
+                margin: 0 0.3em;
+                border-radius: 12px;
+                transition: background-color 0.3s, transform 0.2s;
+            }
+            
+            .navigation__button.active {
+                background-color: rgba(255,255,255,0.1);
+                transform: scale(1.05);
+            }
+            
+            .navigation__button-icon {
+                width: 1.8em;
+                height: 1.8em;
+            }
+        `;
+        document.head.appendChild(style);
     }
 
-    // Apply styles on plugin load if enabled
-    if (Lampa.Storage.get('force_iphone_interface', true)) {
-        applyIPhoneProMaxStyles();
-    }
+    // Применяем стили при загрузке
+    Lampa.Listener.follow('app', function(e) {
+        if (e.type == 'ready') {
+            // Проверяем настройку и применяем стили если включено
+            if (Lampa.Storage.get('iphone_interface', true)) {
+                applyIPhoneProMaxStyles();
+            }
+        }
+    });
 
-    // Add plugin to Lampa
-    window.plugin_iphone_interface = true;
-    Lampa.Plugin.add('iphone_interface', '🔲 iPhone Interface');
-}();
+})();
