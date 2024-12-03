@@ -97,7 +97,7 @@
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
-            text-align: right;
+            text-align: left;
             margin: 0.2em 0;
           }
           
