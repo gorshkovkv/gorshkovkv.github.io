@@ -49,71 +49,63 @@
             const baseStyles = `
                 .navigation-bar {
                     position: fixed !important;
-                    bottom: 0 !important;
-                    right: 0 !important;
                     z-index: 11 !important;
+                    display: -webkit-box !important;
+                    display: -webkit-flex !important;
+                    display: flex !important;
                     background: rgba(0,0,0,0.85) !important;
                     backdrop-filter: blur(20px) !important;
                     -webkit-backdrop-filter: blur(20px) !important;
-                    transition: all 0.3s ease !important;
-                }
-                .navigation-bar__content {
-                    display: flex !important;
-                    gap: 20px !important;
                 }
                 .navigation-bar__item {
                     padding: 8px !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
-                    color: rgba(255, 255, 255, 0.8) !important;
                 }
                 .navigation-bar__item.active {
                     background: rgba(255, 255, 255, 0.2) !important;
                     border-radius: 15px !important;
-                    color: #fff !important;
                 }
             `;
 
             // Стили для портретного режима
             const portraitStyles = `
-                body:not(.orientation--landscape) .navigation-bar {
-                    bottom: 20px !important;
-                    left: 50% !important;
-                    transform: translateX(-50%) !important;
-                    border-radius: 20px !important;
-                    padding: 10px 20px !important;
-                    width: auto !important;
+                .navigation-bar {
+                    top: 0 !important;
+                    left: auto !important;
+                    bottom: 0 !important;
+                    right: 0 !important;
+                    padding: 1.5em !important;
+                    padding-left: 0 !important;
                 }
-                body:not(.orientation--landscape) .navigation-bar__content {
+                .navigation-bar__content {
+                    display: flex !important;
                     flex-direction: row !important;
-                    justify-content: center !important;
+                    justify-content: flex-end !important;
                     align-items: center !important;
                 }
-                body:not(.orientation--landscape) .navigation-bar__item {
+                .navigation-bar__item {
                     margin: 0 10px !important;
                 }
             `;
 
             // Стили для ландшафтного режима
             const landscapeStyles = `
-                body.true--mobile.orientation--landscape .navigation-bar {
-                    top: 0 !important;
-                    left: auto !important;
-                    display: flex !important;
-                    padding: 1.5em !important;
-                    padding-left: 0 !important;
+                .navigation-bar {
+                    top: 50% !important;
                     right: 0 !important;
+                    transform: translateY(-50%) !important;
+                    padding: 1.5em 1em !important;
                 }
-                body.true--mobile.orientation--landscape .navigation-bar__content {
+                .navigation-bar__content {
+                    display: flex !important;
                     flex-direction: column !important;
-                    justify-content: flex-start !important;
+                    justify-content: center !important;
                     align-items: center !important;
-                    padding: 10px !important;
                 }
-                body.true--mobile.orientation--landscape .navigation-bar__item {
+                .navigation-bar__item {
                     margin: 10px 0 !important;
-                    width: 60px !important;
                 }
             `;
 
