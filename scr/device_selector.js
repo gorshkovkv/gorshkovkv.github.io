@@ -78,7 +78,7 @@
 
             // Стили для портретного режима
             const portraitStyles = `
-                .navigation {
+                body.orientation--portrait .navigation {
                     bottom: 1em !important;
                     left: 50% !important;
                     transform: translateX(-50%) !important;
@@ -86,7 +86,7 @@
                     border-radius: 2em !important;
                     padding: 0.3em 1em !important;
                 }
-                .navigation__body {
+                body.orientation--portrait .navigation__body {
                     display: flex !important;
                     flex-direction: row !important;
                     justify-content: center !important;
@@ -96,22 +96,22 @@
 
             // Стили для ландшафтного режима
             const landscapeStyles = `
-                .navigation {
-                    top: 50% !important;
+                body.orientation--landscape .navigation {
+                    bottom: 1em !important;
                     right: 1em !important;
-                    transform: translateY(-50%) !important;
+                    left: 1em !important;
                     border-radius: 2em !important;
-                    padding: 1em 0.3em !important;
+                    padding: 0.3em !important;
                 }
-                .navigation__body {
+                body.orientation--landscape .navigation__body {
                     display: flex !important;
-                    flex-direction: column !important;
-                    justify-content: center !important;
+                    flex-direction: row !important;
+                    justify-content: space-around !important;
                     gap: 0.5em !important;
                 }
             `;
 
-            style.textContent = baseStyles + (orientation === 'portrait' ? portraitStyles : landscapeStyles);
+            style.textContent = baseStyles + portraitStyles + landscapeStyles;
             
             // Удаляем старые стили
             const oldStyle = document.getElementById('navbar-iphone-style');
