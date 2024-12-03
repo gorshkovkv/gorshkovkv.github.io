@@ -55,16 +55,15 @@
 
             @media screen and (orientation: landscape) {
                 .navigation-bar {
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 60px;
-                    background: rgba(0, 0, 0, 0.85);
-                    backdrop-filter: blur(20px);
-                    -webkit-backdrop-filter: blur(20px);
-                    border-top: 1px solid rgba(255, 255, 255, 0.1);
-                    z-index: 999;
+  top: 0;
+  left: auto;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 1.5em;
+  padding-left: 0;
                 }
 
                 .navigation-bar__content {
@@ -105,13 +104,13 @@
 
             @media screen and (orientation: portrait) {
                 .page {
-                    padding-right: 60px !important;
+                    padding-bottom: 60px !important;
                 }
             }
 
             @media screen and (orientation: landscape) {
                 .page {
-                    padding-bottom: 60px !important;
+                    padding-right: 60px !important;
                 }
             }
         `;
