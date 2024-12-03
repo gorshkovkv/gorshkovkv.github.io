@@ -43,7 +43,15 @@
             const orientation = getOrientation();
             debug('Applying styles for orientation:', orientation);
 
+            // Удаляем старые стили
+            const oldStyle = document.getElementById('navbar-iphone-style');
+            if (oldStyle) {
+                debug('Removing old styles');
+                oldStyle.remove();
+            }
+
             const style = document.createElement('style');
+            style.id = 'navbar-iphone-style';
             
             // Базовые стили
             const baseStyles = `
@@ -76,58 +84,52 @@
                 }
             `;
 
-            // Стили для портретного режима
-            const portraitStyles = `
-                body.orientation--portrait .navigation {
-                    bottom: 1em !important;
-                    left: 50% !important;
-                    transform: translateX(-50%) !important;
-                    width: auto !important;
-                    border-radius: 2em !important;
-                    padding: 0.3em 1em !important;
-                }
-                body.orientation--portrait .navigation__body {
-                    display: flex !important;
-                    flex-direction: row !important;
-                    justify-content: center !important;
-                    gap: 0.5em !important;
-                }
-            `;
-
-            // Стили для ландшафтного режима
-            const landscapeStyles = `
-                html body.orientation--landscape .navigation {
-                    position: fixed !important;
-                    top: 50% !important;
-                    bottom: auto !important;
-                    right: 1em !important;
-                    left: auto !important;
-                    transform: translateY(-50%) !important;
-                    border-radius: 2em !important;
-                    padding: 0.5em 0.3em !important;
-                    width: auto !important;
-                    min-height: auto !important;
-                }
-                html body.orientation--landscape .navigation__body {
-                    display: flex !important;
-                    flex-direction: column !important;
-                    justify-content: center !important;
-                    gap: 0.5em !important;
-                    width: auto !important;
-                }
-            `;
-
-            style.textContent = baseStyles + portraitStyles + landscapeStyles;
+            // Определяем стили в зависимости от ориентации
+            let orientationStyles = '';
             
-            // Удаляем старые стили
-            const oldStyle = document.getElementById('navbar-iphone-style');
-            if (oldStyle) {
-                debug('Removing old styles');
-                oldStyle.remove();
+            if (orientation === 'portrait') {
+                debug('Applying portrait styles');
+                orientationStyles = `
+                    .navigation {
+                        bottom: 1em !important;
+                        left: 50% !important;
+                        transform: translateX(-50%) !important;
+                        width: auto !important;
+                        border-radius: 2em !important;
+                        padding: 0.3em 1em !important;
+                    }
+                    .navigation__body {
+                        display: flex !important;
+                        flex-direction: row !important;
+                        justify-content: center !important;
+                        gap: 0.5em !important;
+                    }
+                `;
+            } else {
+                debug('Applying landscape styles');
+                orientationStyles = `
+                    .navigation {
+                        top: 50% !important;
+                        right: 1em !important;
+                        bottom: auto !important;
+                        left: auto !important;
+                        transform: translateY(-50%) !important;
+                        border-radius: 2em !important;
+                        padding: 0.5em 0.3em !important;
+                        width: auto !important;
+                        min-height: auto !important;
+                    }
+                    .navigation__body {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        justify-content: center !important;
+                        gap: 0.5em !important;
+                        width: auto !important;
+                    }
+                `;
             }
-            
-            // Добавляем новые стили
-            style.id = 'navbar-iphone-style';
+
+            style.textContent = baseStyles + orientationStyles;
             document.head.appendChild(style);
             debug('New styles added');
 
@@ -135,11 +137,18 @@
             const navigation = document.querySelector('.navigation');
             if (navigation) {
                 debug('Navigation element found, forcing refresh');
-                navigation.style.display = 'none';
-                setTimeout(() => {
-                    navigation.style.display = '';
-                    debug('Navigation display restored');
-                }, 50);
+                navigation.style.cssText = orientation === 'landscape' ? 
+                    'top: 50% !important; right: 1em !important; bottom: auto !important; left: auto !important; transform: translateY(-50%) !important;' :
+                    'bottom: 1em !important; left: 50% !important; transform: translateX(-50%) !important;';
+                
+                const navigationBody = navigation.querySelector('.navigation__body');
+                if (navigationBody) {
+                    navigationBody.style.cssText = orientation === 'landscape' ?
+                        'display: flex !important; flex-direction: column !important; justify-content: center !important;' :
+                        'display: flex !important; flex-direction: row !important; justify-content: center !important;';
+                }
+                
+                debug('Direct styles applied to navigation element');
             }
         } else {
             debug('Using default style');
