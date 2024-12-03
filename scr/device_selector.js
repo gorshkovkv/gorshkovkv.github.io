@@ -59,18 +59,6 @@
                 }
             `,
             ipad: `
-                .card__view {
-                    padding-top: 140%;
-                }
-                .card--collection {
-                    width: 14em;
-                }
-                .card__plus {
-                    padding: 0.4em;
-                }
-                .menu__item {
-                    padding: 1em;
-                }
                 body.orientation--landscape .navigation-bar {
                     position: fixed;
                     left: 0;
