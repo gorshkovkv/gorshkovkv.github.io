@@ -25,27 +25,56 @@
 
         // Add iPhone Pro Max styles
         const styles = `
-            .navigation-bar {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                height: 84px;
-                background: rgba(0, 0, 0, 0.85);
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-                z-index: 999;
+            @media screen and (orientation: portrait) {
+                .navigation-bar {
+                    position: fixed;
+                    top: 50%;
+                    right: 0;
+                    transform: translateY(-50%);
+                    width: 60px;
+                    height: auto;
+                    background: rgba(0, 0, 0, 0.85);
+                    backdrop-filter: blur(20px);
+                    -webkit-backdrop-filter: blur(20px);
+                    border-radius: 16px 0 0 16px;
+                    border-left: 1px solid rgba(255, 255, 255, 0.1);
+                    z-index: 999;
+                    padding: 15px 0;
+                }
+
+                .navigation-bar__content {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 20px;
+                    height: 100%;
+                    padding: 0;
+                }
             }
 
-            .navigation-bar__content {
-                display: flex;
-                justify-content: space-around;
-                align-items: center;
-                height: 100%;
-                padding: 0 20px;
-                max-width: 500px;
-                margin: 0 auto;
+            @media screen and (orientation: landscape) {
+                .navigation-bar {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 60px;
+                    background: rgba(0, 0, 0, 0.85);
+                    backdrop-filter: blur(20px);
+                    -webkit-backdrop-filter: blur(20px);
+                    border-top: 1px solid rgba(255, 255, 255, 0.1);
+                    z-index: 999;
+                }
+
+                .navigation-bar__content {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 40px;
+                    height: 100%;
+                    padding: 0 20px;
+                }
             }
 
             .navigation-bar__item {
@@ -54,25 +83,36 @@
                 align-items: center;
                 color: rgba(255, 255, 255, 0.5);
                 text-decoration: none;
-                transition: color 0.3s ease;
+                transition: all 0.3s ease;
+                padding: 5px;
+                border-radius: 12px;
             }
 
             .navigation-bar__item.active {
                 color: #fff;
+                background: rgba(255, 255, 255, 0.1);
             }
 
             .navigation-bar__icon {
-                font-size: 24px;
-                margin-bottom: 4px;
+                font-size: 20px;
+                margin-bottom: 2px;
             }
 
             .navigation-bar__text {
-                font-size: 12px;
+                font-size: 10px;
                 font-weight: 500;
             }
 
-            .page {
-                padding-bottom: 84px !important;
+            @media screen and (orientation: portrait) {
+                .page {
+                    padding-right: 60px !important;
+                }
+            }
+
+            @media screen and (orientation: landscape) {
+                .page {
+                    padding-bottom: 60px !important;
+                }
             }
         `;
 
@@ -97,11 +137,11 @@
                     </a>
                     <a href="#" class="navigation-bar__item" data-action="favorites">
                         <div class="navigation-bar__icon">⭐</div>
-                        <div class="navigation-bar__text">Избранное</div>
+                        <div class="navigation-bar__text">Избр</div>
                     </a>
                     <a href="#" class="navigation-bar__item" data-action="settings">
                         <div class="navigation-bar__icon">⚙️</div>
-                        <div class="navigation-bar__text">Настройки</div>
+                        <div class="navigation-bar__text">Настр</div>
                     </a>
                 </div>
             `;
