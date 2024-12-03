@@ -50,22 +50,41 @@
                 .navigation-bar {
                     position: fixed !important;
                     z-index: 11 !important;
-                    display: -webkit-box !important;
-                    display: -webkit-flex !important;
-                    display: flex !important;
+                    right: 0 !important;
                     background: rgba(0,0,0,0.85) !important;
                     backdrop-filter: blur(20px) !important;
                     -webkit-backdrop-filter: blur(20px) !important;
+                    width: 4em !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                }
+                .navigation-bar__content {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    justify-content: flex-start !important;
+                    align-items: center !important;
+                    padding: 1em 0 !important;
+                    gap: 1.5em !important;
                 }
                 .navigation-bar__item {
-                    padding: 8px !important;
+                    padding: 0.5em !important;
                     display: flex !important;
+                    flex-direction: column !important;
                     align-items: center !important;
                     justify-content: center !important;
+                    width: 100% !important;
+                    color: rgba(255,255,255,0.6) !important;
                 }
                 .navigation-bar__item.active {
-                    background: rgba(255, 255, 255, 0.2) !important;
-                    border-radius: 15px !important;
+                    color: #fff !important;
+                }
+                .navigation-bar__icon {
+                    font-size: 1.5em !important;
+                    margin-bottom: 0.3em !important;
+                }
+                .navigation-bar__text {
+                    font-size: 0.8em !important;
+                    text-align: center !important;
                 }
             `;
 
@@ -73,20 +92,8 @@
             const portraitStyles = `
                 .navigation-bar {
                     top: 0 !important;
-                    left: auto !important;
                     bottom: 0 !important;
-                    right: 0 !important;
-                    padding: 1.5em !important;
-                    padding-left: 0 !important;
-                }
-                .navigation-bar__content {
-                    display: flex !important;
-                    flex-direction: row !important;
-                    justify-content: flex-end !important;
-                    align-items: center !important;
-                }
-                .navigation-bar__item {
-                    margin: 0 10px !important;
+                    height: 100% !important;
                 }
             `;
 
@@ -94,18 +101,9 @@
             const landscapeStyles = `
                 .navigation-bar {
                     top: 50% !important;
-                    right: 0 !important;
                     transform: translateY(-50%) !important;
-                    padding: 1.5em 1em !important;
-                }
-                .navigation-bar__content {
-                    display: flex !important;
-                    flex-direction: column !important;
-                    justify-content: center !important;
-                    align-items: center !important;
-                }
-                .navigation-bar__item {
-                    margin: 10px 0 !important;
+                    height: auto !important;
+                    min-height: 400px !important;
                 }
             `;
 
