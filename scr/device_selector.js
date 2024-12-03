@@ -96,19 +96,24 @@
 
             // Стили для ландшафтного режима
             const landscapeStyles = `
-                body.orientation--landscape .navigation {
+                html body.orientation--landscape .navigation {
+                    position: fixed !important;
                     top: 50% !important;
+                    bottom: auto !important;
                     right: 1em !important;
+                    left: auto !important;
                     transform: translateY(-50%) !important;
                     border-radius: 2em !important;
                     padding: 0.5em 0.3em !important;
                     width: auto !important;
+                    min-height: auto !important;
                 }
-                body.orientation--landscape .navigation__body {
+                html body.orientation--landscape .navigation__body {
                     display: flex !important;
                     flex-direction: column !important;
                     justify-content: center !important;
                     gap: 0.5em !important;
+                    width: auto !important;
                 }
             `;
 
