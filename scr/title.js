@@ -88,7 +88,7 @@
         const style = document.createElement('style');
         style.textContent = `
           .title-line {
-            font-size: 1.3em;
+            font-size: 1.1em;
             height: auto;
             max-height: 2.6em;
             line-height: 1.3em;
@@ -97,12 +97,12 @@
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
-            text-align: right;
+            text-align: left;
           }
           
           @media screen and (max-width: 480px) {
             .title-line {
-              font-size: 1em;
+              font-size: 0.9em;
             }
           }
         `;
