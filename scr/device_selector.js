@@ -43,112 +43,128 @@
             const orientation = getOrientation();
             debug('Applying styles for orientation:', orientation);
 
+            const style = document.createElement('style');
+            
+            // Базовые стили для обоих режимов
+            const baseStyles = `
+                .navigation-bar {
+                    position: fixed !important;
+                    background: rgba(0,0,0,0.7) !important;
+                    backdrop-filter: blur(10px) !important;
+                    -webkit-backdrop-filter: blur(10px) !important;
+                    z-index: 999 !important;
+                    transition: all 0.3s ease !important;
+                }
+                .navigation-bar__item {
+                    padding: 8px !important;
+                }
+                .navigation-bar__item.active {
+                    background: rgba(255,255,255,0.2) !important;
+                    border-radius: 15px !important;
+                }
+            `;
+
+            // Стили для портретного режима
+            const portraitStyles = `
+                .navigation-bar {
+                    bottom: 20px !important;
+                    left: 50% !important;
+                    transform: translateX(-50%) !important;
+                    width: auto !important;
+                    height: auto !important;
+                    border-radius: 20px !important;
+                    padding: 10px 20px !important;
+                }
+                .navigation-bar__content {
+                    display: flex !important;
+                    flex-direction: row !important;
+                    justify-content: center !important;
+                }
+                .navigation-bar__item {
+                    margin: 0 15px !important;
+                }
+            `;
+
+            // Стили для ландшафтного режима
+            const landscapeStyles = `
+                .navigation-bar {
+                    top: 50% !important;
+                    bottom: auto !important;
+                    right: 20px !important;
+                    left: auto !important;
+                    transform: translateY(-50%) !important;
+                    width: auto !important;
+                    height: auto !important;
+                    border-radius: 20px !important;
+                    padding: 20px 10px !important;
+                }
+                .navigation-bar__content {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    justify-content: center !important;
+                    align-items: center !important;
+                }
+                .navigation-bar__item {
+                    margin: 10px 0 !important;
+                    width: auto !important;
+                }
+            `;
+
+            // Принудительно сбрасываем все возможные стили позиционирования
+            const resetStyles = `
+                .navigation-bar {
+                    max-width: none !important;
+                    min-width: 0 !important;
+                }
+            `;
+
+            const finalStyles = resetStyles + baseStyles + (orientation === 'portrait' ? portraitStyles : landscapeStyles);
+            debug('Applied styles type:', orientation === 'portrait' ? 'portrait' : 'landscape');
+            
+            style.textContent = finalStyles;
+            
             // Удаляем старые стили
             const oldStyle = document.getElementById('navbar-iphone-style');
             if (oldStyle) {
                 debug('Removing old styles');
                 oldStyle.remove();
             }
-
-            const style = document.createElement('style');
+            
+            // Добавляем новые стили
             style.id = 'navbar-iphone-style';
-            
-            // Базовые стили
-            const baseStyles = `
-                .navigation {
-                    position: fixed !important;
-                    background: rgba(0,0,0,0.8) !important;
-                    backdrop-filter: blur(20px) !important;
-                    -webkit-backdrop-filter: blur(20px) !important;
-                    z-index: 999 !important;
-                    transition: all 0.3s ease !important;
-                    border: 1px solid rgba(255,255,255,0.1) !important;
-                }
-                .navigation__body {
-                    padding: 0 !important;
-                }
-                .navigation__split {
-                    padding: 0.3em !important;
-                }
-                .navigation__link {
-                    padding: 0.7em !important;
-                    margin: 0.2em !important;
-                    border-radius: 0.8em !important;
-                }
-                .navigation__link.active {
-                    background: rgba(255,255,255,0.2) !important;
-                }
-                .navigation__link > svg {
-                    width: 1.4em !important;
-                    height: 1.4em !important;
-                }
-            `;
-
-            // Определяем стили в зависимости от ориентации
-            let orientationStyles = '';
-            
-            if (orientation === 'portrait') {
-                debug('Applying portrait styles');
-                orientationStyles = `
-                    .navigation {
-                        bottom: 1em !important;
-                        left: 50% !important;
-                        transform: translateX(-50%) !important;
-                        width: auto !important;
-                        border-radius: 2em !important;
-                        padding: 0.3em 1em !important;
-                    }
-                    .navigation__body {
-                        display: flex !important;
-                        flex-direction: row !important;
-                        justify-content: center !important;
-                        gap: 0.5em !important;
-                    }
-                `;
-            } else {
-                debug('Applying landscape styles');
-                orientationStyles = `
-                    .navigation {
-                        top: 50% !important;
-                        right: 1em !important;
-                        bottom: auto !important;
-                        left: auto !important;
-                        transform: translateY(-50%) !important;
-                        border-radius: 2em !important;
-                        padding: 0.5em 0.3em !important;
-                        width: auto !important;
-                        min-height: auto !important;
-                    }
-                    .navigation__body {
-                        display: flex !important;
-                        flex-direction: column !important;
-                        justify-content: center !important;
-                        gap: 0.5em !important;
-                        width: auto !important;
-                    }
-                `;
-            }
-
-            style.textContent = baseStyles + orientationStyles;
             document.head.appendChild(style);
             debug('New styles added');
 
             // Принудительно обновляем DOM
-            const navigation = document.querySelector('.navigation');
+            const navigation = document.querySelector('.navigation-bar');
             if (navigation) {
                 debug('Navigation element found, forcing refresh');
-                navigation.style.cssText = orientation === 'landscape' ? 
-                    'top: 50% !important; right: 1em !important; bottom: auto !important; left: auto !important; transform: translateY(-50%) !important;' :
-                    'bottom: 1em !important; left: 50% !important; transform: translateX(-50%) !important;';
-                
-                const navigationBody = navigation.querySelector('.navigation__body');
-                if (navigationBody) {
-                    navigationBody.style.cssText = orientation === 'landscape' ?
-                        'display: flex !important; flex-direction: column !important; justify-content: center !important;' :
-                        'display: flex !important; flex-direction: row !important; justify-content: center !important;';
-                }
-                
-                debug('Direct styles applied to navigation element');
+                debug('Navigation current styles:', {
+                    display: navigation.style.display,
+                    position: window.getComputedStyle(navigation).position,
+                    top: window.getComputedStyle(navigation).top,
+                    right: window.getComputedStyle(navigation).right,
+                    bottom: window.getComputedStyle(navigation).bottom,
+                    left: window.getComputedStyle(navigation).left,
+                    transform: window.getComputedStyle(navigation).transform
+                });
+
+                navigation.style.display = 'none';
+                setTimeout(() => {
+                    navigation.style.display = '';
+                    debug('Navigation display restored');
+                    debug('Navigation updated styles:', {
+                        display: navigation.style.display,
+                        position: window.getComputedStyle(navigation).position,
+                        top: window.getComputedStyle(navigation).top,
+                        right: window.getComputedStyle(navigation).right,
+                        bottom: window.getComputedStyle(navigation).bottom,
+                        left: window.getComputedStyle(navigation).left,
+                        transform: window.getComputedStyle(navigation).transform
+                    });
+                }, 50);
+            } else {
+                debug('Navigation element not found!');
             }
         } else {
             debug('Using default style');
@@ -169,23 +185,15 @@
     });
 
     // Инициализация плагина
-    function initPlugin() {
-        debug('Initializing plugin...');
-        setTimeout(() => {
-            setNavbarStyle();
-            debug('Initial styles applied');
-        }, 1000);
-    }
-
     if (window.appready) {
         debug('App is ready, initializing immediately');
-        initPlugin();
+        setNavbarStyle();
     } else {
         debug('Waiting for app ready event');
         Lampa.Listener.follow('app', function(e) {
             debug('App event received:', e.type);
             if (e.type == 'ready') {
-                initPlugin();
+                setNavbarStyle();
             }
         });
     }
@@ -194,7 +202,7 @@
     window.addEventListener('resize', function() {
         debug('Window resized');
         if (Lampa.Storage.get("navbar_position") === "iphone") {
-            setTimeout(setNavbarStyle, 100);
+            setNavbarStyle();
         }
     });
 
