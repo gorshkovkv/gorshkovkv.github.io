@@ -107,17 +107,16 @@
         }
     });
 
-    // Применяем стили при запуске
-    Lampa.ready(function() {
+    // Инициализация плагина
+    if (window.appready) {
         setNavbarStyle();
-    });
-
-    // Следим за изменениями в навигации и ориентации
-    Lampa.Listener.follow('app', function(e) {
-        if (e.type == 'ready') {
-            setNavbarStyle();
-        }
-    });
+    } else {
+        Lampa.Listener.follow('app', function(e) {
+            if (e.type == 'ready') {
+                setNavbarStyle();
+            }
+        });
+    }
 
     // Отслеживаем изменение ориентации экрана
     window.addEventListener('resize', function() {
