@@ -174,7 +174,12 @@
                     });
 
                     // Добавляем кнопку в интерфейс
-                    $('.full-start__buttons', Lampa.Activity.active().activity.render()).append(btn);
+                    var container = $('.full-start-new__buttons', Lampa.Activity.active().activity.render());
+                    if (container.length) {
+                        container.append(btn);
+                    } else {
+                        console.log('Контейнер для кнопки не найден');
+                    }
                 }, 500);
             }
         });
