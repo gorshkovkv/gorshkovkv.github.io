@@ -97,16 +97,17 @@
             // Стили для ландшафтного режима
             const landscapeStyles = `
                 body.orientation--landscape .navigation {
-                    bottom: 1em !important;
+                    top: 50% !important;
                     right: 1em !important;
-                    left: 1em !important;
+                    transform: translateY(-50%) !important;
                     border-radius: 2em !important;
-                    padding: 0.3em !important;
+                    padding: 0.5em 0.3em !important;
+                    width: auto !important;
                 }
                 body.orientation--landscape .navigation__body {
                     display: flex !important;
-                    flex-direction: row !important;
-                    justify-content: space-around !important;
+                    flex-direction: column !important;
+                    justify-content: center !important;
                     gap: 0.5em !important;
                 }
             `;
