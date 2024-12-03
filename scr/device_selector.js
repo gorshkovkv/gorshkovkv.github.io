@@ -33,6 +33,52 @@
         return orientation;
     }
 
+    // Функция для поиска навигационного элемента
+    function findNavigationElement() {
+        debug('Searching for navigation element...');
+        
+        // Пробуем разные селекторы
+        const selectors = [
+            '.navigation',
+            '[class*="navigation"]',
+            '[class*="nav"]',
+            '#navigation',
+            'nav'
+        ];
+
+        for (let selector of selectors) {
+            const element = document.querySelector(selector);
+            if (element) {
+                debug('Found navigation element with selector:', selector);
+                debug('Element classes:', element.className);
+                debug('Element HTML:', element.outerHTML);
+                return element;
+            }
+        }
+
+        // Поиск по всем элементам с похожими классами
+        debug('Searching all elements with navigation-related classes...');
+        const allElements = document.getElementsByTagName('*');
+        const navigationElements = Array.from(allElements).filter(el => 
+            el.className && typeof el.className === 'string' && 
+            (el.className.includes('nav') || el.className.includes('menu'))
+        );
+
+        if (navigationElements.length > 0) {
+            debug('Found potential navigation elements:', 
+                navigationElements.map(el => ({
+                    className: el.className,
+                    id: el.id,
+                    tagName: el.tagName
+                }))
+            );
+        } else {
+            debug('No navigation elements found in DOM');
+        }
+
+        return null;
+    }
+
     // Основная функция для изменения стиля навигационной панели
     function setNavbarStyle() {
         debug('Setting navbar style');
@@ -45,9 +91,18 @@
 
             const style = document.createElement('style');
             
+            // Расширяем селекторы для поиска навигации
+            const navigationSelectors = `
+                .navigation,
+                [class*="navigation"],
+                .nav-panel,
+                .menu-panel,
+                nav
+            `;
+            
             // Базовые стили для обоих режимов
             const baseStyles = `
-                .navigation {
+                ${navigationSelectors} {
                     position: fixed !important;
                     background: rgba(0,0,0,0.7) !important;
                     backdrop-filter: blur(10px) !important;
@@ -55,10 +110,12 @@
                     z-index: 999 !important;
                     transition: all 0.3s ease !important;
                 }
-                .navigation__link {
+                ${navigationSelectors} a,
+                ${navigationSelectors} .navigation__link {
                     padding: 8px !important;
                 }
-                .navigation__link.active {
+                ${navigationSelectors} a.active,
+                ${navigationSelectors} .navigation__link.active {
                     background: rgba(255,255,255,0.2) !important;
                     border-radius: 15px !important;
                 }
@@ -66,7 +123,7 @@
 
             // Стили для портретного режима
             const portraitStyles = `
-                .navigation {
+                ${navigationSelectors} {
                     bottom: 20px !important;
                     left: 50% !important;
                     transform: translateX(-50%) !important;
@@ -75,19 +132,21 @@
                     border-radius: 20px !important;
                     padding: 10px 20px !important;
                 }
-                .navigation__body {
+                ${navigationSelectors} > div,
+                ${navigationSelectors} > ul {
                     display: flex !important;
                     flex-direction: row !important;
                     justify-content: center !important;
                 }
-                .navigation__link {
+                ${navigationSelectors} a,
+                ${navigationSelectors} .navigation__link {
                     margin: 0 15px !important;
                 }
             `;
 
             // Стили для ландшафтного режима
             const landscapeStyles = `
-                .navigation {
+                ${navigationSelectors} {
                     top: 50% !important;
                     bottom: auto !important;
                     right: 20px !important;
@@ -98,13 +157,15 @@
                     border-radius: 20px !important;
                     padding: 20px 10px !important;
                 }
-                .navigation__body {
+                ${navigationSelectors} > div,
+                ${navigationSelectors} > ul {
                     display: flex !important;
                     flex-direction: column !important;
                     justify-content: center !important;
                     align-items: center !important;
                 }
-                .navigation__link {
+                ${navigationSelectors} a,
+                ${navigationSelectors} .navigation__link {
                     margin: 10px 0 !important;
                     width: auto !important;
                 }
@@ -112,7 +173,7 @@
 
             // Принудительно сбрасываем все возможные стили позиционирования
             const resetStyles = `
-                .navigation {
+                ${navigationSelectors} {
                     max-width: none !important;
                     min-width: 0 !important;
                 }
@@ -135,8 +196,8 @@
             document.head.appendChild(style);
             debug('New styles added');
 
-            // Принудительно обновляем DOM
-            const navigation = document.querySelector('.navigation');
+            // Поиск и обновление навигации
+            const navigation = findNavigationElement();
             if (navigation) {
                 debug('Navigation element found, forcing refresh');
                 debug('Navigation current styles:', {
@@ -163,8 +224,6 @@
                         transform: window.getComputedStyle(navigation).transform
                     });
                 }, 50);
-            } else {
-                debug('Navigation element not found!');
             }
         } else {
             debug('Using default style');
@@ -185,15 +244,24 @@
     });
 
     // Инициализация плагина
+    function initPlugin() {
+        debug('Initializing plugin...');
+        // Ждем немного, чтобы DOM полностью загрузился
+        setTimeout(() => {
+            setNavbarStyle();
+            debug('Initial styles applied');
+        }, 1000);
+    }
+
     if (window.appready) {
         debug('App is ready, initializing immediately');
-        setNavbarStyle();
+        initPlugin();
     } else {
         debug('Waiting for app ready event');
         Lampa.Listener.follow('app', function(e) {
             debug('App event received:', e.type);
             if (e.type == 'ready') {
-                setNavbarStyle();
+                initPlugin();
             }
         });
     }
@@ -202,7 +270,8 @@
     window.addEventListener('resize', function() {
         debug('Window resized');
         if (Lampa.Storage.get("navbar_position") === "iphone") {
-            setNavbarStyle();
+            // Добавляем небольшую задержку для стабильности
+            setTimeout(setNavbarStyle, 100);
         }
     });
 
