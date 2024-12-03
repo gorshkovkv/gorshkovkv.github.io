@@ -79,8 +79,8 @@
       if (e.type == "complite") {
         var render = e.object.activity.render();
         $(".original_title", render).remove();
-        $(".full-start-new__title", render).before(
-          '<div class="original_title" style="margin-top:-0.8em; text-align: right;"><div></div></div>'
+        $(".full-start-new__title", render).after(
+          '<div class="original_title" style="margin: 0.5em 0; text-align: right;"><div></div></div>'
         );
         titleOrigin(e.data.movie);
         
@@ -88,7 +88,7 @@
         const style = document.createElement('style');
         style.textContent = `
           .title-line {
-            font-size: 1.1em;
+            font-size: 1.3em;
             height: auto;
             max-height: 2.6em;
             line-height: 1.3em;
@@ -97,12 +97,13 @@
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
-            text-align: left;
+            text-align: right;
+            margin: 0.2em 0;
           }
           
           @media screen and (max-width: 480px) {
             .title-line {
-              font-size: 0.9em;
+              font-size: 1em;
             }
           }
         `;
