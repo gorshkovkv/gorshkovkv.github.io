@@ -1,204 +1,128 @@
 !function() {
     "use strict";
     
-    // Add settings option
+    // Добавляем настройки для позиции навигационной панели
     Lampa.SettingsApi.addParam({
         component: "interface",
         param: {
-            name: "iphone_interface",
+            name: "navbar_position",
             type: "select",
             values: {
-                1: "iPhone Pro Max",
-                0: "Стандартный"
+                "iphone": "iPhone Pro Max Style",
+                "default": "Default Style"
             },
-            default: "1"
+            default: "default"
         },
         field: {
-            name: "Стиль навигации",
-            description: "Использовать стиль навигации от iPhone Pro Max"
+            name: "Стиль навигационной панели",
+            description: "Выберите стиль отображения навигационной панели"
         }
     });
 
-    // Plugin initialization flag
-    if (!window.iphone_interface_plugin) {
-        window.iphone_interface_plugin = true;
+    // Определяем ориентацию экрана
+    function getOrientation() {
+        return window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
+    }
 
-        // Add iPhone Pro Max styles
-        const styles = `
-            @media screen and (orientation: portrait) {
-                .navigation-bar {
-                    position: fixed;
-                    top: 50%;
-                    right: 0;
-                    transform: translateY(-50%);
-                    width: 60px;
-                    height: auto;
-                    background: rgba(0, 0, 0, 0.85);
-                    backdrop-filter: blur(20px);
-                    -webkit-backdrop-filter: blur(20px);
-                    border-radius: 16px 0 0 16px;
-                    border-left: 1px solid rgba(255, 255, 255, 0.1);
-                    z-index: 999;
-                    padding: 15px 0;
+    // Основная функция для изменения стиля навигационной панели
+    function setNavbarStyle() {
+        if (Lampa.Storage.get("navbar_position") === "iphone") {
+            const orientation = getOrientation();
+            const style = document.createElement('style');
+            
+            // Базовые стили для обоих режимов
+            const baseStyles = `
+                .navigation {
+                    position: fixed !important;
+                    background: rgba(0,0,0,0.7) !important;
+                    backdrop-filter: blur(10px) !important;
+                    -webkit-backdrop-filter: blur(10px) !important;
+                    z-index: 999 !important;
                 }
-
-                .navigation-bar__content {
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 20px;
-                    height: 100%;
-                    padding: 0;
+                .navigation__link {
+                    padding: 8px !important;
                 }
-            }
-
-            @media screen and (orientation: landscape) {
-                .navigation-bar {
-  top: 0;
-  left: auto;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: flex;
-  padding: 1.5em;
-  padding-left: 0;
+                .navigation__link.active {
+                    background: rgba(255,255,255,0.2) !important;
+                    border-radius: 15px !important;
                 }
-
-                .navigation-bar__content {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 40px;
-                    height: 100%;
-                    padding: 0 20px;
+                .navigation__body {
+                    display: flex !important;
+                    justify-content: center !important;
                 }
-            }
-
-            .navigation-bar__item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                color: rgba(255, 255, 255, 0.5);
-                text-decoration: none;
-                transition: all 0.3s ease;
-                padding: 5px;
-                border-radius: 12px;
-            }
-
-            .navigation-bar__item.active {
-                color: #fff;
-                background: rgba(255, 255, 255, 0.1);
-            }
-
-            .navigation-bar__icon {
-                font-size: 20px;
-                margin-bottom: 2px;
-            }
-
-            .navigation-bar__text {
-                font-size: 10px;
-                font-weight: 500;
-            }
-
-            @media screen and (orientation: portrait) {
-                .page {
-                    padding-bottom: 60px !important;
-                }
-            }
-
-            @media screen and (orientation: landscape) {
-                .page {
-                    padding-right: 60px !important;
-                }
-            }
-        `;
-
-        // Add styles to document
-        const styleElement = document.createElement('style');
-        styleElement.textContent = styles;
-        document.head.appendChild(styleElement);
-
-        // Create navigation bar
-        function createNavigationBar() {
-            const nav = document.createElement('div');
-            nav.className = 'navigation-bar';
-            nav.innerHTML = `
-                <div class="navigation-bar__content">
-                    <a href="#" class="navigation-bar__item" data-action="main">
-                        <div class="navigation-bar__icon">🏠</div>
-                        <div class="navigation-bar__text">Главная</div>
-                    </a>
-                    <a href="#" class="navigation-bar__item" data-action="search">
-                        <div class="navigation-bar__icon">🔍</div>
-                        <div class="navigation-bar__text">Поиск</div>
-                    </a>
-                    <a href="#" class="navigation-bar__item" data-action="favorites">
-                        <div class="navigation-bar__icon">⭐</div>
-                        <div class="navigation-bar__text">Избр</div>
-                    </a>
-                    <a href="#" class="navigation-bar__item" data-action="settings">
-                        <div class="navigation-bar__icon">⚙️</div>
-                        <div class="navigation-bar__text">Настр</div>
-                    </a>
-                </div>
             `;
 
-            // Handle navigation clicks
-            nav.addEventListener('click', function(e) {
-                const item = e.target.closest('.navigation-bar__item');
-                if (item) {
-                    e.preventDefault();
-                    const action = item.dataset.action;
-                    
-                    // Remove active class from all items
-                    nav.querySelectorAll('.navigation-bar__item').forEach(i => i.classList.remove('active'));
-                    
-                    // Add active class to clicked item
-                    item.classList.add('active');
-
-                    // Handle navigation actions
-                    switch(action) {
-                        case 'main':
-                            Lampa.Activity.push({component: 'main'});
-                            break;
-                        case 'search':
-                            Lampa.Activity.push({component: 'search'});
-                            break;
-                        case 'favorites':
-                            Lampa.Activity.push({component: 'favorites'});
-                            break;
-                        case 'settings':
-                            Lampa.Activity.push({component: 'settings'});
-                            break;
-                    }
+            // Стили для портретного режима
+            const portraitStyles = `
+                .navigation {
+                    bottom: 20px !important;
+                    left: 50% !important;
+                    transform: translateX(-50%) !important;
+                    width: auto !important;
+                    border-radius: 20px !important;
+                    padding: 10px 20px !important;
                 }
-            });
+                .navigation__link {
+                    margin: 0 15px !important;
+                }
+            `;
 
-            return nav;
+            // Стили для ландшафтного режима
+            const landscapeStyles = `
+                .navigation {
+                    top: 50% !important;
+                    right: 20px !important;
+                    transform: translateY(-50%) !important;
+                    border-radius: 20px !important;
+                    padding: 20px 10px !important;
+                }
+                .navigation__body {
+                    flex-direction: column !important;
+                }
+                .navigation__link {
+                    margin: 10px 0 !important;
+                }
+            `;
+
+            style.textContent = baseStyles + (orientation === 'portrait' ? portraitStyles : landscapeStyles);
+            
+            // Удаляем старые стили
+            const oldStyle = document.getElementById('navbar-iphone-style');
+            if (oldStyle) oldStyle.remove();
+            
+            // Добавляем новые стили
+            style.id = 'navbar-iphone-style';
+            document.head.appendChild(style);
+        } else {
+            // Удаляем стили если выбран дефолтный режим
+            const oldStyle = document.getElementById('navbar-iphone-style');
+            if (oldStyle) oldStyle.remove();
         }
-
-        // Add navigation bar to the page
-        Lampa.Listener.follow('app', function(e) {
-            if (e.type == 'ready' && Lampa.Storage.get('iphone_interface') == '1') {
-                const nav = createNavigationBar();
-                document.body.appendChild(nav);
-
-                // Update active state based on current activity
-                Lampa.Listener.follow('activity', function(e) {
-                    if (e.component) {
-                        const items = document.querySelectorAll('.navigation-bar__item');
-                        items.forEach(item => {
-                            if (item.dataset.action === e.component) {
-                                item.classList.add('active');
-                            } else {
-                                item.classList.remove('active');
-                            }
-                        });
-                    }
-                });
-            }
-        });
     }
+
+    // Слушаем изменения в настройках
+    Lampa.Settings.listener.follow('open', function (e) {
+        if (e.name == 'interface') {
+            setNavbarStyle();
+        }
+    });
+
+    // Применяем стили при запуске
+    Lampa.ready(function() {
+        setNavbarStyle();
+    });
+
+    // Следим за изменениями в навигации и ориентации
+    Lampa.Listener.follow('app', function(e) {
+        if (e.type == 'ready') {
+            setNavbarStyle();
+        }
+    });
+
+    // Отслеживаем изменение ориентации экрана
+    window.addEventListener('resize', function() {
+        if (Lampa.Storage.get("navbar_position") === "iphone") {
+            setNavbarStyle();
+        }
+    });
 }();
