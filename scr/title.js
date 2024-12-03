@@ -101,6 +101,10 @@
             margin: 0.2em 0;
           }
           
+          #titleen {
+            margin-bottom: 1em;
+          }
+          
           @media screen and (max-width: 480px) {
             .title-line {
               font-size: 1em;
