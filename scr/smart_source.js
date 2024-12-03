@@ -3,20 +3,29 @@
 
     // Конфигурация
     var Defined = {
-        api: 'lampac',
-        localhost: window.location.protocol === 'https:' ? 'https://lampa.stream/' : 'http://lampa.stream/',
+        api: 'lampac'
     };
 
     // Список поддерживаемых балансеров
     var balancers = ['rezka2', 'kinobase', 'cdnmovies', 'collaps', 'filmix', 'zetflix', 'redheadsound', 'anilibria'];
     var network = new Lampa.Reguest();
 
-    function proxy() {
-        var proxy1 = 'https://cors.nb557.workers.dev:8443/';
-        var proxy2 = (window.location.protocol === 'https:' ? 'https://' : 'http://') + 'iqslgbok.deploy.cx/';
-        var proxy3 = 'https://cors557.deno.dev/';
+    function getStreamingUrl(movie, balancer) {
+        var user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36';
         
-        return proxy1;
+        // Базовые URL для каждого балансера
+        var balancer_urls = {
+            'rezka2': 'https://rezka.ag',
+            'kinobase': 'https://kinobase.org',
+            'cdnmovies': 'https://cdnmovies.net',
+            'collaps': 'https://api.delivembd.ws',
+            'filmix': 'https://filmix.ac',
+            'zetflix': 'https://zetflix.online',
+            'redheadsound': 'https://redheadsound.video',
+            'anilibria': 'https://api.anilibria.tv'
+        };
+
+        return balancer_urls[balancer] + '/api/v1/search';
     }
 
     // Функция для проверки качества видео
@@ -45,11 +54,19 @@
                 title: movie.title,
                 original_title: movie.original_title,
                 year: movie.year,
-                type: movie.type
+                type: movie.type,
+                imdb_id: movie.imdb_id,
+                tmdb_id: movie.id
+            };
+
+            var headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
             };
 
             network.timeout(15000);
-            network.silent(proxy() + Defined.localhost + 'api/v1/' + balancer + '/search', (found) => {
+            network.native(getStreamingUrl(movie, balancer), function(found) {
                 if (found && found.streams) {
                     resolve({
                         balancer: balancer,
@@ -61,12 +78,17 @@
                         streams: []
                     });
                 }
-            }, (err) => {
+            }, function(err) {
+                console.log('Error with balancer ' + balancer + ':', err);
                 resolve({
                     balancer: balancer,
                     streams: []
                 });
-            }, params);
+            }, params, {
+                headers: headers,
+                method: 'POST',
+                json: true
+            });
         });
     }
 
