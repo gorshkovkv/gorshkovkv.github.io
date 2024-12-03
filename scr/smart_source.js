@@ -10,22 +10,36 @@
     var balancers = ['rezka2', 'kinobase', 'cdnmovies', 'collaps', 'filmix', 'zetflix', 'redheadsound', 'anilibria'];
     var network = new Lampa.Reguest();
 
-    function getStreamingUrl(movie, balancer) {
-        var user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36';
+    function proxy(url) {
+        var proxies = {
+            'cors1': 'https://cors.nb557.workers.dev/',
+            'cors2': 'https://cors557.deno.dev/',
+            'api1': 'https://api.delivembd.ws/api/v1/',
+            'api2': 'https://api.strvid.ws/api/v1/',
+            'api3': 'https://api.strvid.plus/api/v1/'
+        };
         
-        // Базовые URL для каждого балансера
-        var balancer_urls = {
-            'rezka2': 'https://rezka.ag',
-            'kinobase': 'https://kinobase.org',
-            'cdnmovies': 'https://cdnmovies.net',
-            'collaps': 'https://api.delivembd.ws',
-            'filmix': 'https://filmix.ac',
-            'zetflix': 'https://zetflix.online',
-            'redheadsound': 'https://redheadsound.video',
-            'anilibria': 'https://api.anilibria.tv'
+        // Выбираем прокси в зависимости от домена
+        if (url.includes('delivembd.ws')) return proxies.api1;
+        if (url.includes('strvid.ws')) return proxies.api2;
+        if (url.includes('strvid.plus')) return proxies.api3;
+        
+        return proxies.cors1;
+    }
+
+    function getStreamingUrl(movie, balancer) {
+        var urls = {
+            'rezka2': 'https://api.delivembd.ws/api/v1/rezka/search',
+            'kinobase': 'https://api.delivembd.ws/api/v1/kinobase/search',
+            'cdnmovies': 'https://api.strvid.ws/api/v1/cdnmovies/search',
+            'collaps': 'https://api.strvid.ws/api/v1/collaps/search',
+            'filmix': 'https://api.strvid.plus/api/v1/filmix/search',
+            'zetflix': 'https://api.strvid.plus/api/v1/zetflix/search',
+            'redheadsound': 'https://api.delivembd.ws/api/v1/redheadsound/search',
+            'anilibria': 'https://api.delivembd.ws/api/v1/anilibria/search'
         };
 
-        return balancer_urls[balancer] + '/api/v1/search';
+        return urls[balancer] || '';
     }
 
     // Функция для проверки качества видео
@@ -50,6 +64,15 @@
     // Функция для получения потоков от каждого балансера
     function getStreams(movie, balancer) {
         return new Promise((resolve, reject) => {
+            var url = getStreamingUrl(movie, balancer);
+            if (!url) {
+                resolve({
+                    balancer: balancer,
+                    streams: []
+                });
+                return;
+            }
+
             var params = {
                 title: movie.title,
                 original_title: movie.original_title,
@@ -59,14 +82,8 @@
                 tmdb_id: movie.id
             };
 
-            var headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            };
-
             network.timeout(15000);
-            network.native(getStreamingUrl(movie, balancer), function(found) {
+            network.native(proxy(url) + url, function(found) {
                 if (found && found.streams) {
                     resolve({
                         balancer: balancer,
@@ -84,11 +101,7 @@
                     balancer: balancer,
                     streams: []
                 });
-            }, params, {
-                headers: headers,
-                method: 'POST',
-                json: true
-            });
+            }, params);
         });
     }
 
