@@ -1,6 +1,12 @@
 !function() {
     "use strict";
     
+    function debug(msg, data) {
+        console.log('NavbarPlugin Debug:', msg, data || '');
+    }
+
+    debug('Plugin initialization started');
+    
     // Добавляем настройки для позиции навигационной панели
     Lampa.SettingsApi.addParam({
         component: "interface",
@@ -21,13 +27,22 @@
 
     // Определяем ориентацию экрана
     function getOrientation() {
-        return window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
+        const orientation = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
+        debug('Current orientation:', orientation);
+        debug('Window dimensions:', { width: window.innerWidth, height: window.innerHeight });
+        return orientation;
     }
 
     // Основная функция для изменения стиля навигационной панели
     function setNavbarStyle() {
-        if (Lampa.Storage.get("navbar_position") === "iphone") {
+        debug('Setting navbar style');
+        const currentPosition = Lampa.Storage.get("navbar_position");
+        debug('Current navbar position setting:', currentPosition);
+
+        if (currentPosition === "iphone") {
             const orientation = getOrientation();
+            debug('Applying styles for orientation:', orientation);
+
             const style = document.createElement('style');
             
             // Базовые стили для обоих режимов
@@ -103,33 +118,67 @@
                 }
             `;
 
-            style.textContent = resetStyles + baseStyles + (orientation === 'portrait' ? portraitStyles : landscapeStyles);
+            const finalStyles = resetStyles + baseStyles + (orientation === 'portrait' ? portraitStyles : landscapeStyles);
+            debug('Applied styles type:', orientation === 'portrait' ? 'portrait' : 'landscape');
+            
+            style.textContent = finalStyles;
             
             // Удаляем старые стили
             const oldStyle = document.getElementById('navbar-iphone-style');
-            if (oldStyle) oldStyle.remove();
+            if (oldStyle) {
+                debug('Removing old styles');
+                oldStyle.remove();
+            }
             
             // Добавляем новые стили
             style.id = 'navbar-iphone-style';
             document.head.appendChild(style);
+            debug('New styles added');
 
             // Принудительно обновляем DOM
             const navigation = document.querySelector('.navigation');
             if (navigation) {
+                debug('Navigation element found, forcing refresh');
+                debug('Navigation current styles:', {
+                    display: navigation.style.display,
+                    position: window.getComputedStyle(navigation).position,
+                    top: window.getComputedStyle(navigation).top,
+                    right: window.getComputedStyle(navigation).right,
+                    bottom: window.getComputedStyle(navigation).bottom,
+                    left: window.getComputedStyle(navigation).left,
+                    transform: window.getComputedStyle(navigation).transform
+                });
+
                 navigation.style.display = 'none';
                 setTimeout(() => {
                     navigation.style.display = '';
-                }, 0);
+                    debug('Navigation display restored');
+                    debug('Navigation updated styles:', {
+                        display: navigation.style.display,
+                        position: window.getComputedStyle(navigation).position,
+                        top: window.getComputedStyle(navigation).top,
+                        right: window.getComputedStyle(navigation).right,
+                        bottom: window.getComputedStyle(navigation).bottom,
+                        left: window.getComputedStyle(navigation).left,
+                        transform: window.getComputedStyle(navigation).transform
+                    });
+                }, 50);
+            } else {
+                debug('Navigation element not found!');
             }
         } else {
-            // Удаляем стили если выбран дефолтный режим
+            debug('Using default style');
             const oldStyle = document.getElementById('navbar-iphone-style');
-            if (oldStyle) oldStyle.remove();
+            if (oldStyle) {
+                debug('Removing custom styles');
+                oldStyle.remove();
+            }
         }
     }
 
     // Слушаем изменения в настройках
     Lampa.Settings.listener.follow('open', function (e) {
+        debug('Settings opened:', e.name);
         if (e.name == 'interface') {
             setNavbarStyle();
         }
@@ -137,9 +186,12 @@
 
     // Инициализация плагина
     if (window.appready) {
+        debug('App is ready, initializing immediately');
         setNavbarStyle();
     } else {
+        debug('Waiting for app ready event');
         Lampa.Listener.follow('app', function(e) {
+            debug('App event received:', e.type);
             if (e.type == 'ready') {
                 setNavbarStyle();
             }
@@ -148,8 +200,11 @@
 
     // Отслеживаем изменение ориентации экрана
     window.addEventListener('resize', function() {
+        debug('Window resized');
         if (Lampa.Storage.get("navbar_position") === "iphone") {
             setNavbarStyle();
         }
     });
+
+    debug('Plugin initialization completed');
 }();
