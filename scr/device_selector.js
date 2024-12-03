@@ -57,10 +57,16 @@
                 }
                 .navigation-bar__item {
                     padding: 8px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
                 }
                 .navigation-bar__item.active {
                     background: rgba(255,255,255,0.2) !important;
                     border-radius: 15px !important;
+                }
+                .navigation-bar__content {
+                    display: flex !important;
                 }
             `;
 
@@ -76,12 +82,13 @@
                     padding: 10px 20px !important;
                 }
                 .navigation-bar__content {
-                    display: flex !important;
                     flex-direction: row !important;
                     justify-content: center !important;
+                    flex-wrap: nowrap !important;
                 }
                 .navigation-bar__item {
                     margin: 0 15px !important;
+                    flex: 0 0 auto !important;
                 }
             `;
 
@@ -99,14 +106,19 @@
                     padding: 20px 10px !important;
                 }
                 .navigation-bar__content {
-                    display: flex !important;
                     flex-direction: column !important;
                     justify-content: center !important;
                     align-items: center !important;
+                    flex-wrap: nowrap !important;
+                    width: auto !important;
                 }
                 .navigation-bar__item {
                     margin: 10px 0 !important;
-                    width: auto !important;
+                    width: 100% !important;
+                    flex: 0 0 auto !important;
+                }
+                .navigation-bar__icon {
+                    margin-bottom: 5px !important;
                 }
             `;
 
@@ -115,6 +127,11 @@
                 .navigation-bar {
                     max-width: none !important;
                     min-width: 0 !important;
+                }
+                .navigation-bar__content {
+                    width: auto !important;
+                    min-width: 0 !important;
+                    max-width: none !important;
                 }
             `;
 
