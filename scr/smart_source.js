@@ -4,12 +4,20 @@
     // Конфигурация
     var Defined = {
         api: 'lampac',
-        localhost: window.location.protocol === 'https:' ? 'https://showy.online/' : 'http://showy.online/',
+        localhost: window.location.protocol === 'https:' ? 'https://lampa.stream/' : 'http://lampa.stream/',
     };
 
     // Список поддерживаемых балансеров
     var balancers = ['rezka2', 'kinobase', 'cdnmovies', 'collaps', 'filmix', 'zetflix', 'redheadsound', 'anilibria'];
     var network = new Lampa.Reguest();
+
+    function proxy() {
+        var proxy1 = 'https://cors.nb557.workers.dev:8443/';
+        var proxy2 = (window.location.protocol === 'https:' ? 'https://' : 'http://') + 'iqslgbok.deploy.cx/';
+        var proxy3 = 'https://cors557.deno.dev/';
+        
+        return proxy1;
+    }
 
     // Функция для проверки качества видео
     function getQualityScore(quality) {
@@ -41,7 +49,7 @@
             };
 
             network.timeout(15000);
-            network.silent(Defined.localhost + 'api/v1/' + balancer + '/search', (found) => {
+            network.silent(proxy() + Defined.localhost + 'api/v1/' + balancer + '/search', (found) => {
                 if (found && found.streams) {
                     resolve({
                         balancer: balancer,
@@ -84,7 +92,7 @@
 
             results.forEach(result => {
                 console.log('Checking result from:', result.balancer);
-                if (result.streams.length > 0) {
+                if (result.streams && result.streams.length > 0) {
                     var stream = result.streams[0];
                     var quality_score = getQualityScore(stream.quality);
                     console.log('Stream quality:', stream.quality, 'Score:', quality_score);
