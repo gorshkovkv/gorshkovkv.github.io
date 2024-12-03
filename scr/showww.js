@@ -592,111 +592,6 @@
         })
       }, this.getChoice());
     };
-    this.parse = function(str) {
-      var json = Lampa.Arrays.decodeJson(str, {});
-      if (Lampa.Arrays.isObject(str) && str.rch) json = str;
-      if (json.rch) return this.rch(json);
-      try {
-        var items = this.parseJsonDate(str, '.videos__item');
-        var buttons = this.parseJsonDate(str, '.videos__button');
-        if (items.length == 1 && items[0].method == 'link' && !items[0].similar) {
-          filter_find.season = items.map(function(s) {
-            return {
-              title: s.text,
-              url: s.url
-            };
-          });
-          this.replaceChoice({
-            season: 0
-          });
-          this.request(items[0].url);
-        } else {
-          this.activity.loader(false);
-          var videos = items.filter(function(v) {
-            return v.method == 'play' || v.method == 'call';
-          });
-          var similar = items.filter(function(v) {
-            return v.similar;
-          });
-          if (videos.length) {
-            if (buttons.length) {
-              filter_find.voice = buttons.map(function(b) {
-                return {
-                  title: b.text,
-                  url: b.url
-                };
-              });
-              var select_voice_url = this.getChoice(balanser).voice_url;
-              var select_voice_name = this.getChoice(balanser).voice_name;
-              var find_voice_url = buttons.find(function(v) {
-                return v.url == select_voice_url;
-              });
-              var find_voice_name = buttons.find(function(v) {
-                return v.text == select_voice_name;
-              });
-              var find_voice_active = buttons.find(function(v) {
-                return v.active;
-              }); //console.log('b',buttons)
-              //console.log('u',find_voice_url)
-              //console.log('n',find_voice_name)
-              //console.log('a',find_voice_active)
-              if (find_voice_url && !find_voice_url.active) {
-                console.log('Lampac', 'go to voice', find_voice_url);
-                this.replaceChoice({
-                  voice: buttons.indexOf(find_voice_url),
-                  voice_name: find_voice_url.text
-                });
-                this.request(find_voice_url.url);
-              } else if (find_voice_name && !find_voice_name.active) {
-                console.log('Lampac', 'go to voice', find_voice_name);
-                this.replaceChoice({
-                  voice: buttons.indexOf(find_voice_name),
-                  voice_name: find_voice_name.text
-                });
-                this.request(find_voice_name.url);
-              } else {
-                if (find_voice_active) {
-                  this.replaceChoice({
-                    voice: buttons.indexOf(find_voice_active),
-                    voice_name: find_voice_active.text
-                  });
-                }
-                this.display(videos);
-              }
-            } else {
-              this.replaceChoice({
-                voice: 0,
-                voice_url: '',
-                voice_name: ''
-              });
-              this.display(videos);
-            }
-          } else if (items.length) {
-            if (similar.length) {
-              this.similars(similar);
-              this.activity.loader(false);
-            } else { //this.activity.loader(true)
-              filter_find.season = items.map(function(s) {
-                return {
-                  title: s.text,
-                  url: s.url
-                };
-              });
-              var select_season = this.getChoice(balanser).season;
-              var season = filter_find.season[select_season];
-              if (!season) season = filter_find.season[0];
-              console.log('Lampac', 'go to season', season);
-              this.request(season.url);
-            }
-          } else {
-            this.doesNotAnswer();
-          }
-        } catch (e) {
-          console.log('Lampac', 'error', e.stack);
-          this.doesNotAnswer();
-        }
-      };
-    };
     this.similars = function(json) {
       var _this6 = this;
       scroll.clear();
@@ -1092,10 +987,6 @@
               loader.remove();
               image.append('<div class="online-prestige__episode-number">' + ('0' + episode.episode_number).slice(-2) + '</div>');
             }
-            html.on('hover:focus', function(e) {
-              last = e.target;
-              scroll.update($(e.target), true);
-            });
             html.css('opacity', '0.5');
             scroll.append(html);
           });
