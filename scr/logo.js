@@ -78,10 +78,10 @@
                         .full-start-new__details,
                         .full-start-new__reactions,
                         .full-start-new__buttons {
-                            display: flex !important;
+                            //display: flex !important;
                             -webkit-text-stroke: 0.1px #000000 !important;
                             text-align: left !important;
-                            justify-content: flex-start !important;
+                            justify-content: left !important;
                         }
                         .full-start-new__title img {
                             //margin-right: 15px !important;
