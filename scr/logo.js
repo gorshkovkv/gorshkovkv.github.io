@@ -101,7 +101,9 @@
                             
                             if (newDesc) {
                                 movie.overview = newDesc;
+                                // Обновляем описание во всех местах
                                 $(".full-start__description").text(newDesc);
+                                $(".full-descr__text").text(newDesc);
                             }
                         }
                     }
