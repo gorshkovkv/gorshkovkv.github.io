@@ -73,7 +73,7 @@
                         var container = $('<div class="logo-container"></div>');
                         
                         // Добавляем логотип
-                        var imgElement = $('<img style="margin-top: 5px;max-height: 125px;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
+                        var imgElement = $('<img style="margin-top: 5px;max-height: 125px;display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
                         });
@@ -83,19 +83,19 @@
                         if (!$('#logo-titles-style').length) {
                             $('head').append(`
                                 <style id="logo-titles-style">
-                                    .logo-container { text-align: center; }
+                                    .logo-container { text-align: left; }
                                     .title-line {
-                                        font-size: 0.8em;
+                                        font-size: 0.6em;
                                         height: auto;
-                                        max-height: 1.6em;
-                                        line-height: 1.3em;
+                                        max-height: 1.4em;
+                                        line-height: 1.2em;
                                         overflow: hidden;
                                         text-overflow: ellipsis;
                                         display: -webkit-box;
                                         -webkit-line-clamp: 2;
                                         -webkit-box-orient: vertical;
                                         text-align: left;
-                                        margin: 0.2em 0;
+                                        margin: 0.1em 0;
                                         opacity: 0.7;
                                     }
                                 </style>
