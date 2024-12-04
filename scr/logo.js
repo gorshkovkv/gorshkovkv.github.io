@@ -54,7 +54,10 @@
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
                         });
-                        $(".full-start-new__title").html(imgElement);
+                        // Вставляем логотип перед .full-start-new__details
+                        $(".full-start-new__details").before('<div class="full-start-new__title" style="margin-bottom: 1em;">' + imgElement[0].outerHTML + '</div>');
+                        // Удаляем старый заголовок
+                        $(".full-start-new__title").first().remove();
                     } else {
                         $(".full-start-new__title").html(movie.title || movie.name);
                     }
