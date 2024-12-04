@@ -119,7 +119,39 @@
                             if (newDesc) {
                                 console.log('Setting new description:', newDesc);
                                 movie.overview = newDesc;
-                                $(".full-start__description").text(newDesc);
+                                
+                                // Функция для обновления описания
+                                const updateDescription = () => {
+                                    console.log('Trying to update description in DOM');
+                                    const descElements = [
+                                        $('.full-start__description'),
+                                        $('.full-start-new__descr'),
+                                        $('.full-start__details-scroll .full-start__description')
+                                    ];
+                                    
+                                    descElements.forEach(el => {
+                                        if (el.length) {
+                                            console.log('Found element:', el);
+                                            el.html(newDesc);
+                                        }
+                                    });
+
+                                    // Пробуем обновить через Lampa
+                                    if (Lampa.Activity.active()) {
+                                        const activity = Lampa.Activity.active();
+                                        if (activity.activity.render) {
+                                            console.log('Updating through Lampa Activity');
+                                            activity.activity.render().find('.full-start__description').html(newDesc);
+                                        }
+                                    }
+                                };
+
+                                // Обновляем сразу
+                                updateDescription();
+                                
+                                // И через небольшую задержку
+                                setTimeout(updateDescription, 100);
+                                setTimeout(updateDescription, 500);
                             } else {
                                 console.log('No alternative description found');
                             }
