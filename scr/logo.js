@@ -77,11 +77,11 @@
                         .full-start-new__reactions,
                         .full-start-new__buttons {
                             display: flex !important;
-                            text-align: left !important;
-                            justify-content: flex-start !important;
+                            text-align: center !important;
+                            justify-content: flex-center !important;
                         }
                         .full-start-new__title img {
-                            margin-left: 0 !important;
+                            margin: 5px auto !important;
                             max-height: 100% !important;
                             max-width: 20% !important;
                         }
