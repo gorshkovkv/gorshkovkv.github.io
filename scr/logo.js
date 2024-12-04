@@ -209,7 +209,7 @@
                         if (displayLang === currentLang) {
                             // Если отображается на языке приложения
                             if (enTitle && enTitle !== (currentLang === 'ru' ? ruTitle : enTitle)) {
-                                titlesContainer.append(`<div>🇬🇧 ${enTitle}</div>`);
+                                titlesContainer.append(`<div>🇬🇧 ${enTitle} </div>`);
                             }
                             if (origTitle && origTitle !== enTitle && origTitle !== (currentLang === 'ru' ? ruTitle : enTitle)) {
                                 titlesContainer.append(`<div>🌐 ${origTitle}</div>`);
@@ -217,7 +217,7 @@
                         } else if (displayLang === 'en') {
                             // Если отображается на английском
                             if (currentLang === 'ru' && ruTitle && ruTitle !== enTitle) {
-                                titlesContainer.append(`<div>🇷🇺 ${ruTitle}</div>`);
+                                titlesContainer.append(`<div>🇷🇺 ${ruTitle} </div>`);
                             }
                             if (origTitle && origTitle !== enTitle && origTitle !== (currentLang === 'ru' ? ruTitle : enTitle)) {
                                 titlesContainer.append(`<div>🌐 ${origTitle}</div>`);
@@ -225,7 +225,7 @@
                         } else {
                             // Если отображается на другом языке
                             if (currentLang === 'ru' && ruTitle && ruTitle !== origTitle) {
-                                titlesContainer.append(`<div>🇷🇺 ${ruTitle}</div>`);
+                                titlesContainer.append(`<div>🇷🇺 ${ruTitle} </div>`);
                             }
                             if (enTitle && enTitle !== origTitle) {
                                 titlesContainer.append(`<div>🇬🇧 ${enTitle}</div>`);
