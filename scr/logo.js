@@ -1,4 +1,4 @@
-!function() {
+(!function() {
     "use strict";
     
     Lampa.SettingsApi.addParam({
@@ -59,6 +59,7 @@
                         .full-start-new__reactions,
                         .full-start-new__buttons {
                             //font-size: 1em !important;
+                             margin: 5px 0 !important;
                             -webkit-text-stroke: 0px #000000 !important;
                             text-align: center !important;
                             justify-content: center !important;
@@ -245,7 +246,7 @@
                     // Если включена настройка логотипов, пробуем найти и отобразить логотип
                     if (Lampa.Storage.get("logo_glav")) {
                         // Создаем контейнер для логотипа
-                        var imgElement = $('<img style="margin-top: 0.1em; margin-bottom: 0.1em; max-height: 1.8em;" src="' + Lampa.TMDB.image("/t/p/w500" + path.replace(".svg", ".png")) + '" />');
+                        var imgElement = $('<img style="margin-bottom: 0.1em; max-height: 1.5em;" src="' + Lampa.TMDB.image("/t/p/w500" + path.replace(".svg", ".png")) + '" />');
                         //var imgElement = $('<img style="margin-top: 5px; margin-left: 0; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
