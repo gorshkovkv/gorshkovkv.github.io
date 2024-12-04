@@ -28,16 +28,17 @@
         }
     });
 
+    // Добавляем настройку для замены отсутствующего описания
     Lampa.SettingsApi.addParam({
         component: "interface",
         param: {
-            name: "logo_replace_desc",
+            name: "logo_missing_desc",
             type: "trigger",
             default: true
         },
         field: {
-            name: "Замена описания",
-            description: "Заменять отсутствующее описание английским"
+            name: "Замена отсутствующего описания",
+            description: "Заменять отсутствующее описание на описание на другом языке"
         }
     });
 
@@ -85,6 +86,28 @@
                     const enTitle = await getTitle("en");
                     const origTitle = movie.original_title || movie.original_name;
 
+                    // Проверяем и заменяем отсутствующее описание, если включена соответствующая настройка
+                    if (Lampa.Storage.get("logo_missing_desc")) {
+                        const currentDesc = movie.overview;
+                        if (!currentDesc || currentDesc.trim() === "") {
+                            // Пробуем получить описание на разных языках
+                            let newDesc = null;
+                            if (Lampa.Storage.get("language") === "ru") {
+                                newDesc = await getDescription("en");
+                                if (!newDesc) newDesc = await getDescription("");
+                            } else {
+                                newDesc = await getDescription("ru");
+                                if (!newDesc) newDesc = await getDescription("");
+                            }
+                            
+                            if (newDesc) {
+                                movie.overview = newDesc;
+                                // Обновляем описание на странице
+                                $(".full-start__description").text(newDesc);
+                            }
+                        }
+                    }
+
                     // Пробуем найти на текущем языке
                     let path = await tryGetLogo(Lampa.Storage.get("language"));
                     let logoLang = Lampa.Storage.get("language");
@@ -102,18 +125,6 @@
                     }
 
                     if (path) {
-                        // Проверяем и заменяем описание если нужно
-                        if (Lampa.Storage.get("logo_replace_desc")) {
-                            const currentDesc = movie.overview;
-                            if (!currentDesc || currentDesc.trim() === '') {
-                                const enDesc = await getDescription("en");
-                                if (enDesc) {
-                                    movie.overview = enDesc;
-                                    $('.full-start__description').text(enDesc);
-                                }
-                            }
-                        }
-
                         // Создаем контейнер для логотипа и названий
                         var container = $('<div class="logo-container"></div>');
                         
