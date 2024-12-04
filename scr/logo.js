@@ -1,39 +1,44 @@
 !function() {
     "use strict";
     
-    Lampa.SettingsApi.addParam({
-        component: "interface",
-        param: {
-            name: "logo_glav",
-            type: "select",
-            values: {
-                1: "Скрыть",
-                0: "Отображать"
+    function addSettingsParams() {
+        Lampa.SettingsApi.addParam({
+            component: "interface",
+            param: {
+                name: "logo_glav",
+                type: "select",
+                values: {
+                    1: "Скрыть",
+                    0: "Отображать"
+                },
+                default: "0"
             },
-            default: "0"
-        },
-        field: {
-            name: "Логотипы вместо названий",
-            description: "Отображает логотипы фильмов вместо текста"
-        }
-    });
+            field: {
+                name: "Логотипы вместо названий",
+                description: "Отображает логотипы фильмов вместо текста"
+            }
+        });
 
-    Lampa.SettingsApi.addParam({
-        component: "interface",
-        param: {
-            name: "logo_translations",
-            type: "select",
-            values: {
-                1: "Скрыть",
-                0: "Отображать"
+        Lampa.SettingsApi.addParam({
+            component: "interface",
+            param: {
+                name: "logo_translations",
+                type: "select",
+                values: {
+                    1: "Скрыть",
+                    0: "Отображать"
+                },
+                default: "0"
             },
-            default: "0"
-        },
-        field: {
-            name: "Переводы под логотипом",
-            description: "Отображает названия на других языках под логотипом"
-        }
-    });
+            field: {
+                name: "Переводы под логотипом",
+                description: "Отображает названия на других языках под логотипом"
+            }
+        });
+    }
+
+    // Добавляем настройки при загрузке
+    addSettingsParams();
 
     if (!window.logoplugin) {
         window.logoplugin = true;
