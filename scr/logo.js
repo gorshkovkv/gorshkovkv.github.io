@@ -76,14 +76,14 @@
                         .full-start-new__details,
                         .full-start-new__reactions,
                         .full-start-new__buttons {
+                            display: flex !important;
                             text-align: left !important;
                             justify-content: flex-start !important;
                         }
                         .full-start-new__title img {
-                            display: flex !important;
                             margin-left: 0 !important;
                             max-height: 100% !important;
-                            max-width: 25% !important;
+                            max-width: 20% !important;
                         }
                     }
                 </style>
