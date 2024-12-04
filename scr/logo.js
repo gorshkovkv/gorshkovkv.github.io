@@ -1,44 +1,36 @@
 !function() {
     "use strict";
     
-    function addSettingsParams() {
-        Lampa.SettingsApi.addParam({
-            component: "interface",
-            param: {
-                name: "logo_glav",
-                type: "select",
-                values: {
-                    1: "Скрыть",
-                    0: "Отображать"
-                },
-                default: "0"
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: {
+            name: "logo_glav",
+            type: "select",
+            values: {
+                1: "Скрыть",
+                0: "Отображать"
             },
-            field: {
-                name: "Логотипы вместо названий",
-                description: "Отображает логотипы фильмов вместо текста"
-            }
-        });
+            default: "0"
+        },
+        field: {
+            name: "Логотипы вместо названий",
+            description: "Отображает логотипы фильмов вместо текста"
+        }
+    });
 
-        Lampa.SettingsApi.addParam({
-            component: "interface",
-            param: {
-                name: "logo_translations",
-                type: "select",
-                values: {
-                    1: "Скрыть",
-                    0: "Отображать"
-                },
-                default: "0"
-            },
-            field: {
-                name: "Переводы под логотипом",
-                description: "Отображает названия на других языках под логотипом"
-            }
-        });
-    }
-
-    // Добавляем настройки при загрузке
-    addSettingsParams();
+    // Добавляем настройку для отображения переводов
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: {
+            name: "logo_translations",
+            type: "trigger",
+            default: true
+        },
+        field: {
+            name: "Переводы названий",
+            description: "Показывать названия на разных языках под логотипом"
+        }
+    });
 
     if (!window.logoplugin) {
         window.logoplugin = true;
@@ -126,8 +118,8 @@
                             `);
                         }
 
-                        // Добавляем названия в зависимости от языка логотипа только если включено в настройках
-                        if (Lampa.Storage.get("logo_translations") !== "1") {
+                        // Добавляем названия в зависимости от языка логотипа
+                        if (Lampa.Storage.get("logo_translations")) {
                             if (logoLang === "ru") {
                                 if (enTitle) container.append('<div class="title-line">En: ' + enTitle + '</div>');
                                 if (origTitle && origTitle !== enTitle) {
