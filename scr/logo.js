@@ -231,7 +231,7 @@
                     // Если включена настройка логотипов, пробуем найти и отобразить логотип
                     if (Lampa.Storage.get("logo_glav")) {
                         // Создаем контейнер для логотипа
-                        var imgElement = $('<img style="margin-top: 5px; margin-left: 0; max-height: 125px; max-width: 100%; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
+                        var imgElement = $('<img style="margin-top: 5px; margin-left: 0; max-height: 125px; max-width: 25%; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
                         });
