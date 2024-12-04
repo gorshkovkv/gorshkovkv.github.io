@@ -73,9 +73,12 @@
                 async function getDescription(lang) {
                     try {
                         const url = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "?api_key=" + Lampa.TMDB.key() + "&language=" + lang);
+                        console.log('Trying to get description for language:', lang, 'URL:', url);
                         const resp = await $.get(url);
+                        console.log('Response for', lang, ':', resp);
                         return resp.overview;
                     } catch (e) {
+                        console.error('Error getting description for language:', lang, e);
                         return null;
                     }
                 }
@@ -89,21 +92,42 @@
                     // Проверяем и заменяем отсутствующее описание
                     if (Lampa.Storage.get("logo_missing_desc")) {
                         const currentDesc = movie.overview;
+                        console.log('Current description:', currentDesc);
                         if (!currentDesc || currentDesc.trim() === "") {
+                            console.log('Description is empty, trying to find alternative');
                             let newDesc = null;
                             if (Lampa.Storage.get("language") === "ru") {
+                                console.log('Current language is RU, trying EN first');
                                 newDesc = await getDescription("en");
-                                if (!newDesc) newDesc = await getDescription("");
+                                console.log('Got EN description:', newDesc);
+                                if (!newDesc) {
+                                    console.log('No EN description, trying original');
+                                    newDesc = await getDescription("");
+                                    console.log('Got original description:', newDesc);
+                                }
                             } else {
+                                console.log('Current language is not RU, trying RU first');
                                 newDesc = await getDescription("ru");
-                                if (!newDesc) newDesc = await getDescription("");
+                                console.log('Got RU description:', newDesc);
+                                if (!newDesc) {
+                                    console.log('No RU description, trying original');
+                                    newDesc = await getDescription("");
+                                    console.log('Got original description:', newDesc);
+                                }
                             }
                             
                             if (newDesc) {
+                                console.log('Setting new description:', newDesc);
                                 movie.overview = newDesc;
                                 $(".full-start__description").text(newDesc);
+                            } else {
+                                console.log('No alternative description found');
                             }
+                        } else {
+                            console.log('Description is not empty, keeping current');
                         }
+                    } else {
+                        console.log('Description replacement is disabled');
                     }
 
                     // Отображаем переводы названий, если включена соответствующая настройка
