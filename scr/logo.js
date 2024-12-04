@@ -86,6 +86,29 @@
                     const enTitle = await getTitle("en");
                     const origTitle = movie.original_title || movie.original_name;
 
+                    // Инициализируем переменные для логотипа
+                    let path = null;
+                    let logoLang = null;
+
+                    // Если включены логотипы, пробуем их найти
+                    if (Lampa.Storage.get("logo_glav")) {
+                        // Пробуем найти на текущем языке
+                        path = await tryGetLogo(Lampa.Storage.get("language"));
+                        logoLang = Lampa.Storage.get("language");
+                        
+                        // Если нет на текущем языке, пробуем английский
+                        if (!path) {
+                            path = await tryGetLogo("en");
+                            if (path) logoLang = "en";
+                        }
+                        
+                        // Если нет на английском, пробуем язык оригинала
+                        if (!path) {
+                            path = await tryGetLogo("");
+                            if (path) logoLang = "orig";
+                        }
+                    }
+
                     // Проверяем и заменяем отсутствующее описание
                     if (Lampa.Storage.get("logo_missing_desc")) {
                         const currentDesc = movie.overview;
@@ -168,31 +191,13 @@
 
                     // Если включена настройка логотипов, пробуем найти и отобразить логотип
                     if (Lampa.Storage.get("logo_glav")) {
-                        // Пробуем найти на текущем языке
-                        let path = await tryGetLogo(Lampa.Storage.get("language"));
-                        let logoLang = Lampa.Storage.get("language");
-                        
-                        // Если нет на текущем языке, пробуем английский
-                        if (!path) {
-                            path = await tryGetLogo("en");
-                            if (path) logoLang = "en";
-                        }
-                        
-                        // Если нет на английском, пробуем язык оригинала
-                        if (!path) {
-                            path = await tryGetLogo("");
-                            if (path) logoLang = "orig";
-                        }
-
-                        if (path) {
-                            // Создаем контейнер для логотипа
-                            var imgElement = $('<img style="margin-top: 5px; max-height: 125px; max-width: 100%; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
-                            imgElement.on('error', function() {
-                                $(".full-start-new__title").html(movie.title || movie.name);
-                            });
-                            // Заменяем текстовый заголовок на логотип
-                            $(".full-start-new__title").html(imgElement);
-                        }
+                        // Создаем контейнер для логотипа
+                        var imgElement = $('<img style="margin-top: 5px; max-height: 125px; max-width: 100%; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
+                        imgElement.on('error', function() {
+                            $(".full-start-new__title").html(movie.title || movie.name);
+                        });
+                        // Заменяем текстовый заголовок на логотип
+                        $(".full-start-new__title").html(imgElement);
                     }
                 }
 
