@@ -101,17 +101,7 @@
                             
                             if (newDesc) {
                                 movie.overview = newDesc;
-                                // Обновляем описание на странице, проверяя существование элемента
-                                const descElement = $(".full-start__description");
-                                if (descElement.length) {
-                                    descElement.text(newDesc);
-                                } else {
-                                    // Если элемент не найден, пробуем найти альтернативный
-                                    const altDescElement = $(".full-start-new__descr");
-                                    if (altDescElement.length) {
-                                        altDescElement.text(newDesc);
-                                    }
-                                }
+                                $(".full-start__description").text(newDesc);
                             }
                         }
                     }
@@ -125,10 +115,16 @@
                             'opacity': '0.7'
                         });
 
-                        // Добавляем разные переводы
-                        if (ruTitle && ruTitle !== enTitle) titlesContainer.append(`<div>🇷🇺 ${ruTitle}</div>`);
-                        if (enTitle && enTitle !== origTitle) titlesContainer.append(`<div>🇬🇧 ${enTitle}</div>`);
-                        if (origTitle && origTitle !== ruTitle && origTitle !== enTitle) titlesContainer.append(`<div>🌐 ${origTitle}</div>`);
+                        const currentLang = Lampa.Storage.get("language");
+
+                        // Добавляем разные переводы в зависимости от текущего языка
+                        if (currentLang === "ru") {
+                            if (enTitle && enTitle !== ruTitle) titlesContainer.append(`<div>🇬🇧 ${enTitle}</div>`);
+                            if (origTitle && origTitle !== ruTitle && origTitle !== enTitle) titlesContainer.append(`<div>🌐 ${origTitle}</div>`);
+                        } else {
+                            if (ruTitle && ruTitle !== enTitle) titlesContainer.append(`<div>🇷🇺 ${ruTitle}</div>`);
+                            if (origTitle && origTitle !== ruTitle && origTitle !== enTitle) titlesContainer.append(`<div>🌐 ${origTitle}</div>`);
+                        }
 
                         // Добавляем переводы после заголовка
                         $(".full-start-new__title").after(titlesContainer);
