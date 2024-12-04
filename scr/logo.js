@@ -28,6 +28,19 @@
         }
     });
 
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: {
+            name: "logo_replace_desc",
+            type: "trigger",
+            default: true
+        },
+        field: {
+            name: "Замена описания",
+            description: "Заменять отсутствующее описание английским"
+        }
+    });
+
     if (!window.logoplugin) {
         window.logoplugin = true;
         Lampa.Listener.follow("full", function(e) {
@@ -56,6 +69,16 @@
                     }
                 }
 
+                async function getDescription(lang) {
+                    try {
+                        const url = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "?api_key=" + Lampa.TMDB.key() + "&language=" + lang);
+                        const resp = await $.get(url);
+                        return resp.overview;
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
                 async function findLogo() {
                     // Получаем заранее все названия
                     const ruTitle = await getTitle("ru");
@@ -79,6 +102,18 @@
                     }
 
                     if (path) {
+                        // Проверяем и заменяем описание если нужно
+                        if (Lampa.Storage.get("logo_replace_desc")) {
+                            const currentDesc = movie.overview;
+                            if (!currentDesc || currentDesc.trim() === '') {
+                                const enDesc = await getDescription("en");
+                                if (enDesc) {
+                                    movie.overview = enDesc;
+                                    $('.full-start__description').text(enDesc);
+                                }
+                            }
+                        }
+
                         // Создаем контейнер для логотипа и названий
                         var container = $('<div class="logo-container"></div>');
                         
