@@ -58,7 +58,7 @@
                         .full-start-new__details,
                         .full-start-new__reactions,
                         .full-start-new__buttons {
-                            font-size: 1.2em !important;
+                            font-size: 1.1em !important;
                             -webkit-text-stroke: 0.1px #000000 !important;
                             text-align: center !important;
                             justify-content: center !important;
@@ -185,9 +185,9 @@
                     // Отображаем переводы названий, если включена соответствующая настройка
                     if (Lampa.Storage.get("logo_translations")) {
                         var titlesContainer = $('<div class="title-translations"></div>').css({
-                            'margin-top': '10px',
-                            'margin-bottom': '15px',
-                            'margin-right': '10px',
+                            //'margin-top': '10px',
+                            //'margin-bottom': '15px',
+                            //'margin-right': '10px',
                             'font-size': '1em',
                             '-webkit-text-stroke': '0.1px #000000',
                             'opacity': '1'
