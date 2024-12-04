@@ -52,7 +52,7 @@
                     @media screen and (orientation: portrait) {
                         .full-start-new__head,
                         .full-start-new__title,
-                        full-start-new__tagline,
+                        .full-start-new__tagline,
                         .title-translations,
                         .full-start-new__rate-line,
                         .full-start-new__details,
