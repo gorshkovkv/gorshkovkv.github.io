@@ -76,9 +76,8 @@
                         .full-start-new__details,
                         .full-start-new__reactions,
                         .full-start-new__buttons {
-                            display: flex !important;
                             text-align: center !important;
-                            justify-content: flex-center !important;
+                            justify-content: center !important;
                         }
                         .full-start-new__title img {
                             margin: 5px auto !important;
