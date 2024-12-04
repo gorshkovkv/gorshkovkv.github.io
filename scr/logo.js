@@ -80,9 +80,10 @@
                             justify-content: flex-start !important;
                         }
                         .full-start-new__title img {
+                            display: flex !important;
                             margin-left: 0 !important;
-                            max-height: 5% !important;
-                            max-width: 15% !important;
+                            max-height: 100% !important;
+                            max-width: 25% !important;
                         }
                     }
                 </style>
