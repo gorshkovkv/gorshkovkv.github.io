@@ -186,6 +186,7 @@
                             'margin-bottom': '15px',
                             'margin-right': '10px',
                             'font-size': '1em',
+                            '-webkit-text-stroke': '1px #000000';
                             'opacity': '1'
                         });
 
