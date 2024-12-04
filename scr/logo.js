@@ -73,12 +73,9 @@
                 async function getDescription(lang) {
                     try {
                         const url = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "?api_key=" + Lampa.TMDB.key() + "&language=" + lang);
-                        console.log('Trying to get description for language:', lang, 'URL:', url);
                         const resp = await $.get(url);
-                        console.log('Response for', lang, ':', resp);
                         return resp.overview;
                     } catch (e) {
-                        console.error('Error getting description for language:', lang, e);
                         return null;
                     }
                 }
@@ -92,74 +89,31 @@
                     // Проверяем и заменяем отсутствующее описание
                     if (Lampa.Storage.get("logo_missing_desc")) {
                         const currentDesc = movie.overview;
-                        console.log('Current description:', currentDesc);
                         if (!currentDesc || currentDesc.trim() === "") {
-                            console.log('Description is empty, trying to find alternative');
                             let newDesc = null;
                             if (Lampa.Storage.get("language") === "ru") {
-                                console.log('Current language is RU, trying EN first');
                                 newDesc = await getDescription("en");
-                                console.log('Got EN description:', newDesc);
-                                if (!newDesc) {
-                                    console.log('No EN description, trying original');
-                                    newDesc = await getDescription("");
-                                    console.log('Got original description:', newDesc);
-                                }
+                                if (!newDesc) newDesc = await getDescription("");
                             } else {
-                                console.log('Current language is not RU, trying RU first');
                                 newDesc = await getDescription("ru");
-                                console.log('Got RU description:', newDesc);
-                                if (!newDesc) {
-                                    console.log('No RU description, trying original');
-                                    newDesc = await getDescription("");
-                                    console.log('Got original description:', newDesc);
-                                }
+                                if (!newDesc) newDesc = await getDescription("");
                             }
                             
                             if (newDesc) {
-                                console.log('Setting new description:', newDesc);
                                 movie.overview = newDesc;
-                                
-                                // Функция для обновления описания
-                                const updateDescription = () => {
-                                    console.log('Trying to update description in DOM');
-                                    const descElements = [
-                                        $('.full-start__description'),
-                                        $('.full-start-new__descr'),
-                                        $('.full-start__details-scroll .full-start__description')
-                                    ];
-                                    
-                                    descElements.forEach(el => {
-                                        if (el.length) {
-                                            console.log('Found element:', el);
-                                            el.html(newDesc);
-                                        }
-                                    });
-
-                                    // Пробуем обновить через Lampa
-                                    if (Lampa.Activity.active()) {
-                                        const activity = Lampa.Activity.active();
-                                        if (activity.activity.render) {
-                                            console.log('Updating through Lampa Activity');
-                                            activity.activity.render().find('.full-start__description').html(newDesc);
-                                        }
+                                // Обновляем описание на странице, проверяя существование элемента
+                                const descElement = $(".full-start__description");
+                                if (descElement.length) {
+                                    descElement.text(newDesc);
+                                } else {
+                                    // Если элемент не найден, пробуем найти альтернативный
+                                    const altDescElement = $(".full-start-new__descr");
+                                    if (altDescElement.length) {
+                                        altDescElement.text(newDesc);
                                     }
-                                };
-
-                                // Обновляем сразу
-                                updateDescription();
-                                
-                                // И через небольшую задержку
-                                setTimeout(updateDescription, 100);
-                                setTimeout(updateDescription, 500);
-                            } else {
-                                console.log('No alternative description found');
+                                }
                             }
-                        } else {
-                            console.log('Description is not empty, keeping current');
                         }
-                    } else {
-                        console.log('Description replacement is disabled');
                     }
 
                     // Отображаем переводы названий, если включена соответствующая настройка
