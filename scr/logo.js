@@ -28,6 +28,20 @@
         }
     });
 
+    // Добавляем настройку для отображения среднего времени серии
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: {
+            name: "logo_average_runtime",
+            type: "trigger",
+            default: true
+        },
+        field: {
+            name: "Среднее время серии",
+            description: "Показывать среднее время серии под логотипом"
+        }
+    });
+
     if (!window.logoplugin) {
         window.logoplugin = true;
         Lampa.Listener.follow("full", function(e) {
@@ -46,22 +60,6 @@
                     return null;
                 }
 
-                async function getAverageRuntime() {
-                    if (movie.imdb_id) {
-                        try {
-                            const response = await $.get("https://api.tvmaze.com/lookup/shows?imdb=" + movie.imdb_id);
-                            if (response.averageRuntime) {
-                                const hours = Math.floor(response.averageRuntime / 60);
-                                const minutes = response.averageRuntime % 60;
-                                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-                            }
-                        } catch (error) {
-                            console.error("Ошибка при получении среднего времени:", error);
-                        }
-                    }
-                    return null;
-                }
-
                 async function getTitle(lang) {
                     try {
                         const url = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "?api_key=" + Lampa.TMDB.key() + "&language=" + lang);
@@ -73,94 +71,108 @@
                 }
 
                 async function findLogo() {
-                    var logoPath = await tryGetLogo(Lampa.Storage.get("language"));
-                    var runtimeText = await getAverageRuntime();
-                    
-                    if (logoPath) {
-                        var logoUrl = "https://image.tmdb.org/t/p/w500" + logoPath;
-                        var $title = $(e.object).find(".full-start-new__title");
-                        var $logo = $("<img>", {
-                            src: logoUrl,
-                            class: "full-start__logo"
-                        });
-
-                        // Создаем контейнер для логотипа и времени
-                        var $container = $("<div>", {
-                            class: "full-start__logo-container"
-                        });
-
-                        $container.append($logo);
-
-                        // Добавляем время если оно есть
-                        if (runtimeText) {
-                            var $runtime = $("<div>", {
-                                class: "full-start__runtime",
-                                text: runtimeText
-                            });
-                            $container.append($runtime);
+                    try {
+                        const logoPath = await tryGetLogo(Lampa.Storage.get("language"));
+                        let logoLang = Lampa.Storage.get("language");
+                        
+                        // Если нет на текущем языке, пробуем английский
+                        if (!logoPath) {
+                            logoPath = await tryGetLogo("en");
+                            if (logoPath) logoLang = "en";
+                        }
+                        
+                        // Если нет на английском, пробуем язык оригинала
+                        if (!logoPath) {
+                            logoPath = await tryGetLogo("");
+                            if (logoPath) logoLang = "orig";
                         }
 
-                        $title.empty().append($container);
-
-                        // Добавляем стили для контейнера и времени
-                        var style = `
-                            <style>
-                                .full-start__logo-container {
-                                    display: flex;
-                                    flex-direction: column;
-                                    align-items: center;
-                                    gap: 10px;
-                                }
-                                .full-start__runtime {
-                                    color: rgba(255, 255, 255, 0.8);
-                                    font-size: 1.2em;
-                                }
-                            </style>
-                        `;
-                        $('head').append(style);
-
-                        // Если включено отображение переводов
-                        if (Lampa.Storage.get("logo_translations")) {
+                        if (logoPath) {
                             // Получаем заранее все названия
                             const ruTitle = await getTitle("ru");
                             const enTitle = await getTitle("en");
                             const origTitle = movie.original_title || movie.original_name;
 
-                            // Пробуем найти на текущем языке
-                            let logoLang = Lampa.Storage.get("language");
+                            // Получаем imdb_id для запроса среднего времени
+                            const imdbId = movie.imdb_id;
+                            let averageRuntime = '';
                             
-                            // Если нет на текущем языке, пробуем английский
-                            if (!logoPath) {
-                                logoPath = await tryGetLogo("en");
-                                if (logoPath) logoLang = "en";
+                            // Если включена настройка показа среднего времени и есть imdb_id
+                            if (Lampa.Storage.get("logo_average_runtime") && imdbId && movie.name) {
+                                try {
+                                    const response = await $.ajax({
+                                        url: "https://api.tvmaze.com/lookup/shows?imdb=" + imdbId,
+                                        method: "GET"
+                                    });
+                                    if (response.averageRuntime) {
+                                        const hours = Math.floor(response.averageRuntime / 60);
+                                        const minutes = response.averageRuntime % 60;
+                                        averageRuntime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                                    }
+                                } catch (error) {
+                                    console.error("Ошибка при получении среднего времени:", error);
+                                }
                             }
+
+                            var logo = $("<img class='full--logo' src='https://image.tmdb.org/t/p/w500" + logoPath + "' />");
+                            var container = $("<div class='full--logo-container'></div>").append(logo);
                             
-                            // Если нет на английском, пробуем язык оригинала
-                            if (!logoPath) {
-                                logoPath = await tryGetLogo("");
-                                if (logoPath) logoLang = "orig";
+                            // Добавляем среднее время, если оно есть
+                            if (averageRuntime) {
+                                container.append(`<div class="full--logo-runtime">~${averageRuntime}</div>`);
                             }
 
                             // Добавляем названия в зависимости от языка логотипа
-                            if (logoLang === "ru") {
-                                if (enTitle) $container.append('<div class="title-line">En: ' + enTitle + '</div>');
-                                if (origTitle && origTitle !== enTitle) {
-                                    $container.append('<div class="title-line">Orig: ' + origTitle + '</div>');
-                                }
-                            } else if (logoLang === "en") {
-                                if (ruTitle) $container.append('<div class="title-line">Ru: ' + ruTitle + '</div>');
-                                if (origTitle && origTitle !== enTitle) {
-                                    $container.append('<div class="title-line">Orig: ' + origTitle + '</div>');
-                                }
-                            } else { // orig
-                                if (ruTitle) $container.append('<div class="title-line">Ru: ' + ruTitle + '</div>');
-                                if (enTitle && enTitle !== origTitle) {
-                                    $container.append('<div class="title-line">En: ' + enTitle + '</div>');
+                            if (Lampa.Storage.get("logo_translations")) {
+                                if (logoLang === "ru") {
+                                    if (enTitle) container.append('<div class="title-line">En: ' + enTitle + '</div>');
+                                    if (origTitle && origTitle !== enTitle) {
+                                        container.append('<div class="title-line">Orig: ' + origTitle + '</div>');
+                                    }
+                                } else if (logoLang === "en") {
+                                    if (ruTitle) container.append('<div class="title-line">Ru: ' + ruTitle + '</div>');
+                                    if (origTitle && origTitle !== enTitle) {
+                                        container.append('<div class="title-line">Orig: ' + origTitle + '</div>');
+                                    }
+                                } else { // orig
+                                    if (ruTitle) container.append('<div class="title-line">Ru: ' + ruTitle + '</div>');
+                                    if (enTitle && enTitle !== origTitle) {
+                                        container.append('<div class="title-line">En: ' + enTitle + '</div>');
+                                    }
                                 }
                             }
+
+                            // Добавляем стили для названий
+                            if (!$('#logo-titles-style').length) {
+                                $('head').append(`
+                                    <style id="logo-titles-style">
+                                        .logo-container { text-align: left; }
+                                        .title-line {
+                                            font-size: 0.6em;
+                                            white-space: nowrap;
+                                            overflow: hidden;
+                                            text-overflow: ellipsis;
+                                            text-align: left;
+                                            margin: 0.1em 0;
+                                            opacity: 0.7;
+                                            width: 100%;
+                                            min-width: 0;
+                                        }
+                                        @media screen and (max-width: 480px) {
+                                            .title-line {
+                                                font-size: 0.5em;
+                                            }
+                                        }
+                                    </style>
+                                `);
+                            }
+
+                            $(".full-start-new__title").html(container);
+                        } else {
+                            $(".full-start-new__title").html(movie.title || movie.name);
                         }
-                    } else {
-                        $(".full-start-new__title").html(movie.title || movie.name);
+                    } catch (error) {
+                        console.error("Ошибка при получении логотипа:", error);
                     }
                 }
 
