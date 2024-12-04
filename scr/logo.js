@@ -63,9 +63,9 @@
                             justify-content: center !important;
                         }
                         .full-start-new__title img {
-                            margin: 5px auto !important;
-                            max-height: 10% !important;
-                            max-width: 45% !important;
+                            //margin: 5px auto !important;
+                            //max-height: 10% !important;
+                            //max-width: 45% !important;
                         }
                     }
                     @media screen and (orientation: landscape) {
@@ -83,9 +83,9 @@
                             justify-content: flex-start !important;
                         }
                         .full-start-new__title img {
-                            margin-left: 0 !important;
-                            max-height: 100% !important;
-                            max-width: 20% !important;
+                            //margin-left: 0 !important;
+                            //max-height: 100% !important;
+                            //max-width: 20% !important;
                         }
                     }
                 </style>
@@ -242,7 +242,8 @@
                     // Если включена настройка логотипов, пробуем найти и отобразить логотип
                     if (Lampa.Storage.get("logo_glav")) {
                         // Создаем контейнер для логотипа
-                        var imgElement = $('<img style="margin-top: 5px; margin-left: 0; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
+                        var imgElement = $('<img style="margin-top: 0.3em; margin-bottom: 0.4em; max-height: 1.8em;" src="' + Lampa.TMDB.image("/t/p/w500" + path.replace(".svg", ".png")) + '" />');
+                        //var imgElement = $('<img style="margin-top: 5px; margin-left: 0; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
                         });
