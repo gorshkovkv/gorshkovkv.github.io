@@ -174,7 +174,7 @@
                                 $(".full-start__description").text(newDesc);
                                 $(".full-descr__text").text(newDesc);
                                 // Меняем заголовок на английский
-                                $(".items-line__title").text("Description in English");
+                                //$(".items-line__title").text("Description in English");
                             }
                         }
                     }
@@ -185,8 +185,8 @@
                             'margin-top': '10px',
                             'margin-bottom': '15px',
                             'margin-right': '10px',
-                            'font-size': '0.9em',
-                            'opacity': '0.7'
+                            'font-size': '1em',
+                            'opacity': '1'
                         });
 
                         const currentLang = Lampa.Storage.get("language");
