@@ -58,6 +58,7 @@
                         .full-start-new__details,
                         .full-start-new__reactions,
                         .full-start-new__buttons {
+                            font-size: 1.2em !important;
                             -webkit-text-stroke: 0.1px #000000 !important;
                             text-align: center !important;
                             justify-content: center !important;
