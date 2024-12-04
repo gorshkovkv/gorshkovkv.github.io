@@ -54,11 +54,17 @@
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
                         });
-                        // Вставляем логотип перед .full-start-new__details
-                        $(".full-start-new__details").before('<div class="full-start-new__title" style="margin-bottom: 1em;">' + imgElement[0].outerHTML + '</div>');
-                        // Удаляем старый заголовок
-                        $(".full-start-new__title").first().remove();
+                        
+                        // Создаем контейнер для логотипа и позиционируем его
+                        var logoContainer = $('<div class="logo-container" style="position: relative; z-index: 2; margin-bottom: 1em;"></div>');
+                        logoContainer.append(imgElement);
+                        
+                        // Вставляем логотип перед .full-start-new__title
+                        $(".full-start-new__title").before(logoContainer);
+                        // Скрываем текстовый заголовок
+                        $(".full-start-new__title").hide();
                     } else {
+                        $(".full-start-new__title").show();
                         $(".full-start-new__title").html(movie.title || movie.name);
                     }
                 }
