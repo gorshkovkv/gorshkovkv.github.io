@@ -18,6 +18,23 @@
         }
     });
 
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: {
+            name: "logo_translations",
+            type: "select",
+            values: {
+                1: "Скрыть",
+                0: "Отображать"
+            },
+            default: "0"
+        },
+        field: {
+            name: "Переводы под логотипом",
+            description: "Отображает названия на других языках под логотипом"
+        }
+    });
+
     if (!window.logoplugin) {
         window.logoplugin = true;
         Lampa.Listener.follow("full", function(e) {
@@ -104,21 +121,23 @@
                             `);
                         }
 
-                        // Добавляем названия в зависимости от языка логотипа
-                        if (logoLang === "ru") {
-                            if (enTitle) container.append('<div class="title-line">En: ' + enTitle + '</div>');
-                            if (origTitle && origTitle !== enTitle) {
-                                container.append('<div class="title-line">Orig: ' + origTitle + '</div>');
-                            }
-                        } else if (logoLang === "en") {
-                            if (ruTitle) container.append('<div class="title-line">Ru: ' + ruTitle + '</div>');
-                            if (origTitle && origTitle !== enTitle) {
-                                container.append('<div class="title-line">Orig: ' + origTitle + '</div>');
-                            }
-                        } else { // orig
-                            if (ruTitle) container.append('<div class="title-line">Ru: ' + ruTitle + '</div>');
-                            if (enTitle && enTitle !== origTitle) {
-                                container.append('<div class="title-line">En: ' + enTitle + '</div>');
+                        // Добавляем названия в зависимости от языка логотипа только если включено в настройках
+                        if (Lampa.Storage.get("logo_translations") !== "1") {
+                            if (logoLang === "ru") {
+                                if (enTitle) container.append('<div class="title-line">En: ' + enTitle + '</div>');
+                                if (origTitle && origTitle !== enTitle) {
+                                    container.append('<div class="title-line">Orig: ' + origTitle + '</div>');
+                                }
+                            } else if (logoLang === "en") {
+                                if (ruTitle) container.append('<div class="title-line">Ru: ' + ruTitle + '</div>');
+                                if (origTitle && origTitle !== enTitle) {
+                                    container.append('<div class="title-line">Orig: ' + origTitle + '</div>');
+                                }
+                            } else { // orig
+                                if (ruTitle) container.append('<div class="title-line">Ru: ' + ruTitle + '</div>');
+                                if (enTitle && enTitle !== origTitle) {
+                                    container.append('<div class="title-line">En: ' + enTitle + '</div>');
+                                }
                             }
                         }
 
