@@ -59,7 +59,7 @@
                         .full-start-new__reactions,
                         .full-start-new__buttons {
                             //font-size: 1em !important;
-                             margin: 5px 0 !important;
+                            margin: 5px 0 !important;
                             -webkit-text-stroke: 0px #000000 !important;
                             text-align: center !important;
                             justify-content: center !important;
