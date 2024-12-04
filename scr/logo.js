@@ -184,6 +184,7 @@
                         var titlesContainer = $('<div class="title-translations"></div>').css({
                             'margin-top': '10px',
                             'margin-bottom': '15px',
+                            'margin-right': '10px',
                             'font-size': '0.9em',
                             'opacity': '0.7'
                         });
