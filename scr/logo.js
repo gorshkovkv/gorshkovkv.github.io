@@ -1,6 +1,42 @@
 !function() {
     "use strict";
     
+    // Добавляем стили для разных ориентаций
+    if (!$('#logo-orientation-style').length) {
+        $('head').append(`
+            <style id="logo-orientation-style">
+                @media screen and (orientation: portrait) {
+                    .full-start-new__right {
+                        text-align: center !important;
+                    }
+                    .full-start-new__title {
+                        text-align: center !important;
+                    }
+                    .title-translations {
+                        text-align: center !important;
+                    }
+                    .full-start__description {
+                        text-align: center !important;
+                    }
+                }
+                @media screen and (orientation: landscape) {
+                    .full-start-new__right {
+                        text-align: left !important;
+                    }
+                    .full-start-new__title {
+                        text-align: left !important;
+                    }
+                    .title-translations {
+                        text-align: left !important;
+                    }
+                    .full-start__description {
+                        text-align: left !important;
+                    }
+                }
+            </style>
+        `);
+    }
+
     Lampa.SettingsApi.addParam({
         component: "interface",
         param: {
@@ -44,35 +80,6 @@
 
     if (!window.logoplugin) {
         window.logoplugin = true;
-
-        // Добавляем стили для центрирования
-        if (!$('#logo-center-style').length) {
-            $('head').append(`
-                <style id="logo-center-style">
-                    .full-start-new__head,
-                    .title-translations,
-                    .full-start-new__rate-line,
-                    .full-start-new__details,
-                    .full-start-new__reactions {
-                        display: flex !important;
-                        justify-content: center !important;
-                        text-align: center !important;
-                        width: 100% !important;
-                    }
-                    .full-start-new__head {
-                        flex-direction: column !important;
-                        align-items: center !important;
-                    }
-                    .title-translations > div {
-                        margin: 0 5px !important;
-                    }
-                    .full-start-new__rate-line > div {
-                        margin: 0 5px !important;
-                    }
-                </style>
-            `);
-        }
-
         Lampa.Listener.follow("full", function(e) {
             if (e.type == "complite") {
                 var movie = e.data.movie;
