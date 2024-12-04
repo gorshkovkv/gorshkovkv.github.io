@@ -85,9 +85,9 @@
                                 <style id="logo-titles-style">
                                     .logo-container { text-align: center; }
                                     .title-line {
-                                        font-size: 1.3em;
+                                        font-size: 0.8em;
                                         height: auto;
-                                        max-height: 2.6em;
+                                        max-height: 1.6em;
                                         line-height: 1.3em;
                                         overflow: hidden;
                                         text-overflow: ellipsis;
@@ -96,6 +96,7 @@
                                         -webkit-box-orient: vertical;
                                         text-align: left;
                                         margin: 0.2em 0;
+                                        opacity: 0.7;
                                     }
                                 </style>
                             `);
