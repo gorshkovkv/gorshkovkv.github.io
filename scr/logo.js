@@ -58,8 +58,8 @@
                         .full-start-new__details,
                         .full-start-new__reactions,
                         .full-start-new__buttons {
-                            font-size: 1.1em !important;
-                            -webkit-text-stroke: 0.1px #000000 !important;
+                            //font-size: 1em !important;
+                            //-webkit-text-stroke: 0.1px #000000 !important;
                             text-align: center !important;
                             justify-content: center !important;
                         }
@@ -188,7 +188,7 @@
                             //'margin-top': '10px',
                             //'margin-bottom': '15px',
                             //'margin-right': '10px',
-                            'font-size': '1em',
+                            'font-size': '1.1em',
                             '-webkit-text-stroke': '0.1px #000000',
                             'opacity': '1'
                         });
