@@ -143,7 +143,7 @@
 
                         if (path) {
                             // Создаем контейнер для логотипа
-                            var imgElement = $('<img style="margin-top: 5px;max-height: 125px;display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
+                            var imgElement = $('<img style="margin-top: 5px; max-height: 125px; max-width: 100%; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
                             imgElement.on('error', function() {
                                 $(".full-start-new__title").html(movie.title || movie.name);
                             });
