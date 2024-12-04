@@ -25,7 +25,8 @@
                 var movie = e.data.movie;
                 
                 async function tryGetLogo(lang) {
-                    var url = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "/images?api_key=" + Lampa.TMDB.key() + "&language=" + lang);
+                    // Для языка оригинала не указываем параметр language в URL
+                    var url = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "/images?api_key=" + Lampa.TMDB.key() + (lang ? "&language=" + lang : ""));
                     try {
                         const resp = await $.get(url);
                         if (resp.logos && resp.logos[0]) {
@@ -46,7 +47,7 @@
                     
                     // Если нет на английском, пробуем язык оригинала
                     if (!path) {
-                        path = await tryGetLogo(null);
+                        path = await tryGetLogo("");  // Пустая строка для получения оригинального языка
                     }
 
                     if (path) {
@@ -54,17 +55,8 @@
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
                         });
-                        
-                        // Создаем контейнер для логотипа и позиционируем его
-                        var logoContainer = $('<div class="logo-container" style="position: relative; z-index: 2; margin-bottom: 1em;"></div>');
-                        logoContainer.append(imgElement);
-                        
-                        // Вставляем логотип перед .full-start-new__title
-                        $(".full-start-new__title").before(logoContainer);
-                        // Скрываем текстовый заголовок
-                        $(".full-start-new__title").hide();
+                        $(".full-start-new__title").html(imgElement);
                     } else {
-                        $(".full-start-new__title").show();
                         $(".full-start-new__title").html(movie.title || movie.name);
                     }
                 }
