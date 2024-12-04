@@ -36,26 +36,90 @@
                     return null;
                 }
 
+                async function getTitle(lang) {
+                    try {
+                        const url = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "?api_key=" + Lampa.TMDB.key() + "&language=" + lang);
+                        const resp = await $.get(url);
+                        return resp.title || resp.name;
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
                 async function findLogo() {
+                    // Получаем заранее все названия
+                    const ruTitle = await getTitle("ru");
+                    const enTitle = await getTitle("en");
+                    const origTitle = movie.original_title || movie.original_name;
+
                     // Пробуем найти на текущем языке
                     let path = await tryGetLogo(Lampa.Storage.get("language"));
+                    let logoLang = Lampa.Storage.get("language");
                     
                     // Если нет на текущем языке, пробуем английский
                     if (!path) {
                         path = await tryGetLogo("en");
+                        if (path) logoLang = "en";
                     }
                     
                     // Если нет на английском, пробуем язык оригинала
                     if (!path) {
-                        path = await tryGetLogo("");  // Пустая строка для получения оригинального языка
+                        path = await tryGetLogo("");
+                        if (path) logoLang = "orig";
                     }
 
                     if (path) {
+                        // Создаем контейнер для логотипа и названий
+                        var container = $('<div class="logo-container"></div>');
+                        
+                        // Добавляем логотип
                         var imgElement = $('<img style="margin-top: 5px;max-height: 125px;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
                         });
-                        $(".full-start-new__title").html(imgElement);
+                        container.append(imgElement);
+
+                        // Добавляем стили для названий
+                        if (!$('#logo-titles-style').length) {
+                            $('head').append(`
+                                <style id="logo-titles-style">
+                                    .logo-container { text-align: center; }
+                                    .title-line {
+                                        font-size: 1.3em;
+                                        height: auto;
+                                        max-height: 2.6em;
+                                        line-height: 1.3em;
+                                        overflow: hidden;
+                                        text-overflow: ellipsis;
+                                        display: -webkit-box;
+                                        -webkit-line-clamp: 2;
+                                        -webkit-box-orient: vertical;
+                                        text-align: left;
+                                        margin: 0.2em 0;
+                                    }
+                                </style>
+                            `);
+                        }
+
+                        // Добавляем названия в зависимости от языка логотипа
+                        if (logoLang === "ru") {
+                            if (enTitle) container.append('<div class="title-line">En: ' + enTitle + '</div>');
+                            if (origTitle && origTitle !== enTitle) {
+                                container.append('<div class="title-line">Orig: ' + origTitle + '</div>');
+                            }
+                        } else if (logoLang === "en") {
+                            if (ruTitle) container.append('<div class="title-line">Ru: ' + ruTitle + '</div>');
+                            if (origTitle && origTitle !== enTitle) {
+                                container.append('<div class="title-line">Orig: ' + origTitle + '</div>');
+                            }
+                        } else { // orig
+                            if (ruTitle) container.append('<div class="title-line">Ru: ' + ruTitle + '</div>');
+                            if (enTitle && enTitle !== origTitle) {
+                                container.append('<div class="title-line">En: ' + enTitle + '</div>');
+                            }
+                        }
+
+                        $(".full-start-new__title").html(container);
                     } else {
                         $(".full-start-new__title").html(movie.title || movie.name);
                     }
