@@ -44,6 +44,35 @@
 
     if (!window.logoplugin) {
         window.logoplugin = true;
+
+        // Добавляем стили для центрирования
+        if (!$('#logo-center-style').length) {
+            $('head').append(`
+                <style id="logo-center-style">
+                    .full-start-new__head,
+                    .title-translations,
+                    .full-start-new__rate-line,
+                    .full-start-new__details,
+                    .full-start-new__reactions {
+                        display: flex !important;
+                        justify-content: center !important;
+                        text-align: center !important;
+                        width: 100% !important;
+                    }
+                    .full-start-new__head {
+                        flex-direction: column !important;
+                        align-items: center !important;
+                    }
+                    .title-translations > div {
+                        margin: 0 5px !important;
+                    }
+                    .full-start-new__rate-line > div {
+                        margin: 0 5px !important;
+                    }
+                </style>
+            `);
+        }
+
         Lampa.Listener.follow("full", function(e) {
             if (e.type == "complite") {
                 var movie = e.data.movie;
