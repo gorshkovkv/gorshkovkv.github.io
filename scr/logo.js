@@ -79,7 +79,7 @@
                         .full-start-new__reactions,
                         .full-start-new__buttons {
                             //display: flex !important;
-                            margin: auto !important;
+                            margin: 1em 0 !important;
                             -webkit-text-stroke: 0.1px #000000 !important;
                             text-align: left !important;
                             justify-content: left !important;
