@@ -5,12 +5,8 @@
         component: "interface",
         param: {
             name: "logo_glav",
-            type: "select",
-            values: {
-                1: "Скрыть",
-                0: "Отображать"
-            },
-            default: "0"
+            type: "trigger",
+            default: true
         },
         field: {
             name: "Логотипы вместо названий",
@@ -35,7 +31,7 @@
     if (!window.logoplugin) {
         window.logoplugin = true;
         Lampa.Listener.follow("full", function(e) {
-            if (e.type == "complite" && Lampa.Storage.get("logo_glav") != "1") {
+            if (e.type == "complite" && Lampa.Storage.get("logo_glav")) {
                 var movie = e.data.movie;
                 
                 async function tryGetLogo(lang) {
