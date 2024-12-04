@@ -86,17 +86,19 @@
                                     .logo-container { text-align: left; }
                                     .title-line {
                                         font-size: 0.6em;
-                                        height: auto;
-                                        max-height: 1.4em;
-                                        line-height: 1.2em;
+                                        white-space: nowrap;
                                         overflow: hidden;
                                         text-overflow: ellipsis;
-                                        display: -webkit-box;
-                                        -webkit-line-clamp: 2;
-                                        -webkit-box-orient: vertical;
                                         text-align: left;
                                         margin: 0.1em 0;
                                         opacity: 0.7;
+                                        width: 100%;
+                                        min-width: 0;
+                                    }
+                                    @media screen and (max-width: 480px) {
+                                        .title-line {
+                                            font-size: 0.5em;
+                                        }
                                     }
                                 </style>
                             `);
