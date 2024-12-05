@@ -165,6 +165,14 @@
                             text-align: center !important;
                             justify-content: center !important;
                         }
+                        .full-start-new__title img {
+                            padding-top: 5px !important;
+                            max-height: fit-content !important;
+                            max-width: 60% !important;
+                        }
+                        .scroll--mask {
+                            height: 100% !important;
+                        }
                     }
                     @media screen and (orientation: landscape) {
                         .full-start-new__head,
