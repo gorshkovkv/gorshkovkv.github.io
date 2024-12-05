@@ -24,7 +24,7 @@
         },
         field: {
             name: "Переводы названий",
-            description: "Показывать названия на разных языках под логотипом"
+            description: "Показывать названия на разных языках под названием или логотипом."
         }
     });
 
@@ -53,6 +53,20 @@
         field: {
             name: "Навигация справа в ландшафте",
             description: "Отображает навигационную панель справа в ландшафтном режиме"
+        }
+    });
+
+    // Добавляем настройку для качества изображений
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: {
+            name: "logo_high_quality",
+            type: "trigger",
+            default: true
+        },
+        field: {
+            name: "Высокое качество изображений",
+            description: "Всегда использовать высокое качество изображений, даже на мобильных устройствах"
         }
     });
 
@@ -192,6 +206,16 @@
                 </style>
             `);
         }
+
+        // Переопределяем метод получения пути к изображению
+        var originalImageFunction = Lampa.TMDB.image;
+        Lampa.TMDB.image = function(url) {
+            // Если включена настройка высокого качества, заменяем путь
+            if (Lampa.Storage.field('logo_high_quality')) {
+                url = url.replace('t/p/w300', 't/p/w500');
+            }
+            return originalImageFunction(url);
+        };
 
         // Функция для пересчета высоты скролла
         function updateScrollHeight() {
