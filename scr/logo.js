@@ -46,7 +46,7 @@
     Lampa.SettingsApi.addParam({
         component: "interface",
         param: {
-            name: "logo_nav_right",
+            name: "navigation_bar_right",
             type: "trigger",
             default: true
         },
@@ -72,12 +72,14 @@
                         .full-start-new__details,
                         .full-start-new__reactions,
                         .full-start-new__buttons {
+                            //font-size: 1em !important;
                             margin: 5px 0 !important;
                             -webkit-text-stroke: 0px #000000 !important;
                             text-align: center !important;
                             justify-content: center !important;
                         }
                         .full-start-new__title img {
+                            //margin-top: 5px !important;
                             padding-top: 5px !important;
                             max-height: fit-content !important;
                             max-width: 60% !important;
@@ -92,56 +94,66 @@
                         .full-start-new__details,
                         .full-start-new__reactions,
                         .full-start-new__buttons {
+                            //display: flex !important;
                             margin: 5px 0 0 0 !important;
                             -webkit-text-stroke: 0.1px #000000 !important;
                             text-align: left !important;
                             justify-content: left !important;
                         }
-                        body[data-nav-right="true"] {
-                            height: 100vh !important;
-                            overflow-y: auto !important;
+                        .full-start-new__title img {
+                            //margin-right: 15px !important;
+                            //margin-bottom: 15px !important;
+                            //max-height: 100% !important;
+                            //max-width: 20% !important;
                         }
+                    }
+
+                    /* Стили для навигационной панели */
+                    .navigation-bar {
+                        display: block;
+                    }
+
+                    @media screen and (orientation: landscape) {
                         body[data-nav-right="true"] .navigation-bar {
-                            top: 0 !important;
-                            left: auto !important;
-                            right: 0 !important;
-                            display: -webkit-box !important;
-                            display: -webkit-flex !important;
-                            display: -moz-box !important;
-                            display: -ms-flexbox !important;
-                            display: flex !important;
-                            padding: 1.5em !important;
-                            padding-left: 0 !important;
-                            height: 100vh !important;
-                            position: fixed !important;
+                            top: 0;
+                            left: auto;
+                            right: 0;
+                            display: -webkit-box;
+                            display: -webkit-flex;
+                            display: -moz-box;
+                            display: -ms-flexbox;
+                            display: flex;
+                            padding: 1.5em;
+                            padding-left: 0;
                         }
                         body[data-nav-right="true"] .navigation-bar .navigation-bar__body {
-                            -webkit-box-orient: vertical !important;
-                            -webkit-box-direction: normal !important;
-                            -webkit-flex-direction: column !important;
-                            -moz-box-orient: vertical !important;
-                            -moz-box-direction: normal !important;
-                            -ms-flex-direction: column !important;
-                            flex-direction: column !important;
-                            height: 100% !important;
-                        }
-                        body[data-nav-right="true"] .layout {
-                            padding-right: 6em !important;
+                            -webkit-box-orient: vertical;
+                            -webkit-box-direction: normal;
+                            -webkit-flex-direction: column;
+                            -moz-box-orient: vertical;
+                            -moz-box-direction: normal;
+                            -ms-flex-direction: column;
+                            flex-direction: column;
                         }
                     }
                 </style>
             `);
         }
 
-        // Следим за изменением настройки навигационной панели
+        // Функция для обновления атрибута body в зависимости от настройки
+        function updateNavigationPosition() {
+            $('body').attr('data-nav-right', Lampa.Storage.get('navigation_bar_right'));
+        }
+
+        // Обновляем позицию при изменении настройки
         Lampa.Storage.listener.follow('change', function (event) {
-            if (event.name == 'logo_nav_right') {
-                $('body').attr('data-nav-right', event.value);
+            if (event.name == 'navigation_bar_right') {
+                updateNavigationPosition();
             }
         });
 
         // Устанавливаем начальное значение
-        $('body').attr('data-nav-right', Lampa.Storage.get('logo_nav_right'));
+        updateNavigationPosition();
 
         Lampa.Listener.follow("full", function(e) {
             if (e.type == "complite") {
