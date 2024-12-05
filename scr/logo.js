@@ -84,6 +84,20 @@
         }
     });
 
+    // Добавляем настройку для отображения среднего времени серии
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: {
+            name: "logo_show_average_time",
+            type: "trigger",
+            default: false
+        },
+        field: {
+            name: "Показывать среднее время серии",
+            description: "Отображает среднее время серии в карточке сериала"
+        }
+    });
+
     if (!window.logoplugin) {
         window.logoplugin = true;
 
@@ -447,6 +461,44 @@
                 }
 
                 findLogo();
+            }
+        });
+
+        Lampa.Listener.follow("full", function(cardData) {
+            // Проверяем, включена ли опция отображения среднего времени
+            if (!Lampa.Storage.field('logo_show_average_time')) return;
+            
+            if (cardData.type === "complite") {
+                var imdbId = cardData.data.movie.imdb_id;
+                if (imdbId) {
+                    $.ajax({
+                        url: "https://api.tvmaze.com/lookup/shows?imdb=".concat(imdbId),
+                        method: "GET",
+                        success: function success(response) {
+                            var averageRuntime = response.averageRuntime;
+                            var hours = Math.floor(averageRuntime / 60);
+                            var minutes = averageRuntime % 60;
+                            var formattedRuntime = "".concat(hours.toString().padStart(2, '0'), ":").concat(minutes.toString().padStart(2, '0'));
+
+                            var runtimeSpan = $("<span>", {
+                                id: "averageRuntime",
+                                text: formattedRuntime
+                            });
+
+                            var splitSpan = $("<span>", {
+                                "class": "full-start-new__split",
+                                text: "●"
+                            });
+
+                            cardData.object.activity.render().find('.full-start-new__details').prepend(runtimeSpan, splitSpan);
+                        },
+                        error: function error(_error) {
+                            console.error("Ошибка при выполнении запроса:", _error);
+                        }
+                    });
+                } else {
+                    console.warn("IMDB ID отсутствует в данных фильма.");
+                }
             }
         });
     }
