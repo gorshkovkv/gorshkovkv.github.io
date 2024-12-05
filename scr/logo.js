@@ -143,6 +143,13 @@
         // Функция для обновления атрибута body в зависимости от настройки
         function updateNavigationPosition() {
             $('body').attr('data-nav-right', Lampa.Storage.get('navigation_bar_right'));
+            // Принудительно обновляем скролл
+            $('.scroll').each(function() {
+                if (this.scrollController) {
+                    this.scrollController.destroy();
+                    this.scrollController.init();
+                }
+            });
         }
 
         // Обновляем позицию при изменении настройки
@@ -150,6 +157,12 @@
             if (event.name == 'navigation_bar_right') {
                 updateNavigationPosition();
             }
+        });
+
+        // Слушаем изменение ориентации экрана
+        window.addEventListener('orientationchange', function() {
+            // Даем небольшую задержку, чтобы DOM успел обновиться
+            setTimeout(updateNavigationPosition, 100);
         });
 
         // Устанавливаем начальное значение
