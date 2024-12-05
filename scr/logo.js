@@ -189,6 +189,14 @@
         function updateScrollHeight() {
             let windowHeight = window.innerHeight;
             $('.scroll--mask').css('height', windowHeight + 'px');
+            
+            // Обновляем высоту для settings__content
+            let settingsContent = $('.settings__content');
+            if (settingsContent.length) {
+                let headerHeight = $('.settings__header').outerHeight() || 0;
+                let availableHeight = windowHeight - headerHeight;
+                settingsContent.find('.scroll--mask').css('max-height', availableHeight + 'px');
+            }
         }
 
         // Слушаем изменение ориентации
@@ -200,6 +208,9 @@
         window.addEventListener('resize', function() {
             updateScrollHeight();
         });
+
+        // Обновляем при открытии настроек
+        Lampa.Settings.listener.follow('open', updateScrollHeight);
 
         // Инициализируем при загрузке
         setTimeout(updateScrollHeight, 100);
