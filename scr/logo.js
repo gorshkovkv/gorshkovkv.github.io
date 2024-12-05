@@ -121,7 +121,6 @@
                         }
                         body[data-nav-right="true"] .navigation-bar .navigation-bar__body {
                             padding: 0.5em;
-                            height: 50%;
                             -webkit-box-orient: vertical;
                             -webkit-box-direction: normal;
                             -webkit-flex-direction: column;
