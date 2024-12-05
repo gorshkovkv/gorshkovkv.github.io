@@ -46,7 +46,7 @@
     Lampa.SettingsApi.addParam({
         component: "interface",
         param: {
-            name: "logo_navbar_right",
+            name: "logo_nav_right",
             type: "trigger",
             default: true
         },
@@ -59,7 +59,7 @@
     if (!window.logoplugin) {
         window.logoplugin = true;
 
-        // Добавляем стили для адаптивного центрирования и навигационной панели
+        // Добавляем стили для адаптивного центрирования
         if (!$('#logo-adaptive-style').length) {
             $('head').append(`
                 <style id="logo-adaptive-style">
@@ -97,7 +97,6 @@
                             text-align: left !important;
                             justify-content: left !important;
                         }
-                        
                         body[data-nav-right="true"] .navigation-bar {
                             top: 0 !important;
                             left: auto !important;
@@ -109,12 +108,8 @@
                             display: flex !important;
                             padding: 1.5em !important;
                             padding-left: 0 !important;
-                            width: 4em !important;
-                            height: 100% !important;
-                            background: rgba(0, 0, 0, 0.8) !important;
                         }
-                        
-                        body[data-nav-right="true"] .navigation-bar__body {
+                        body[data-nav-right="true"] .navigation-bar .navigation-bar__body {
                             -webkit-box-orient: vertical !important;
                             -webkit-box-direction: normal !important;
                             -webkit-flex-direction: column !important;
@@ -122,25 +117,6 @@
                             -moz-box-direction: normal !important;
                             -ms-flex-direction: column !important;
                             flex-direction: column !important;
-                            height: 100% !important;
-                            padding: 1em 0 !important;
-                            justify-content: center !important;
-                            -webkit-box-pack: center !important;
-                            -webkit-justify-content: center !important;
-                            -moz-box-pack: center !important;
-                            -ms-flex-pack: center !important;
-                        }
-                        
-                        body[data-nav-right="true"] .navigation-bar__item {
-                            margin: 1em 0 !important;
-                            flex-direction: column !important;
-                        }
-                        
-                        body[data-nav-right="true"] .navigation-bar__label {
-                            writing-mode: vertical-rl !important;
-                            transform: rotate(180deg) !important;
-                            margin: 1em 0 0 0 !important;
-                            text-align: center !important;
                         }
                     }
                 </style>
@@ -149,13 +125,13 @@
 
         // Следим за изменением настройки навигационной панели
         Lampa.Storage.listener.follow('change', function (event) {
-            if (event.name == 'logo_navbar_right') {
+            if (event.name == 'logo_nav_right') {
                 $('body').attr('data-nav-right', event.value);
             }
         });
 
         // Устанавливаем начальное значение
-        $('body').attr('data-nav-right', Lampa.Storage.get('logo_navbar_right'));
+        $('body').attr('data-nav-right', Lampa.Storage.get('logo_nav_right'));
 
         Lampa.Listener.follow("full", function(e) {
             if (e.type == "complite") {
