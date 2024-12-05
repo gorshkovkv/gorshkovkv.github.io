@@ -56,6 +56,20 @@
         }
     });
 
+    // Добавляем настройку для кнопки "назад" в браузере
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: {
+            name: "browser_back_button",
+            type: "trigger",
+            default: true
+        },
+        field: {
+            name: "Кнопка 'назад' в браузере",
+            description: "Использовать кнопку 'назад' в браузере для навигации в приложении"
+        }
+    });
+
     if (!window.logoplugin) {
         window.logoplugin = true;
 
@@ -93,6 +107,138 @@
                 </style>
             `);
         }
+
+        if (!$('#logo-nav-style').length && Lampa.Storage.get('logo_nav_right')) {
+            $('head').append(`
+                <style id="logo-nav-style">
+                    @media screen and (orientation: landscape) {
+                        body[data-nav-right="true"] .navigation-bar {
+                            top: 0;
+                            left: auto;
+                            right: 0;
+                            display: -webkit-box;
+                            display: -webkit-flex;
+                            display: -moz-box;
+                            display: -ms-flexbox;
+                            display: flex;
+                            padding: 0.5em;
+                            padding-left: 0;
+                        }
+                        body[data-nav-right="true"] .navigation-bar .navigation-bar__body {
+                            -webkit-box-orient: vertical;
+                            -webkit-box-direction: normal;
+                            -webkit-flex-direction: column;
+                            -moz-box-orient: vertical;
+                            -moz-box-direction: normal;
+                            -ms-flex-direction: column;
+                            flex-direction: column;
+                        }
+                    }
+                </style>
+            `);
+        }
+
+        if (!$('#logo-glav-style').length && Lampa.Storage.get('logo_glav')) {
+            $('head').append(`
+                <style id="logo-glav-style">
+                    @media screen and (orientation: portrait) {
+                        .full-start-new__title img {
+                            padding-top: 5px !important;
+                            max-height: fit-content !important;
+                            max-width: 60% !important;
+                        }
+                    }
+                </style>
+            `);
+        }
+
+        if (!$('#logo-scroll-style').length) {
+            $('head').append(`
+                <style id="logo-scroll-style">
+                    .scroll--mask {
+                        height: 100% !important;
+                    }
+                    .settings__body .scroll--mask {
+                        height: calc(100vh - 6em) !important;
+                    }
+                    @media screen and (orientation: landscape) {
+                        .settings__body .scroll--mask {
+                            height: calc(100vh - 4em) !important;
+                        }
+                    }
+                </style>
+            `);
+        }
+
+        if (!$('#logo-common-style').length) {
+            $('head').append(`
+                <style id="logo-common-style">
+                    @media screen and (orientation: portrait) {
+                        .full-start-new__head,
+                        .full-start-new__title,
+                        .full-start-new__tagline,
+                        .title-translations,
+                        .full-start-new__rate-line,
+                        .full-start-new__details,
+                        .full-start-new__reactions,
+                        .full-start-new__buttons {
+                            margin: 5px 0 !important;
+                            -webkit-text-stroke: 0px #000000 !important;
+                            text-align: center !important;
+                            justify-content: center !important;
+                        }
+                    }
+                    @media screen and (orientation: landscape) {
+                        .full-start-new__head,
+                        .full-start-new__title,
+                        .full-start-new__tagline,
+                        .title-translations,
+                        .full-start-new__rate-line,
+                        .full-start-new__details,
+                        .full-start-new__reactions,
+                        .full-start-new__buttons {
+                            margin: 5px 0 0 0 !important;
+                            -webkit-text-stroke: 0.1px #000000 !important;
+                            text-align: left !important;
+                            justify-content: left !important;
+                        }
+                    }
+                </style>
+            `);
+        }
+
+        // Добавляем настройку для кнопки "назад"
+        Lampa.Settings.main().render().find('[data-component="interface"]').append(
+            $('<div class="settings-param selector" data-type="toggle" data-name="browser_back_button">')
+                .append($('<div class="settings-param__name">Кнопка "назад" в браузере</div>'))
+                .append($('<div class="settings-param__value"></div>'))
+                .append($('<div class="settings-param__descr">Использовать кнопку "назад" в браузере для навигации в приложении</div>'))
+        );
+
+        Lampa.Storage.set('browser_back_button', true);
+
+        // Обработка кнопки "назад" в браузере
+        function handleBrowserBackButton(event) {
+            if (window.history.state !== null && Lampa.Storage.get('browser_back_button')) {
+                // Предотвращаем стандартное поведение браузера
+                event.preventDefault();
+                
+                // Вызываем нажатие кнопки "назад" в приложении
+                $('.head__btn--back').click();
+            }
+        }
+
+        window.addEventListener('popstate', handleBrowserBackButton);
+
+        // Слушаем изменение настройки
+        Lampa.Settings.listener.follow('open', function (e) {
+            if (e.name == 'browser_back_button') {
+                e.element.on('hover:enter', function () {
+                    Lampa.Storage.set('browser_back_button', !Lampa.Storage.get('browser_back_button'));
+                    Lampa.Settings.update();
+                });
+            }
+        });
 
         if (!$('#logo-nav-style').length && Lampa.Storage.get('logo_nav_right')) {
             $('head').append(`
