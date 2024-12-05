@@ -167,6 +167,40 @@
             $('.scroll--mask').css('height', windowHeight + 'px');
         }
 
+        // Функция для обработки ориентации экрана
+        function handleOrientation() {
+            const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+            const fullStartImg = $('.full-start-new__img');
+            const backgroundImg = $('.full-start__background');
+            
+            if (isPortrait) {
+                // Сохраняем оригинальный src если еще не сохранен
+                if (!fullStartImg.data('original-src')) {
+                    fullStartImg.data('original-src', fullStartImg.attr('src'));
+                }
+                // Устанавливаем src из background
+                const bgUrl = backgroundImg.css('background-image');
+                if (bgUrl) {
+                    const url = bgUrl.replace(/^url\(['"](.+)['"]\)$/, '$1');
+                    fullStartImg.attr('src', url);
+                }
+            } else {
+                // Возвращаем оригинальный src
+                const originalSrc = fullStartImg.data('original-src');
+                if (originalSrc) {
+                    fullStartImg.attr('src', originalSrc);
+                }
+            }
+        }
+
+        // Слушаем изменение ориентации
+        window.addEventListener('orientationchange', function() {
+            setTimeout(handleOrientation, 100);
+        });
+
+        // Также проверяем при загрузке
+        setTimeout(handleOrientation, 100);
+
         // Слушаем изменение ориентации
         window.addEventListener('orientationchange', function() {
             setTimeout(updateScrollHeight, 100); // Небольшая задержка для уверенности, что DOM обновился
