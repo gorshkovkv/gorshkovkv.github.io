@@ -207,35 +207,31 @@
             `);
         }
 
+        // Функция для изменения размера изображения
+        function resizeImage(url) {
+            if (url && url.includes('/t/p/w')) {
+                // Заменяем размер на 860x860
+                return url.replace(/\/t\/p\/w\d+/, '/t/p/w860');
+            }
+            return url;
+        }
+
+        // Переопределяем функцию cardToTile из main.js
+        var originalCardToTile = Lampa.Card.cardToTile;
+        Lampa.Card.cardToTile = function(card, subtitle) {
+            var result = originalCardToTile.apply(this, arguments);
+            if (result.image_url) {
+                result.image_url = resizeImage(result.image_url);
+            }
+            return result;
+        };
+
         // Переопределяем метод получения пути к изображению
         var originalImageFunction = Lampa.TMDB.image;
         Lampa.TMDB.image = function(url) {
             // Если включена настройка высокого качества, заменяем путь
             if (Lampa.Storage.field('logo_high_quality')) {
                 url = url.replace('t/p/w200', 't/p/w1280');
-                
-                // Добавляем обработчик для изменения размера изображения
-                if (window.innerHeight > window.innerWidth) { // портретный режим
-                    var img = new Image();
-                    img.crossOrigin = "Anonymous";
-                    img.onload = function() {
-                        var canvas = document.createElement('canvas');
-                        canvas.width = 860;
-                        canvas.height = 860;
-                        var ctx = canvas.getContext('2d');
-                        
-                        // Вычисляем размеры для центрирования изображения
-                        var scale = Math.max(canvas.width / img.width, canvas.height / img.height);
-                        var x = (canvas.width - img.width * scale) / 2;
-                        var y = (canvas.height - img.height * scale) / 2;
-                        
-                        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-                        
-                        // Заменяем URL изображения на URL canvas
-                        url = canvas.toDataURL('image/jpeg', 0.95);
-                    };
-                    img.src = url;
-                }
             }
             return originalImageFunction(url);
         };
