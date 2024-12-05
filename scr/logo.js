@@ -70,6 +70,20 @@
         }
     });
 
+    // Добавляем настройку для стилей логотипов
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: {
+            name: "logo_common_style",
+            type: "trigger",
+            default: true
+        },
+        field: {
+            name: "Стили",
+            description: "Применять стили для адаптивного отображения на телевизоре лучше отключить"
+        }
+    });
+
     if (!window.logoplugin) {
         window.logoplugin = true;
 
@@ -170,7 +184,7 @@
             `);
         }
 
-        if (!$('#logo-common-style').length) {
+        if (!$('#logo-common-style').length && Lampa.Storage.field('logo_common_style')) {
             $('head').append(`
                 <style id="logo-common-style">
                     @media screen and (orientation: portrait) {
