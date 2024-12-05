@@ -193,27 +193,26 @@
             `);
         }
 
-        // Функция для пересчета высоты скролла
-        function updateScrollHeight() {
+        // Функция для пересчета высоты скролла с debounce
+        const debouncedScrollHeight = Lampa.Utils.debounce(() => {
             let windowHeight = window.innerHeight;
             $('.scroll--mask').css('height', windowHeight + 'px');
-        }
+        }, 250);
 
-        // Слушаем изменение ориентации
-        window.addEventListener('orientationchange', function() {
-            setTimeout(updateScrollHeight, 100); // Небольшая задержка для уверенности, что DOM обновился
-        });
+        // Обработчик изменения ориентации
+        const orientationHandler = () => {
+            setTimeout(debouncedScrollHeight, 100);
+        };
 
-        // Также обновляем при изменении размера окна
-        window.addEventListener('resize', function() {
-            updateScrollHeight();
-        });
+        // Добавляем слушатели событий
+        window.addEventListener('orientationchange', orientationHandler);
+        window.addEventListener('resize', debouncedScrollHeight);
 
         // Инициализируем при загрузке
-        setTimeout(updateScrollHeight, 100);
+        setTimeout(debouncedScrollHeight, 100);
 
         // Обновляем высоту при открытии настроек
-        Lampa.Settings.listener.follow('open', updateScrollHeight);
+        Lampa.Settings.listener.follow('open', debouncedScrollHeight);
 
         // Следим за изменением настройки навигационной панели
         Lampa.Storage.listener.follow('change', function (event) {
