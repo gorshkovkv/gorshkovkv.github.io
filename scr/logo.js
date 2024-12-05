@@ -105,7 +105,7 @@
                             justify-content: center !important;
                         }
                         .full-start-new__title img {
-                            padding-top: 5px !important;
+                            padding-top: 0 !important;
                             max-height: fit-content !important;
                             max-width: 60% !important;
                         }
