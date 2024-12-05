@@ -125,21 +125,14 @@
 
                         /* Фиксим прокрутку в ландшафтном режиме */
                         .scroll--mask {
-                            position: absolute !important;
-                            top: 0 !important;
-                            left: 0 !important;
-                            right: 0 !important;
-                            bottom: 0 !important;
-                            overflow-y: scroll !important;
-                            overflow-x: hidden !important;
                             -webkit-overflow-scrolling: touch !important;
                         }
-                        .scroll--body {
-                            position: relative !important;
+                        .scroll--mask .scroll__content {
+                            padding-bottom: 1em;
                             min-height: 100% !important;
                         }
                         .layer--height {
-                            min-height: 100% !important;
+                            height: 100%;
                         }
                     }
                 </style>
