@@ -66,7 +66,7 @@
                         }
                         .full-start-new__title img {
                             //margin: 5px auto !important;
-                            //max-height: 10% !important;
+                             max-height: 1.8em !important;
                             //max-width: 45% !important;
                         }
                     }
