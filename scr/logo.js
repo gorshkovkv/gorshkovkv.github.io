@@ -63,34 +63,34 @@
         if (!$('#logo-adaptive-style').length) {
             $('head').append(`
                 <style id="logo-adaptive-style">
-                    /* Устанавливаем порядок элементов */
-                    .full-start-new__right {
-                        display: flex !important;
-                        flex-direction: column !important;
-                    }
-                    .full-start-new__title {
-                        order: 1 !important;
-                    }
-                    .title-translations {
-                        order: 2 !important;
-                    }
-                    .full-start-new__head {
-                        order: 3 !important;
-                    }
-                    .full-start-new__rate-line {
-                        order: 4 !important;
-                    }
-                    .full-start-new__details {
-                        order: 5 !important;
-                    }
-                    .full-start-new__reactions {
-                        order: 6 !important;
-                    }
-                    .full-start-new__buttons {
-                        order: 7 !important;
-                    }
-
                     @media screen and (orientation: portrait) {
+                        /* Устанавливаем порядок элементов */
+                        .full-start-new__right {
+                            display: flex !important;
+                            flex-direction: column !important;
+                        }
+                        .full-start-new__title {
+                            order: 1 !important;
+                        }
+                        .title-translations {
+                            order: 2 !important;
+                        }
+                        .full-start-new__head {
+                            order: 3 !important;
+                        }
+                        .full-start-new__rate-line {
+                            order: 4 !important;
+                        }
+                        .full-start-new__details {
+                            order: 5 !important;
+                        }
+                        .full-start-new__reactions {
+                            order: 6 !important;
+                        }
+                        .full-start-new__buttons {
+                            order: 7 !important;
+                        }
+
                         .full-start-new__head,
                         .full-start-new__title,
                         .full-start-new__tagline,
