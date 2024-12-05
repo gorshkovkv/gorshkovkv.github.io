@@ -85,6 +85,10 @@
                         .scroll--mask {
                             height: 100% !important;
                         }
+                        .scroll--mask .scroll__content {
+                            height: auto !important;
+                            min-height: 100% !important;
+                        }
                     }
                     @media screen and (orientation: landscape) {
                         .full-start-new__head,
@@ -102,6 +106,10 @@
                         }
                         .scroll--mask {
                             height: 100% !important;
+                        }
+                        .scroll--mask .scroll__content {
+                            height: auto !important;
+                            min-height: 100% !important;
                         }
                     }
 
@@ -138,7 +146,16 @@
         // Функция для пересчета высоты скролла
         function updateScrollHeight() {
             let windowHeight = window.innerHeight;
-            $('.scroll--mask').css('height', windowHeight + 'px');
+            $('.scroll--mask').each(function() {
+                let $mask = $(this);
+                let $content = $mask.find('.scroll__content');
+                
+                $mask.css('height', windowHeight + 'px');
+                $content.css({
+                    'height': 'auto',
+                    'min-height': windowHeight + 'px'
+                });
+            });
         }
 
         // Слушаем изменение ориентации
@@ -153,6 +170,13 @@
 
         // Инициализируем при загрузке
         setTimeout(updateScrollHeight, 100);
+
+        // Обновляем высоту при открытии карточки фильма
+        Lampa.Listener.follow("full", function(e) {
+            if (e.type == "complite") {
+                setTimeout(updateScrollHeight, 100);
+            }
+        });
 
         // Следим за изменением настройки навигационной панели
         Lampa.Storage.listener.follow('change', function (event) {
