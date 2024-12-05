@@ -193,6 +193,17 @@
             `);
         }
 
+        // Обработка кнопки "назад" в браузере
+        window.addEventListener('popstate', function(event) {
+            if (window.history.state !== null) {
+                // Предотвращаем стандартное поведение браузера
+                event.preventDefault();
+                
+                // Вызываем нажатие кнопки "назад" в приложении
+                $('.head__btn--back').click();
+            }
+        });
+
         // Функция для пересчета высоты скролла
         function updateScrollHeight() {
             let windowHeight = window.innerHeight;
