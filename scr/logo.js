@@ -144,6 +144,14 @@
                     .scroll--mask {
                         height: 100% !important;
                     }
+                    .settings__body .scroll--mask {
+                        height: calc(100vh - 6em) !important;
+                    }
+                    @media screen and (orientation: landscape) {
+                        .settings__body .scroll--mask {
+                            height: calc(100vh - 4em) !important;
+                        }
+                    }
                 </style>
             `);
         }
@@ -189,16 +197,6 @@
         function updateScrollHeight() {
             let windowHeight = window.innerHeight;
             $('.scroll--mask').css('height', windowHeight + 'px');
-
-            // Специальная обработка для панели настроек
-            if ($('.settings__body').length) {
-                let settingsBody = $('.settings__body');
-                let settingsScroll = settingsBody.find('.scroll--mask');
-                if (settingsScroll.length) {
-                    let settingsHeight = windowHeight - settingsBody.offset().top;
-                    settingsScroll.css('height', settingsHeight + 'px');
-                }
-            }
         }
 
         // Слушаем изменение ориентации
