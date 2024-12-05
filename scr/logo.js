@@ -111,6 +111,8 @@
                     /* Стили для навигационной панели */
                     .navigation-bar {
                         display: block;
+                        position: fixed;
+                        z-index: 100;
                     }
 
                     @media screen and (orientation: landscape) {
@@ -118,6 +120,7 @@
                             top: 0;
                             left: auto;
                             right: 0;
+                            bottom: 0;
                             display: -webkit-box;
                             display: -webkit-flex;
                             display: -moz-box;
@@ -125,6 +128,8 @@
                             display: flex;
                             padding: 1.5em;
                             padding-left: 0;
+                            width: auto;
+                            height: 100%;
                         }
                         body[data-nav-right="true"] .navigation-bar .navigation-bar__body {
                             -webkit-box-orient: vertical;
@@ -134,6 +139,11 @@
                             -moz-box-direction: normal;
                             -ms-flex-direction: column;
                             flex-direction: column;
+                            height: 100%;
+                        }
+                        /* Добавляем отступ для контента, чтобы не перекрывался навигацией */
+                        body[data-nav-right="true"] .layer--width {
+                            padding-right: 5em;
                         }
                     }
                 </style>
