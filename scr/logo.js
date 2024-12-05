@@ -108,7 +108,7 @@
                     /* Стили для навигационной панели */
                     @media screen and (orientation: landscape) {
                         body[data-nav-right="true"] .navigation-bar {
-                            top: 0;
+                            top: 20%;
                             left: auto;
                             right: 0;
                             display: -webkit-box;
@@ -118,8 +118,10 @@
                             display: flex;
                             padding: 1.5em;
                             padding-left: 0;
+                            height: 60%;
                         }
                         body[data-nav-right="true"] .navigation-bar .navigation-bar__body {
+                            padding: 0.5em;
                             -webkit-box-orient: vertical;
                             -webkit-box-direction: normal;
                             -webkit-flex-direction: column;
