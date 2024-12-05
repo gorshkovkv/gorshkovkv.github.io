@@ -212,7 +212,7 @@
         Lampa.TMDB.image = function(url) {
             // Если включена настройка высокого качества, заменяем путь
             if (Lampa.Storage.field('logo_high_quality')) {
-                url = url.replace('t/p/w1280', 't/p/original');
+                url = url.replace(/t\/p\/w\d+/, 't/p/original');
             }
             return originalImageFunction(url);
         };
