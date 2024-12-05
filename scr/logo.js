@@ -212,7 +212,7 @@
         Lampa.TMDB.image = function(url) {
             // Если включена настройка высокого качества, заменяем путь
             if (Lampa.Storage.field('logo_high_quality')) {
-                url = url.replace('t/p/w200', 't/p/w1280');
+                url = url.replace('t/p/w780', 't/p/w1280');
             }
             return originalImageFunction(url);
         };
@@ -298,37 +298,6 @@
                         return null;
                     }
                 }
-
-                // Функция для обработки изображения
-                function processBackgroundImage(img, callback) {
-                    const targetSize = 860;
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    canvas.width = targetSize;
-                    canvas.height = targetSize;
-                    
-                    // Вычисляем пропорции для сохранения соотношения сторон
-                    const ratio = Math.max(canvas.width / img.width, canvas.height / img.height);
-                    const nw = img.width * ratio;
-                    const nh = img.height * ratio;
-                    
-                    // Отрисовываем изображение с центрированием
-                    ctx.drawImage(img, -(nw - canvas.width) / 2, -(nh - canvas.height) / 2, nw, nh);
-                    
-                    // Создаем новое изображение с обработанными размерами
-                    const processedImg = new Image();
-                    processedImg.onload = () => callback(processedImg);
-                    processedImg.src = canvas.toDataURL('image/jpeg');
-                }
-
-                // Перехватываем оригинальную функцию blurPoster
-                const originalBlurPoster = window.blurPoster;
-                window.blurPoster = function(img, w, h, callback) {
-                    processBackgroundImage(img, (processedImg) => {
-                        originalBlurPoster(processedImg, 860, 860, callback);
-                    });
-                };
 
                 async function findLogo() {
                     // Получаем заранее все названия для переводов
