@@ -66,8 +66,8 @@
                         }
                         .full-start-new__title img {
                             //margin: 5px auto !important;
-                             max-height: 3em !important;
-                            //max-width: 45% !important;
+                            //max-height: 3em !important;
+                            max-width: 45% !important;
                         }
                     }
                     @media screen and (orientation: landscape) {
