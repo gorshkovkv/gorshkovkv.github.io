@@ -210,9 +210,10 @@
         // Переопределяем метод получения пути к изображению
         var originalImageFunction = Lampa.TMDB.image;
         Lampa.TMDB.image = function(url) {
-            // Если включена настройка высокого качества, заменяем путь
+            // Если включена настройка высокого качества, заменяем пути
             if (Lampa.Storage.field('logo_high_quality')) {
                 url = url.replace('t/p/w780', 't/p/original');
+                url = url.replace('t/p/w1280', 't/p/original');
             }
             return originalImageFunction(url);
         };
