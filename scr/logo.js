@@ -82,6 +82,9 @@
                             max-height: fit-content !important;
                             max-width: 60% !important;
                         }
+                        .scroll--mask {
+                            height: 100% !important;
+                        }
                     }
                     @media screen and (orientation: landscape) {
                         .full-start-new__head,
@@ -96,6 +99,9 @@
                             -webkit-text-stroke: 0.1px #000000 !important;
                             text-align: left !important;
                             justify-content: left !important;
+                        }
+                        .scroll--mask {
+                            height: 100% !important;
                         }
                     }
 
@@ -122,22 +128,29 @@
                             -ms-flex-direction: column;
                             flex-direction: column;
                         }
-
-                        /* Фиксим прокрутку в ландшафтном режиме */
-                        .scroll--mask {
-                            -webkit-overflow-scrolling: touch !important;
-                        }
-                        .scroll--mask .scroll__content {
-                            padding-bottom: 1em;
-                            min-height: 100% !important;
-                        }
-                        .layer--height {
-                            height: 100%;
-                        }
                     }
                 </style>
             `);
         }
+
+        // Функция для пересчета высоты скролла
+        function updateScrollHeight() {
+            let windowHeight = window.innerHeight;
+            $('.scroll--mask').css('height', windowHeight + 'px');
+        }
+
+        // Слушаем изменение ориентации
+        window.addEventListener('orientationchange', function() {
+            setTimeout(updateScrollHeight, 100); // Небольшая задержка для уверенности, что DOM обновился
+        });
+
+        // Также обновляем при изменении размера окна
+        window.addEventListener('resize', function() {
+            updateScrollHeight();
+        });
+
+        // Инициализируем при загрузке
+        setTimeout(updateScrollHeight, 100);
 
         // Следим за изменением настройки навигационной панели
         Lampa.Storage.listener.follow('change', function (event) {
