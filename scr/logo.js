@@ -252,23 +252,27 @@
                 }
 
                 async function getDescription(lang) {
-                    var card = Lampa.Activity.active().card;
-                    if (card) {
-                        var desc = card.overview || card.description;
-                        if (desc && desc[lang]) return desc[lang];
+                    try {
+                        // Сначала пробуем получить описание из TMDB
+                        const url = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "?api_key=" + Lampa.TMDB.key() + "&language=" + lang);
+                        const resp = await $.get(url);
                         
-                        // Проверяем настройку logo_missing_desc
+                        if (resp.overview) return resp.overview;
+                        
+                        // Если описание не найдено и включена опция logo_missing_desc
                         if (Lampa.Storage.get('logo_missing_desc', true)) {
-                            // Если описание на запрошенном языке отсутствует, 
-                            // пробуем найти на других языках
-                            if (desc) {
-                                for (var other_lang in desc) {
-                                    if (desc[other_lang]) return desc[other_lang];
-                                }
+                            // Пробуем получить описание на английском как запасной вариант
+                            if (lang !== 'en') {
+                                const url_en = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "?api_key=" + Lampa.TMDB.key() + "&language=en");
+                                const resp_en = await $.get(url_en);
+                                if (resp_en.overview) return resp_en.overview;
                             }
                         }
+                        
+                        return null;
+                    } catch (e) {
+                        return null;
                     }
-                    return '';
                 }
 
                 async function findLogo() {
