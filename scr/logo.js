@@ -60,11 +60,10 @@
         window.logoplugin = true;
 
         // Добавляем стили для адаптивного центрирования и навигации
-        if (!$('#logo-adaptive-style').length) {
+        if (!$('#logo-order-style').length && Lampa.Storage.get('logo_translations')) {
             $('head').append(`
-                <style id="logo-adaptive-style">
+                <style id="logo-order-style">
                     @media screen and (orientation: portrait) {
-                        /* Устанавливаем порядок элементов */
                         .full-start-new__right {
                             display: flex !important;
                             flex-direction: column !important;
@@ -90,7 +89,69 @@
                         .full-start-new__buttons {
                             order: 7 !important;
                         }
+                    }
+                </style>
+            `);
+        }
 
+        if (!$('#logo-nav-style').length && Lampa.Storage.get('logo_nav_right')) {
+            $('head').append(`
+                <style id="logo-nav-style">
+                    @media screen and (orientation: landscape) {
+                        body[data-nav-right="true"] .navigation-bar {
+                            top: 0;
+                            left: auto;
+                            right: 0;
+                            display: -webkit-box;
+                            display: -webkit-flex;
+                            display: -moz-box;
+                            display: -ms-flexbox;
+                            display: flex;
+                            padding: 0.5em;
+                            padding-left: 0;
+                        }
+                        body[data-nav-right="true"] .navigation-bar .navigation-bar__body {
+                            -webkit-box-orient: vertical;
+                            -webkit-box-direction: normal;
+                            -webkit-flex-direction: column;
+                            -moz-box-orient: vertical;
+                            -moz-box-direction: normal;
+                            -ms-flex-direction: column;
+                            flex-direction: column;
+                        }
+                    }
+                </style>
+            `);
+        }
+
+        if (!$('#logo-glav-style').length && Lampa.Storage.get('logo_glav')) {
+            $('head').append(`
+                <style id="logo-glav-style">
+                    @media screen and (orientation: portrait) {
+                        .full-start-new__title img {
+                            padding-top: 5px !important;
+                            max-height: fit-content !important;
+                            max-width: 60% !important;
+                        }
+                    }
+                </style>
+            `);
+        }
+
+        if (!$('#logo-scroll-style').length) {
+            $('head').append(`
+                <style id="logo-scroll-style">
+                    .scroll--mask {
+                        height: 100% !important;
+                    }
+                </style>
+            `);
+        }
+
+        if (!$('#logo-common-style').length) {
+            $('head').append(`
+                <style id="logo-common-style">
+                    @media screen and (orientation: portrait) {
                         .full-start-new__head,
                         .full-start-new__title,
                         .full-start-new__tagline,
@@ -103,14 +164,6 @@
                             -webkit-text-stroke: 0px #000000 !important;
                             text-align: center !important;
                             justify-content: center !important;
-                        }
-                        .full-start-new__title img {
-                            padding-top: 5px !important;
-                            max-height: fit-content !important;
-                            max-width: 60% !important;
-                        }
-                        .scroll--mask {
-                            height: 100% !important;
                         }
                     }
                     @media screen and (orientation: landscape) {
@@ -126,35 +179,6 @@
                             -webkit-text-stroke: 0.1px #000000 !important;
                             text-align: left !important;
                             justify-content: left !important;
-                        }
-                        .scroll--mask {
-                            height: 100% !important;
-                        }
-                    }
-
-                    /* Стили для навигационной панели */
-                    @media screen and (orientation: landscape) {
-                        body[data-nav-right="true"] .navigation-bar {
-                            top: 0;
-                            left: auto;
-                            right: 0;
-                            display: -webkit-box;
-                            display: -webkit-flex;
-                            display: -moz-box;
-                            display: -ms-flexbox;
-                            display: flex;
-                            padding: 0.5em;
-                            padding-left: 0;
-                        }
-                        body[data-nav-right="true"] .navigation-bar .navigation-bar__body {
-                            //padding: 0.5em;
-                            -webkit-box-orient: vertical;
-                            -webkit-box-direction: normal;
-                            -webkit-flex-direction: column;
-                            -moz-box-orient: vertical;
-                            -moz-box-direction: normal;
-                            -ms-flex-direction: column;
-                            flex-direction: column;
                         }
                     }
                 </style>
