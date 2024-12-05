@@ -144,22 +144,8 @@
                     .scroll--mask {
                         height: 100% !important;
                     }
-                    
-                    /* Стили для скролла в настройках */
-                    .settings__content {
-                        position: relative !important;
-                        height: calc(100vh - 60px) !important;
-                        overflow: hidden !important;
-                    }
-                    
                     .settings__content .scroll--mask {
-                        position: absolute !important;
-                        top: 0 !important;
-                        left: 0 !important;
-                        right: 0 !important;
-                        bottom: 0 !important;
                         height: 100% !important;
-                        overflow-y: auto !important;
                     }
                 </style>
             `);
@@ -205,23 +191,13 @@
         // Функция для пересчета высоты скролла
         function updateScrollHeight() {
             let windowHeight = window.innerHeight;
-            
-            // Обновляем высоту для settings__content
-            let settingsContent = $('.settings__content');
-            if (settingsContent.length) {
-                let headerHeight = $('.settings__header').outerHeight() || 0;
-                let availableHeight = windowHeight - headerHeight;
-                settingsContent.css('height', availableHeight + 'px');
-                settingsContent.find('.scroll--mask').css({
-                    'height': '100%',
-                    'max-height': 'none'
-                });
-            }
+            $('.scroll--mask').css('height', windowHeight + 'px');
+            $('.settings__content .scroll--mask').css('height', windowHeight + 'px');
         }
 
         // Слушаем изменение ориентации
         window.addEventListener('orientationchange', function() {
-            setTimeout(updateScrollHeight, 100);
+            setTimeout(updateScrollHeight, 100); // Небольшая задержка для уверенности, что DOM обновился
         });
 
         // Также обновляем при изменении размера окна
@@ -229,13 +205,13 @@
             updateScrollHeight();
         });
 
-        // Обновляем при открытии настроек
+        // Инициализируем при загрузке
+        setTimeout(updateScrollHeight, 100);
+
+        // Обновляем высоту при открытии настроек
         Lampa.Settings.listener.follow('open', function() {
             setTimeout(updateScrollHeight, 100);
         });
-
-        // Инициализируем при загрузке
-        setTimeout(updateScrollHeight, 100);
 
         // Следим за изменением настройки навигационной панели
         Lampa.Storage.listener.follow('change', function (event) {
