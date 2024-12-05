@@ -99,19 +99,36 @@
                         }
                         
                         body[data-nav-right="true"] .navigation-bar {
+                            top: 0 !important;
                             left: auto !important;
                             right: 0 !important;
+                            display: -webkit-box !important;
+                            display: -webkit-flex !important;
+                            display: -moz-box !important;
+                            display: -ms-flexbox !important;
+                            display: flex !important;
+                            padding: 1.5em !important;
+                            padding-left: 0 !important;
                             width: 4em !important;
                             height: 100% !important;
-                            bottom: 0 !important;
                             background: rgba(0, 0, 0, 0.8) !important;
                         }
                         
                         body[data-nav-right="true"] .navigation-bar__body {
+                            -webkit-box-orient: vertical !important;
+                            -webkit-box-direction: normal !important;
+                            -webkit-flex-direction: column !important;
+                            -moz-box-orient: vertical !important;
+                            -moz-box-direction: normal !important;
+                            -ms-flex-direction: column !important;
                             flex-direction: column !important;
                             height: 100% !important;
                             padding: 1em 0 !important;
                             justify-content: center !important;
+                            -webkit-box-pack: center !important;
+                            -webkit-justify-content: center !important;
+                            -moz-box-pack: center !important;
+                            -ms-flex-pack: center !important;
                         }
                         
                         body[data-nav-right="true"] .navigation-bar__item {
