@@ -202,6 +202,9 @@
                             text-align: left !important;
                             justify-content: left !important;
                         }
+                        .full-start-new__body {
+                            align-items: center !important;
+                        }
                     }
                 </style>
             `);
