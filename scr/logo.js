@@ -97,6 +97,10 @@
                             text-align: left !important;
                             justify-content: left !important;
                         }
+                        body[data-nav-right="true"] {
+                            height: 100vh !important;
+                            overflow-y: auto !important;
+                        }
                         body[data-nav-right="true"] .navigation-bar {
                             top: 0 !important;
                             left: auto !important;
@@ -108,6 +112,8 @@
                             display: flex !important;
                             padding: 1.5em !important;
                             padding-left: 0 !important;
+                            height: 100vh !important;
+                            position: fixed !important;
                         }
                         body[data-nav-right="true"] .navigation-bar .navigation-bar__body {
                             -webkit-box-orient: vertical !important;
@@ -117,6 +123,10 @@
                             -moz-box-direction: normal !important;
                             -ms-flex-direction: column !important;
                             flex-direction: column !important;
+                            height: 100% !important;
+                        }
+                        body[data-nav-right="true"] .layout {
+                            padding-right: 6em !important;
                         }
                     }
                 </style>
