@@ -42,10 +42,24 @@
         }
     });
 
+    // Добавляем настройку для навигационной панели
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: {
+            name: "logo_navbar_right",
+            type: "trigger",
+            default: true
+        },
+        field: {
+            name: "Навигация справа в ландшафте",
+            description: "Отображает навигационную панель справа в ландшафтном режиме"
+        }
+    });
+
     if (!window.logoplugin) {
         window.logoplugin = true;
 
-        // Добавляем стили для адаптивного центрирования
+        // Добавляем стили для адаптивного центрирования и навигационной панели
         if (!$('#logo-adaptive-style').length) {
             $('head').append(`
                 <style id="logo-adaptive-style">
@@ -58,13 +72,15 @@
                         .full-start-new__details,
                         .full-start-new__reactions,
                         .full-start-new__buttons {
+                            margin: 5px 0 !important;
+                            -webkit-text-stroke: 0px #000000 !important;
                             text-align: center !important;
                             justify-content: center !important;
                         }
                         .full-start-new__title img {
-                            margin: 5px auto !important;
-                            max-height: 10% !important;
-                            max-width: 45% !important;
+                            padding-top: 5px !important;
+                            max-height: fit-content !important;
+                            max-width: 60% !important;
                         }
                     }
                     @media screen and (orientation: landscape) {
@@ -76,19 +92,53 @@
                         .full-start-new__details,
                         .full-start-new__reactions,
                         .full-start-new__buttons {
-                            display: flex !important;
+                            margin: 5px 0 0 0 !important;
+                            -webkit-text-stroke: 0.1px #000000 !important;
                             text-align: left !important;
-                            justify-content: flex-start !important;
+                            justify-content: left !important;
                         }
-                        .full-start-new__title img {
-                            margin-left: 0 !important;
-                            max-height: 100% !important;
-                            max-width: 20% !important;
+                        
+                        body[data-nav-right="true"] .navigation-bar {
+                            left: auto !important;
+                            right: 0 !important;
+                            width: 4em !important;
+                            height: 100% !important;
+                            bottom: 0 !important;
+                            background: rgba(0, 0, 0, 0.8) !important;
+                        }
+                        
+                        body[data-nav-right="true"] .navigation-bar__body {
+                            flex-direction: column !important;
+                            height: 100% !important;
+                            padding: 1em 0 !important;
+                            justify-content: center !important;
+                        }
+                        
+                        body[data-nav-right="true"] .navigation-bar__item {
+                            margin: 1em 0 !important;
+                            flex-direction: column !important;
+                        }
+                        
+                        body[data-nav-right="true"] .navigation-bar__label {
+                            writing-mode: vertical-rl !important;
+                            transform: rotate(180deg) !important;
+                            margin: 1em 0 0 0 !important;
+                            text-align: center !important;
                         }
                     }
                 </style>
             `);
         }
+
+        // Следим за изменением настройки навигационной панели
+        Lampa.Storage.listener.follow('change', function (event) {
+            if (event.name == 'logo_navbar_right') {
+                $('body').attr('data-nav-right', event.value);
+            }
+        });
+
+        // Устанавливаем начальное значение
+        $('body').attr('data-nav-right', Lampa.Storage.get('logo_navbar_right'));
 
         Lampa.Listener.follow("full", function(e) {
             if (e.type == "complite") {
@@ -174,7 +224,7 @@
                                 $(".full-start__description").text(newDesc);
                                 $(".full-descr__text").text(newDesc);
                                 // Меняем заголовок на английский
-                                $(".items-line__title").text("Description in English");
+                                //$(".items-line__title").text("Description in English");
                             }
                         }
                     }
@@ -182,10 +232,12 @@
                     // Отображаем переводы названий, если включена соответствующая настройка
                     if (Lampa.Storage.get("logo_translations")) {
                         var titlesContainer = $('<div class="title-translations"></div>').css({
-                            'margin-top': '10px',
-                            'margin-bottom': '15px',
-                            'font-size': '0.9em',
-                            'opacity': '0.7'
+                            //'margin-top': '10px',
+                            //'margin-bottom': '15px',
+                            //'margin-right': '10px',
+                            'font-size': '1.1em',
+                            '-webkit-text-stroke': '0.1px #000000',
+                            'opacity': '1'
                         });
 
                         const currentLang = Lampa.Storage.get("language");
@@ -208,7 +260,7 @@
                         if (displayLang === currentLang) {
                             // Если отображается на языке приложения
                             if (enTitle && enTitle !== (currentLang === 'ru' ? ruTitle : enTitle)) {
-                                titlesContainer.append(`<div>🇬🇧 ${enTitle}</div>`);
+                                titlesContainer.append(`<div>🇬🇧 ${enTitle} </div>`);
                             }
                             if (origTitle && origTitle !== enTitle && origTitle !== (currentLang === 'ru' ? ruTitle : enTitle)) {
                                 titlesContainer.append(`<div>🌐 ${origTitle}</div>`);
@@ -216,7 +268,7 @@
                         } else if (displayLang === 'en') {
                             // Если отображается на английском
                             if (currentLang === 'ru' && ruTitle && ruTitle !== enTitle) {
-                                titlesContainer.append(`<div>🇷🇺 ${ruTitle}</div>`);
+                                titlesContainer.append(`<div>🇷🇺 ${ruTitle} </div>`);
                             }
                             if (origTitle && origTitle !== enTitle && origTitle !== (currentLang === 'ru' ? ruTitle : enTitle)) {
                                 titlesContainer.append(`<div>🌐 ${origTitle}</div>`);
@@ -224,7 +276,7 @@
                         } else {
                             // Если отображается на другом языке
                             if (currentLang === 'ru' && ruTitle && ruTitle !== origTitle) {
-                                titlesContainer.append(`<div>🇷🇺 ${ruTitle}</div>`);
+                                titlesContainer.append(`<div>🇷🇺 ${ruTitle} </div>`);
                             }
                             if (enTitle && enTitle !== origTitle) {
                                 titlesContainer.append(`<div>🇬🇧 ${enTitle}</div>`);
@@ -238,7 +290,8 @@
                     // Если включена настройка логотипов, пробуем найти и отобразить логотип
                     if (Lampa.Storage.get("logo_glav")) {
                         // Создаем контейнер для логотипа
-                        var imgElement = $('<img style="margin-top: 5px; margin-left: 0; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
+                        var imgElement = $('<img style="matging-top: 0.2em; margin-bottom: 0.1em; max-height: 1.5em;" src="' + Lampa.TMDB.image("/t/p/w500" + path.replace(".svg", ".png")) + '" />');
+                        //var imgElement = $('<img style="margin-top: 5px; margin-left: 0; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
                         });
