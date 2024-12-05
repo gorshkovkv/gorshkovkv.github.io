@@ -144,6 +144,12 @@
                     .scroll--mask {
                         height: 100% !important;
                     }
+                    .scroll__content.layer--wheight {
+                        height: 100% !important;
+                    }
+                    .scroll__content > .scroll__body {
+                        height: 100% !important;
+                    }
                 </style>
             `);
         }
@@ -189,11 +195,6 @@
         function updateScrollHeight() {
             let windowHeight = window.innerHeight;
             $('.scroll--mask').css('height', windowHeight + 'px');
-            $('.scroll.scroll--mask.scroll--over.layer--height').css({
-                'height': windowHeight + 'px',
-                'max-height': windowHeight + 'px'
-            });
-            $('.scroll--mask .scroll__content').css('max-height', windowHeight + 'px');
         }
 
         // Слушаем изменение ориентации
@@ -208,17 +209,6 @@
 
         // Инициализируем при загрузке
         setTimeout(updateScrollHeight, 100);
-
-        // Добавляем обработчик для обновления высоты при изменении контента
-        const observer = new MutationObserver(function(mutations) {
-            updateScrollHeight();
-        });
-
-        // Начинаем наблюдение за изменениями в DOM
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
 
         // Следим за изменением настройки навигационной панели
         Lampa.Storage.listener.follow('change', function (event) {
