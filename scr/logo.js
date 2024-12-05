@@ -214,8 +214,8 @@
             if (Lampa.Storage.field('logo_high_quality')) {
                 url = url.replace('t/p/w780', 't/p/original');
                 url = url.replace('t/p/w1280', 't/p/original');
-                url = url.replace('t/p/w200', 't/p/500');
-                url = url.replace('t/p/w500', 't/p/780');
+                url = url.replace('t/p/w200', 't/p/w500');
+                url = url.replace('t/p/w500', 't/p/w780');
             }
             return originalImageFunction(url);
         };
