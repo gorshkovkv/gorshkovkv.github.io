@@ -63,6 +63,23 @@
         if (!$('#logo-adaptive-style').length) {
             $('head').append(`
                 <style id="logo-adaptive-style">
+                    .full-start-new {
+                        display: flex !important;
+                        flex-direction: column !important;
+                    }
+                    .full-start-new__head {
+                        order: -1 !important;
+                    }
+                    .full-start-new__rate-line {
+                        order: 1 !important;
+                    }
+                    .full-start-new__title {
+                        order: 0 !important;
+                    }
+                    .title-translations {
+                        order: 0 !important;
+                    }
+
                     @media screen and (orientation: portrait) {
                         .full-start-new__head,
                         .full-start-new__title,
