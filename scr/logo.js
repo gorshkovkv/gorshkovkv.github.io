@@ -80,7 +80,7 @@
         },
         field: {
             name: "Стили",
-            description: "Применять стили для адаптивного отображения на телевизоре лучше отключить"
+            description: "Применять стили для адаптивного отображения, на телевизоре лучше отключить"
         }
     });
 
@@ -222,7 +222,7 @@
                             justify-content: space-between !important;
                             align-items: flex-start !important;
                             align-self: flex-start !important;
-                            height: 25em !important;
+                            height: 659px !important;
                         }
                     }
                 </style>
