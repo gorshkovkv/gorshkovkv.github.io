@@ -56,20 +56,6 @@
         }
     });
 
-    // Добавляем настройку для кнопки "назад" в браузере
-    Lampa.SettingsApi.addParam({
-        component: "interface",
-        param: {
-            name: "logo_back_button",
-            type: "trigger",
-            default: true
-        },
-        field: {
-            name: "Обработка кнопки назад",
-            description: "Включить обработку кнопки назад в браузере как кнопка назад в приложении"
-        }
-    });
-
     if (!window.logoplugin) {
         window.logoplugin = true;
 
@@ -206,17 +192,6 @@
                 </style>
             `);
         }
-
-        // Обработка кнопки "назад" в браузере
-        window.addEventListener('popstate', function(event) {
-            if (window.history.state !== null && Lampa.Storage.get('logo_back_button', true)) {
-                // Предотвращаем стандартное поведение браузера
-                event.preventDefault();
-                
-                // Вызываем нажатие кнопки "назад" в приложении
-                $('.head__btn--back').click();
-            }
-        });
 
         // Функция для пересчета высоты скролла
         function updateScrollHeight() {
