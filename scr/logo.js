@@ -116,7 +116,7 @@
                             display: -moz-box;
                             display: -ms-flexbox;
                             display: flex;
-                            padding: 1.5em;
+                            padding: 0.5em;
                             padding-left: 0;
                             height: 60%;
                         }
