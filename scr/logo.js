@@ -66,21 +66,7 @@
         },
         field: {
             name: "Высокое качество изображений",
-            description: "Всегда использовать высокое качество изображений и портретный режим для фоновых изображений (860x860)"
-        }
-    });
-
-    // Добавляем настройку для портретного режима
-    Lampa.SettingsApi.addParam({
-        component: "interface",
-        param: {
-            name: "logo_portrait_mode",
-            type: "trigger",
-            default: true
-        },
-        field: {
-            name: "Портретный режим",
-            description: "Использовать квадратные фоновые изображения (860x860) в портретном режиме"
+            description: "Всегда использовать высокое качество изображений, даже на мобильных устройствах"
         }
     });
 
@@ -221,29 +207,34 @@
             `);
         }
 
-        // Переопределяем функцию для изображений TMDB
+        // Переопределяем метод получения пути к изображению
         var originalImageFunction = Lampa.TMDB.image;
         Lampa.TMDB.image = function(url) {
+            // Если включена настройка высокого качества, заменяем путь
             if (Lampa.Storage.field('logo_high_quality')) {
-                // Проверяем, включен ли портретный режим и находимся ли мы в портретной ориентации
-                if (Lampa.Storage.field('logo_portrait_mode') && window.innerHeight > window.innerWidth) {
-                    if (url.indexOf('t/p/w200') !== -1) {
-                        url = url.replace('t/p/w200', 't/p/w860_and_h860_face');
-                    } else if (url.indexOf('t/p/w300') !== -1) {
-                        url = url.replace('t/p/w300', 't/p/w860_and_h860_face');
-                    } else if (url.indexOf('t/p/w500') !== -1) {
-                        url = url.replace('t/p/w500', 't/p/w860_and_h860_face');
-                    } else if (url.indexOf('t/p/w780') !== -1) {
-                        url = url.replace('t/p/w780', 't/p/w860_and_h860_face');
-                    } else {
-                        url = url.replace('t/p/w1280', 't/p/w860_and_h860_face');
-                    }
-                } else {
-                    // Стандартная замена на высокое качество
-                    url = url.replace('t/p/w200', 't/p/w1280')
-                           .replace('t/p/w300', 't/p/w1280')
-                           .replace('t/p/w500', 't/p/w1280')
-                           .replace('t/p/w780', 't/p/w1280');
+                url = url.replace('t/p/w200', 't/p/w1280');
+                
+                // Добавляем обработчик для изменения размера изображения
+                if (window.innerHeight > window.innerWidth) { // портретный режим
+                    var img = new Image();
+                    img.crossOrigin = "Anonymous";
+                    img.onload = function() {
+                        var canvas = document.createElement('canvas');
+                        canvas.width = 860;
+                        canvas.height = 860;
+                        var ctx = canvas.getContext('2d');
+                        
+                        // Вычисляем размеры для центрирования изображения
+                        var scale = Math.max(canvas.width / img.width, canvas.height / img.height);
+                        var x = (canvas.width - img.width * scale) / 2;
+                        var y = (canvas.height - img.height * scale) / 2;
+                        
+                        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                        
+                        // Заменяем URL изображения на URL canvas
+                        url = canvas.toDataURL('image/jpeg', 0.95);
+                    };
+                    img.src = url;
                 }
             }
             return originalImageFunction(url);
