@@ -143,30 +143,57 @@
         // Функция для обновления атрибута body в зависимости от настройки
         function updateNavigationPosition() {
             $('body').attr('data-nav-right', Lampa.Storage.get('navigation_bar_right'));
-            // Принудительно обновляем скролл
-            $('.scroll').each(function() {
-                if (this.scrollController) {
-                    this.scrollController.destroy();
-                    this.scrollController.init();
+        }
+
+        // Функция для пересчета скролла
+        function reinitializeScroll() {
+            // Сначала обновляем навигацию
+            updateNavigationPosition();
+            
+            // Затем обновляем размеры контейнера и скролл
+            setTimeout(function() {
+                // Обновляем размеры контейнера
+                $('.layer--width').css('height', window.innerHeight + 'px');
+                
+                // Находим активный скролл
+                let scroll = $('.scroll.layer--width');
+                if (scroll.length) {
+                    let content = scroll.find('.layer--height');
+                    if (content.length) {
+                        // Устанавливаем правильную высоту контента
+                        content.css('min-height', window.innerHeight + 'px');
+                    }
                 }
-            });
+
+                // Принудительно обновляем все скроллы
+                $('.scroll').each(function() {
+                    if (this.scrollController) {
+                        this.scrollController.destroy();
+                        this.scrollController.init();
+                    }
+                });
+
+                // Для надежности вызываем обработчик ресайза окна
+                if (typeof Lampa.Controller.toggle === 'function') {
+                    Lampa.Controller.toggle();
+                }
+            }, 200);
         }
 
         // Обновляем позицию при изменении настройки
         Lampa.Storage.listener.follow('change', function (event) {
             if (event.name == 'navigation_bar_right') {
-                updateNavigationPosition();
+                reinitializeScroll();
             }
         });
 
         // Слушаем изменение ориентации экрана
         window.addEventListener('orientationchange', function() {
-            // Даем небольшую задержку, чтобы DOM успел обновиться
-            setTimeout(updateNavigationPosition, 100);
+            reinitializeScroll();
         });
 
-        // Устанавливаем начальное значение
-        updateNavigationPosition();
+        // Устанавливаем начальное значение и инициализируем скролл
+        reinitializeScroll();
 
         Lampa.Listener.follow("full", function(e) {
             if (e.type == "complite") {
