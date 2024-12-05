@@ -144,12 +144,6 @@
                     .scroll--mask {
                         height: 100% !important;
                     }
-                    .scroll__content.layer--wheight {
-                        height: 100% !important;
-                    }
-                    .scroll__content > .scroll__body {
-                        height: 100% !important;
-                    }
                 </style>
             `);
         }
@@ -195,6 +189,16 @@
         function updateScrollHeight() {
             let windowHeight = window.innerHeight;
             $('.scroll--mask').css('height', windowHeight + 'px');
+
+            // Специальная обработка для панели настроек
+            if ($('.settings__body').length) {
+                let settingsBody = $('.settings__body');
+                let settingsScroll = settingsBody.find('.scroll--mask');
+                if (settingsScroll.length) {
+                    let settingsHeight = windowHeight - settingsBody.offset().top;
+                    settingsScroll.css('height', settingsHeight + 'px');
+                }
+            }
         }
 
         // Слушаем изменение ориентации
@@ -209,6 +213,9 @@
 
         // Инициализируем при загрузке
         setTimeout(updateScrollHeight, 100);
+
+        // Обновляем высоту при открытии настроек
+        Lampa.Settings.listener.follow('open', updateScrollHeight);
 
         // Следим за изменением настройки навигационной панели
         Lampa.Storage.listener.follow('change', function (event) {
