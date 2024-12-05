@@ -255,59 +255,57 @@
                     // Отображаем переводы названий, если включена соответствующая настройка
                     if (Lampa.Storage.get("logo_translations")) {
                         var titlesContainer = $('<div class="title-translations"></div>').css({
-                            //'margin-top': '10px',
-                            //'margin-bottom': '15px',
-                            //'margin-right': '10px',
                             'font-size': '1.1em',
                             '-webkit-text-stroke': '0.1px #000000',
                             'opacity': '1'
                         });
 
                         const currentLang = Lampa.Storage.get("language");
-                        let displayLang = currentLang; // язык текущего отображения (логотипа или названия)
+                        let displayLang = currentLang;
 
                         if (Lampa.Storage.get("logo_glav")) {
-                            // Если включены логотипы, используем язык найденного логотипа
                             if (path) {
                                 displayLang = logoLang;
                             }
                         } else {
-                            // Если логотипы выключены, определяем язык текущего названия
                             const currentTitle = movie.title || movie.name;
                             if (currentTitle === ruTitle) displayLang = 'ru';
                             else if (currentTitle === enTitle) displayLang = 'en';
                             else displayLang = 'orig';
                         }
 
-                        // Добавляем переводы в зависимости от языка отображения
+                        let translations = [];
+
                         if (displayLang === currentLang) {
-                            // Если отображается на языке приложения
                             if (enTitle && enTitle !== (currentLang === 'ru' ? ruTitle : enTitle)) {
-                                titlesContainer.append(`<div>🇬🇧 ${enTitle} </div>`);
+                                translations.push(`<div style="margin-bottom: 0.3em;">🇬🇧 ${enTitle}</div>`);
                             }
                             if (origTitle && origTitle !== enTitle && origTitle !== (currentLang === 'ru' ? ruTitle : enTitle)) {
-                                titlesContainer.append(`<div>🌐 ${origTitle}</div>`);
+                                translations.push(`<div style="margin-bottom: 0.3em;">🌐 ${origTitle}</div>`);
                             }
                         } else if (displayLang === 'en') {
-                            // Если отображается на английском
                             if (currentLang === 'ru' && ruTitle && ruTitle !== enTitle) {
-                                titlesContainer.append(`<div>🇷🇺 ${ruTitle} </div>`);
+                                translations.push(`<div style="margin-bottom: 0.3em;">🇷🇺 ${ruTitle}</div>`);
                             }
                             if (origTitle && origTitle !== enTitle && origTitle !== (currentLang === 'ru' ? ruTitle : enTitle)) {
-                                titlesContainer.append(`<div>🌐 ${origTitle}</div>`);
+                                translations.push(`<div style="margin-bottom: 0.3em;">🌐 ${origTitle}</div>`);
                             }
                         } else {
-                            // Если отображается на другом языке
                             if (currentLang === 'ru' && ruTitle && ruTitle !== origTitle) {
-                                titlesContainer.append(`<div>🇷🇺 ${ruTitle} </div>`);
+                                translations.push(`<div style="margin-bottom: 0.3em;">🇷🇺 ${ruTitle}</div>`);
                             }
                             if (enTitle && enTitle !== origTitle) {
-                                titlesContainer.append(`<div>🇬🇧 ${enTitle}</div>`);
+                                translations.push(`<div style="margin-bottom: 0.3em;">🇬🇧 ${enTitle}</div>`);
                             }
                         }
 
-                        // Добавляем переводы после заголовка
-                        $(".full-start-new__title").after(titlesContainer);
+                        // Добавляем переводы в контейнер
+                        titlesContainer.html(translations.join(''));
+
+                        // Если есть хотя бы один перевод, добавляем контейнер
+                        if (translations.length > 0) {
+                            $(".full-start-new__title").after(titlesContainer);
+                        }
                     }
 
                     // Если включена настройка логотипов, пробуем найти и отобразить логотип
