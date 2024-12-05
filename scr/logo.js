@@ -46,9 +46,9 @@
     Lampa.SettingsApi.addParam({
         component: "interface",
         param: {
-            name: "navigation_bar_right",
+            name: "logo_nav_right",
             type: "trigger",
-            default: true
+            default: false
         },
         field: {
             name: "Навигация справа в ландшафте",
@@ -59,7 +59,7 @@
     if (!window.logoplugin) {
         window.logoplugin = true;
 
-        // Добавляем стили для адаптивного центрирования
+        // Добавляем стили для адаптивного центрирования и навигации
         if (!$('#logo-adaptive-style').length) {
             $('head').append(`
                 <style id="logo-adaptive-style">
@@ -72,14 +72,12 @@
                         .full-start-new__details,
                         .full-start-new__reactions,
                         .full-start-new__buttons {
-                            //font-size: 1em !important;
                             margin: 5px 0 !important;
                             -webkit-text-stroke: 0px #000000 !important;
                             text-align: center !important;
                             justify-content: center !important;
                         }
                         .full-start-new__title img {
-                            //margin-top: 5px !important;
                             padding-top: 5px !important;
                             max-height: fit-content !important;
                             max-width: 60% !important;
@@ -94,33 +92,19 @@
                         .full-start-new__details,
                         .full-start-new__reactions,
                         .full-start-new__buttons {
-                            //display: flex !important;
                             margin: 5px 0 0 0 !important;
                             -webkit-text-stroke: 0.1px #000000 !important;
                             text-align: left !important;
                             justify-content: left !important;
                         }
-                        .full-start-new__title img {
-                            //margin-right: 15px !important;
-                            //margin-bottom: 15px !important;
-                            //max-height: 100% !important;
-                            //max-width: 20% !important;
-                        }
                     }
 
                     /* Стили для навигационной панели */
-                    .navigation-bar {
-                        display: block;
-                        position: fixed;
-                        z-index: 100;
-                    }
-
                     @media screen and (orientation: landscape) {
                         body[data-nav-right="true"] .navigation-bar {
                             top: 0;
                             left: auto;
                             right: 0;
-                            bottom: 0;
                             display: -webkit-box;
                             display: -webkit-flex;
                             display: -moz-box;
@@ -128,8 +112,6 @@
                             display: flex;
                             padding: 1.5em;
                             padding-left: 0;
-                            width: auto;
-                            height: 100%;
                         }
                         body[data-nav-right="true"] .navigation-bar .navigation-bar__body {
                             -webkit-box-orient: vertical;
@@ -139,71 +121,21 @@
                             -moz-box-direction: normal;
                             -ms-flex-direction: column;
                             flex-direction: column;
-                            height: 100%;
-                        }
-                        /* Добавляем отступ для контента, чтобы не перекрывался навигацией */
-                        body[data-nav-right="true"] .layer--width {
-                            padding-right: 5em;
                         }
                     }
                 </style>
             `);
         }
 
-        // Функция для обновления атрибута body в зависимости от настройки
-        function updateNavigationPosition() {
-            $('body').attr('data-nav-right', Lampa.Storage.get('navigation_bar_right'));
-        }
-
-        // Функция для пересчета скролла
-        function reinitializeScroll() {
-            // Сначала обновляем навигацию
-            updateNavigationPosition();
-            
-            // Затем обновляем размеры контейнера и скролл
-            setTimeout(function() {
-                // Обновляем размеры контейнера
-                $('.layer--width').css('height', window.innerHeight + 'px');
-                
-                // Находим активный скролл
-                let scroll = $('.scroll.layer--width');
-                if (scroll.length) {
-                    let content = scroll.find('.layer--height');
-                    if (content.length) {
-                        // Устанавливаем правильную высоту контента
-                        content.css('min-height', window.innerHeight + 'px');
-                    }
-                }
-
-                // Принудительно обновляем все скроллы
-                $('.scroll').each(function() {
-                    if (this.scrollController) {
-                        this.scrollController.destroy();
-                        this.scrollController.init();
-                    }
-                });
-
-                // Для надежности вызываем обработчик ресайза окна
-                if (typeof Lampa.Controller.toggle === 'function') {
-                    Lampa.Controller.toggle();
-                }
-            }, 200);
-        }
-
-        // Обновляем позицию при изменении настройки
+        // Следим за изменением настройки навигационной панели
         Lampa.Storage.listener.follow('change', function (event) {
-            if (event.name == 'navigation_bar_right') {
-                reinitializeScroll();
+            if (event.name == 'logo_nav_right') {
+                $('body').attr('data-nav-right', event.value);
             }
         });
 
-        // Слушаем изменение ориентации экрана
-        window.addEventListener('orientationchange', function() {
-            reinitializeScroll();
-        });
-
-        // Устанавливаем начальное значение и инициализируем скролл
-        reinitializeScroll();
+        // Устанавливаем начальное значение
+        $('body').attr('data-nav-right', Lampa.Storage.get('logo_nav_right'));
 
         Lampa.Listener.follow("full", function(e) {
             if (e.type == "complite") {
