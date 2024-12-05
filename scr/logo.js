@@ -143,9 +143,13 @@
                 <style id="logo-scroll-style">
                     .scroll--mask {
                         height: 100% !important;
+                        max-height: 100% !important;
                     }
-                    .settings__content .scroll--mask {
-                        height: 100% !important;
+                    .scroll--mask.scroll--over {
+                        max-height: 100% !important;
+                    }
+                    .layer--wheight {
+                        max-height: 100% !important;
                     }
                 </style>
             `);
@@ -191,8 +195,10 @@
         // Функция для пересчета высоты скролла
         function updateScrollHeight() {
             let windowHeight = window.innerHeight;
-            $('.scroll--mask').css('height', windowHeight + 'px');
-            $('.settings__content .scroll--mask').css('height', windowHeight + 'px');
+            $('.scroll--mask, .scroll--mask.scroll--over, .layer--wheight').css({
+                'height': windowHeight + 'px',
+                'max-height': windowHeight + 'px'
+            });
         }
 
         // Слушаем изменение ориентации
@@ -207,11 +213,6 @@
 
         // Инициализируем при загрузке
         setTimeout(updateScrollHeight, 100);
-
-        // Обновляем высоту при открытии настроек
-        Lampa.Settings.listener.follow('open', function() {
-            setTimeout(updateScrollHeight, 100);
-        });
 
         // Следим за изменением настройки навигационной панели
         Lampa.Storage.listener.follow('change', function (event) {
