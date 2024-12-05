@@ -193,26 +193,27 @@
             `);
         }
 
-        // Функция для пересчета высоты скролла с debounce
-        const debouncedScrollHeight = Lampa.Utils.debounce(() => {
+        // Функция для пересчета высоты скролла
+        function updateScrollHeight() {
             let windowHeight = window.innerHeight;
             $('.scroll--mask').css('height', windowHeight + 'px');
-        }, 250);
+        }
 
-        // Обработчик изменения ориентации
-        const orientationHandler = () => {
-            setTimeout(debouncedScrollHeight, 100);
-        };
+        // Слушаем изменение ориентации
+        window.addEventListener('orientationchange', function() {
+            setTimeout(updateScrollHeight, 100); // Небольшая задержка для уверенности, что DOM обновился
+        });
 
-        // Добавляем слушатели событий
-        window.addEventListener('orientationchange', orientationHandler);
-        window.addEventListener('resize', debouncedScrollHeight);
+        // Также обновляем при изменении размера окна
+        window.addEventListener('resize', function() {
+            updateScrollHeight();
+        });
 
         // Инициализируем при загрузке
-        setTimeout(debouncedScrollHeight, 100);
+        setTimeout(updateScrollHeight, 100);
 
         // Обновляем высоту при открытии настроек
-        Lampa.Settings.listener.follow('open', debouncedScrollHeight);
+        Lampa.Settings.listener.follow('open', updateScrollHeight);
 
         // Следим за изменением настройки навигационной панели
         Lampa.Storage.listener.follow('change', function (event) {
@@ -251,13 +252,23 @@
                 }
 
                 async function getDescription(lang) {
-                    try {
-                        const url = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "?api_key=" + Lampa.TMDB.key() + "&language=" + lang);
-                        const resp = await $.get(url);
-                        return resp.overview;
-                    } catch (e) {
-                        return null;
+                    var card = Lampa.Activity.active().card;
+                    if (card) {
+                        var desc = card.overview || card.description;
+                        if (desc && desc[lang]) return desc[lang];
+                        
+                        // Проверяем настройку logo_missing_desc
+                        if (Lampa.Storage.get('logo_missing_desc', true)) {
+                            // Если описание на запрошенном языке отсутствует, 
+                            // пробуем найти на других языках
+                            if (desc) {
+                                for (var other_lang in desc) {
+                                    if (desc[other_lang]) return desc[other_lang];
+                                }
+                            }
+                        }
                     }
+                    return '';
                 }
 
                 async function findLogo() {
