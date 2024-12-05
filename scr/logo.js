@@ -222,7 +222,7 @@
                             justify-content: space-between !important;
                             align-items: flex-start !important;
                             align-self: flex-start !important;
-                            height: 659px !important;
+                            height: 25em !important;
                         }
                     }
                 </style>
