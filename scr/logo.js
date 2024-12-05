@@ -202,8 +202,13 @@
                             text-align: left !important;
                             justify-content: left !important;
                         }
-                        .full-start-new__body {
-                            align-items: center !important;
+                        .full-start-new__right {
+                            display: flex !important;
+                            flex-direction: column !important;
+                            justify-content: space-between !important;
+                            align-items: flex-start !important;
+                            align-self: flex-start !important;
+                            height: 25em !important;
                         }
                     }
                 </style>
