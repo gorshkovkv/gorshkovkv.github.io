@@ -260,21 +260,14 @@
         function updateScrollHeight() {
             let windowHeight = window.innerHeight;
             
-            // Применяем только к основным элементам scroll--mask, исключая те, что в других модулях
-            $('.scroll--mask').each(function() {
-                let $this = $(this);
-                
-                // Проверяем, не принадлежит ли элемент к другим модулям
-                if (!$this.closest('.layer--width').length && 
-                    !$this.closest('.player').length && 
-                    !$this.closest('.modal').length) {
-                    
-                    // Если включена правая навигация, учитываем это
-                    if (Lampa.Storage.get('logo_nav_right')) {
-                        $this.css('height', windowHeight + 'px');
-                    }
-                }
-            });
+            // Применяем только к основным элементам интерфейса
+            if (Lampa.Storage.get('logo_nav_right')) {
+                $('.scroll--mask').filter(function() {
+                    // Ищем только элементы основного интерфейса
+                    return $(this).closest('.activity--active').length > 0 && 
+                           $(this).closest('.activity__body').length > 0;
+                }).css('height', windowHeight + 'px');
+            }
         }
 
         // Слушаем изменение ориентации
