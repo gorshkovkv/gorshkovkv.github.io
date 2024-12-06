@@ -41,7 +41,7 @@
                         }
 
                         .layer--height {
-                            height: calc(100% + 4em) !important;
+                            min-height: 110vh !important;
                         }
                     }
                 </style>
