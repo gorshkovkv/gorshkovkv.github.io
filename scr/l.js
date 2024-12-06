@@ -17,6 +17,7 @@
     if (!window.logoplugin_glav) {
         window.logoplugin_glav = true;
 
+        // Добавляем стили для логотипов
         if (!$('#logo-glav-style').length && Lampa.Storage.get('logo_glav')) {
             $('head').append(`
                 <style id="logo-glav-style">
@@ -31,76 +32,59 @@
             `);
         }
 
-        function tryGetLogo(lang) {
-            let logos = Lampa.Activity.active().card.logo;
-            if (logos && logos[lang]) {
-                return logos[lang];
-            }
-            return '';
-        }
-
-        function getTitle(lang) {
-            let card = Lampa.Activity.active().card;
-            if (card) {
-                return card.title || '';
-            }
-            return '';
-        }
-
-        function findLogo() {
-            if (!Lampa.Storage.get('logo_glav')) return;
-
-            let card = Lampa.Activity.active().card;
-            if (!card) return;
-
-            let imdb_id = card.imdb_id;
-            if (!imdb_id) return;
-
-            let url = 'http://api.themoviedb.org/3/find/' + imdb_id + '?api_key=4ef0d7355d9ffb5151e987764708ce96&external_source=imdb_id';
-
-            $.ajax({
-                url: url,
-                type: 'GET',
-                dataType: 'json',
-                success: function (response) {
-                    let movie = response.movie_results[0] || response.tv_results[0];
-                    if (movie) {
-                        let tmdb_id = movie.id;
-                        let type = movie.title ? 'movie' : 'tv';
-                        let apiUrl = 'http://api.themoviedb.org/3/' + type + '/' + tmdb_id + '/images?api_key=4ef0d7355d9ffb5151e987764708ce96';
-
-                        $.ajax({
-                            url: apiUrl,
-                            type: 'GET',
-                            dataType: 'json',
-                            success: function (data) {
-                                if (data.logos && data.logos.length > 0) {
-                                    let logos = {};
-                                    data.logos.forEach(function(logo) {
-                                        logos[logo.iso_639_1 || 'en'] = 'https://image.tmdb.org/t/p/w500' + logo.file_path;
-                                    });
-
-                                    // Сохраняем логотипы в карточке
-                                    card.logo = logos;
-
-                                    // Проверяем, есть ли логотип на нужном языке
-                                    let currentLogo = tryGetLogo('ru') || tryGetLogo('en');
-                                    
-                                    if (currentLogo) {
-                                        $('.full-start-new__title', Lampa.Activity.active().activity.render()).html('<img src="' + currentLogo + '" alt="' + getTitle('ru') + '">');
-                                    }
-                                }
-                            },
-                            error: function() {
-                                console.error('Failed to fetch logos');
-                            }
-                        });
-                    }
-                },
-                error: function() {
-                    console.error('Failed to fetch TMDB ID');
+        async function tryGetLogo(lang) {
+            let movie = Lampa.Activity.active().card;
+            if (!movie) return null;
+            
+            // Для языка оригинала не указываем параметр language в URL
+            var url = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "/images?api_key=" + Lampa.TMDB.key() + (lang ? "&language=" + lang : ""));
+            try {
+                const resp = await $.get(url);
+                if (resp.logos && resp.logos[0]) {
+                    return resp.logos[0].file_path;
                 }
-            });
+            } catch (e) {}
+            return null;
+        }
+
+        async function findLogo() {
+            if (!Lampa.Storage.get("logo_glav")) return;
+
+            let movie = Lampa.Activity.active().card;
+            if (!movie) return;
+
+            // Инициализируем переменные для логотипа
+            let path = null;
+            let logoLang = null;
+
+            // Пробуем найти на текущем языке
+            path = await tryGetLogo(Lampa.Storage.get("language"));
+            logoLang = Lampa.Storage.get("language");
+            
+            // Если нет на текущем языке, пробуем английский
+            if (!path) {
+                path = await tryGetLogo("en");
+                if (path) logoLang = "en";
+            }
+            
+            // Если нет на английском, пробуем язык оригинала
+            if (!path) {
+                path = await tryGetLogo("");
+                if (path) logoLang = "orig";
+            }
+
+            // Если нашли логотип, отображаем его
+            if (path) {
+                // Сохраняем информацию о логотипе в объекте movie
+                movie.logo = path;
+                movie.logo_lang = logoLang;
+
+                // Создаем контейнер для логотипа
+                var imgElement = $('<img style="matging-top: 0.2em; margin-bottom: 0.1em; max-height: 1.5em;" src="' + Lampa.TMDB.image("/t/p/w500" + path.replace(".svg", ".png")) + '" />');
+                
+                // Заменяем текстовое название логотипом
+                $(".full-start-new__title", Lampa.Activity.active().activity.render()).html(imgElement);
+            }
         }
 
         // Слушаем изменения в активности
