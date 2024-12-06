@@ -23,17 +23,19 @@
         if (Lampa.Storage.get('centered_landscape_nav')) {
             const style = `
                 <style id="nav-landscape-style">
-                    .navigation-bar {
-                        left: 25% !important;
-                        right: 25% !important;
-                        top: auto !important;
-                        bottom: 2em !important;
-                        padding: 0 !important;
-                    }
-                    
-                    .navigation-bar .navigation-bar__body {
-                        flex-direction: row !important;
-                        width: 100% !important;
+                    @media screen and (orientation: landscape) {
+                        .navigation-bar {
+                            left: 25% !important;
+                            right: 25% !important;
+                            top: auto !important;
+                            bottom: 2em !important;
+                            padding: 0 !important;
+                        }
+                        
+                        .navigation-bar .navigation-bar__body {
+                            flex-direction: row !important;
+                            width: 100% !important;
+                        }
                     }
                 </style>
             `;
