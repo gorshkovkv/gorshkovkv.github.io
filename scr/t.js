@@ -52,84 +52,82 @@
             `);
         }
 
-        function getTitle(lang) {
-            let card = Lampa.Activity.active().card;
-            if (card && card.translations && card.translations[lang]) {
-                return card.translations[lang];
+        async function getTitle(lang) {
+            try {
+                let movie = Lampa.Activity.active().card;
+                if (!movie || !movie.id) return null;
+                
+                const url = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "?api_key=" + Lampa.TMDB.key() + "&language=" + lang);
+                const resp = await $.get(url);
+                return resp.title || resp.name;
+            } catch (e) {
+                return null;
             }
-            return card ? (card.original_title || card.original_name || '') : '';
         }
 
-        function findTranslations() {
+        async function findTranslations() {
             if (!Lampa.Storage.get('logo_translations')) return;
 
-            let card = Lampa.Activity.active().card;
-            if (!card) return;
+            let movie = Lampa.Activity.active().card;
+            if (!movie || !movie.id) return;
 
-            let imdb_id = card.imdb_id;
-            if (!imdb_id) return;
+            try {
+                // Получаем заранее все названия для переводов
+                const ruTitle = await getTitle("ru");
+                const enTitle = await getTitle("en");
+                const origTitle = movie.original_title || movie.original_name;
 
-            let url = 'http://api.themoviedb.org/3/find/' + imdb_id + '?api_key=4ef0d7355d9ffb5151e987764708ce96&external_source=imdb_id';
-
-            $.ajax({
-                url: url,
-                type: 'GET',
-                dataType: 'json',
-                success: function (response) {
-                    let movie = response.movie_results[0] || response.tv_results[0];
-                    if (movie) {
-                        let tmdb_id = movie.id;
-                        let type = movie.title ? 'movie' : 'tv';
-                        let apiUrl = 'http://api.themoviedb.org/3/' + type + '/' + tmdb_id + '/translations?api_key=4ef0d7355d9ffb5151e987764708ce96';
-
-                        $.ajax({
-                            url: apiUrl,
-                            type: 'GET',
-                            dataType: 'json',
-                            success: function (data) {
-                                if (data.translations && data.translations.length > 0) {
-                                    let translations = {};
-                                    data.translations.forEach(function(trans) {
-                                        let title = trans.data.title || trans.data.name || '';
-                                        if (title) {
-                                            translations[trans.iso_639_1] = title;
-                                        }
-                                    });
-
-                                    // Сохраняем переводы в карточке
-                                    card.translations = translations;
-
-                                    // Создаем блок с переводами
-                                    let translationsHtml = '';
-                                    let langs = ['en', 'es', 'de', 'fr', 'it', 'zh'];
-                                    
-                                    langs.forEach(function(lang) {
-                                        let title = translations[lang];
-                                        if (title) {
-                                            translationsHtml += '<div class="translation-item">' + title + ' (' + lang.toUpperCase() + ')</div>';
-                                        }
-                                    });
-
-                                    if (translationsHtml) {
-                                        let $translations = $('.title-translations');
-                                        if (!$translations.length) {
-                                            $translations = $('<div class="title-translations"></div>');
-                                            $('.full-start-new__title', Lampa.Activity.active().activity.render()).after($translations);
-                                        }
-                                        $translations.html(translationsHtml);
-                                    }
-                                }
-                            },
-                            error: function() {
-                                console.error('Failed to fetch translations');
-                            }
-                        });
-                    }
-                },
-                error: function() {
-                    console.error('Failed to fetch TMDB ID');
+                // Создаем блок с переводами
+                let translationsHtml = '';
+                
+                if (ruTitle && ruTitle !== origTitle) {
+                    translationsHtml += '<div class="translation-item"> ' + ruTitle + '</div>';
                 }
-            });
+                
+                if (enTitle && enTitle !== origTitle && enTitle !== ruTitle) {
+                    translationsHtml += '<div class="translation-item"> ' + enTitle + '</div>';
+                }
+                
+                if (origTitle && origTitle !== ruTitle && origTitle !== enTitle) {
+                    translationsHtml += '<div class="translation-item"> ' + origTitle + '</div>';
+                }
+
+                if (translationsHtml) {
+                    let $translations = $('.title-translations');
+                    if (!$translations.length) {
+                        $translations = $('<div class="title-translations"></div>');
+                        $('.full-start-new__title', Lampa.Activity.active().activity.render()).after($translations);
+                    }
+                    $translations.html(translationsHtml);
+                }
+
+            } catch (e) {
+                console.error('Failed to fetch translations:', e);
+            }
+        }
+
+        // Добавляем стили для переводов
+        if (!$('#logo-translations-style').length) {
+            $('head').append(`
+                <style id="logo-translations-style">
+                    .title-translations {
+                        margin: 1em 0;
+                        text-align: center;
+                    }
+                    .translation-item {
+                        display: inline-block;
+                        margin: 0.3em;
+                        padding: 0.4em 0.8em;
+                        background-color: rgba(0, 0, 0, 0.3);
+                        border-radius: 0.3em;
+                    }
+                    @media screen and (orientation: portrait) {
+                        .title-translations {
+                            margin: 0.5em 0;
+                        }
+                    }
+                </style>
+            `);
         }
 
         // Слушаем изменения в активности
