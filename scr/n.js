@@ -19,72 +19,59 @@
 
         // Инициализация Scroll для основного интерфейса
         let mainScroll;
-        let pluginScrolls = {};
         
         function initScroll() {
-            // Конфигурация скролла
-            let scrollConfig = {
-                mask: true,
-                over: true
-            };
+            if (mainScroll) mainScroll.destroy();
             
             if (Lampa.Storage.get('logo_nav_right')) {
-                // Уничтожаем старые скроллы
-                if (mainScroll) mainScroll.destroy();
-                Object.values(pluginScrolls).forEach(scroll => scroll.destroy());
-                pluginScrolls = {};
+                let scrollConfig = {
+                    mask: true,
+                    over: true
+                };
+
+                // Ищем корневой контейнер активного плагина
+                let rootContainer = $('.activity--active .activity__body');
                 
-                // Создаем скролл для основного контейнера
-                mainScroll = new Lampa.Scroll(scrollConfig);
-                let mainContainer = $('.activity--active .activity__body');
-                if (mainContainer.length) {
-                    mainScroll.render().appendTo(mainContainer);
+                if (!rootContainer.length) {
+                    rootContainer = $('.activity--active .scroll-wrapper');
                 }
                 
-                // Создаем скроллы для контейнеров плагинов
-                $('.activity--active .scroll-wrapper').each(function() {
-                    let container = $(this);
-                    let containerId = container.attr('data-scroll-id') || 'scroll_' + Math.random();
-                    container.attr('data-scroll-id', containerId);
+                if (!rootContainer.length) {
+                    rootContainer = $('.activity--active .scroll--mask');
+                }
+                
+                if (!rootContainer.length) {
+                    rootContainer = $('.activity--active');
+                }
+
+                if (rootContainer.length) {
+                    mainScroll = new Lampa.Scroll(scrollConfig);
+                    mainScroll.render().appendTo(rootContainer.first());
                     
-                    let scroll = new Lampa.Scroll(scrollConfig);
-                    scroll.render().appendTo(container);
-                    pluginScrolls[containerId] = scroll;
-                });
+                    // Добавляем стили для корректного отображения скролла
+                    rootContainer.first().css({
+                        'position': 'relative',
+                        'overflow': 'hidden'
+                    });
+                }
             }
         }
 
         // Слушаем события для пересоздания скролла
         Lampa.Listener.follow('activity', function(e){
-            if(e.type == 'start') setTimeout(initScroll, 50);
+            if(e.type == 'start') setTimeout(initScroll, 100);
         });
 
         // Слушаем события для обновления скролла при изменении контента
         Lampa.Listener.follow('content', function(e){
             if(e.type == 'update' || e.type == 'render') {
-                setTimeout(function() {
-                    if(mainScroll) mainScroll.reset();
-                    Object.values(pluginScrolls).forEach(scroll => scroll.reset());
-                    
-                    // Проверяем новые контейнеры
-                    $('.activity--active .scroll-wrapper').each(function() {
-                        let container = $(this);
-                        let containerId = container.attr('data-scroll-id');
-                        
-                        if (!containerId || !pluginScrolls[containerId]) {
-                            containerId = 'scroll_' + Math.random();
-                            container.attr('data-scroll-id', containerId);
-                            
-                            let scroll = new Lampa.Scroll({
-                                mask: true,
-                                over: true
-                            });
-                            scroll.render().appendTo(container);
-                            pluginScrolls[containerId] = scroll;
-                        }
-                    });
-                }, 10);
+                setTimeout(initScroll, 100);
             }
+        });
+
+        // Слушаем события скролла для обновления при прокрутке
+        Lampa.Listener.follow('scroll', function(e){
+            if(e.type == 'start') setTimeout(initScroll, 100);
         });
 
         // Добавляем стили для навигации справа
