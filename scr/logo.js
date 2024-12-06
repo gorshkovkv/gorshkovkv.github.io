@@ -243,6 +243,56 @@
             `);
         }
 
+        // Инициализация Scroll для основного интерфейса
+        let mainScroll;
+        
+        function initScroll() {
+            if (mainScroll) mainScroll.destroy();
+            
+            // Конфигурация скролла
+            let scrollConfig = {
+                mask: true,
+                over: true
+            };
+            
+            if (Lampa.Storage.get('logo_nav_right')) {
+                // Если включена правая навигация, создаем новый скролл
+                mainScroll = new Lampa.Scroll(scrollConfig);
+                
+                // Находим основной контейнер
+                let mainContainer = $('.activity--active .activity__body');
+                if (mainContainer.length) {
+                    mainScroll.render().appendTo(mainContainer);
+                }
+            }
+        }
+        
+        // Вызываем initScroll вместо updateScrollHeight
+        window.addEventListener('orientationchange', function() {
+            setTimeout(initScroll, 100);
+        });
+        
+        window.addEventListener('resize', function() {
+            initScroll();
+        });
+        
+        // Инициализируем при загрузке
+        setTimeout(initScroll, 100);
+        
+        // Обновляем при открытии настроек
+        Lampa.Settings.listener.follow('open', initScroll);
+        
+        // Следим за изменением настройки навигационной панели
+        Lampa.Storage.listener.follow('change', function (event) {
+            if (event.name == 'logo_nav_right') {
+                $('body').attr('data-nav-right', event.value);
+                initScroll();
+            }
+        });
+        
+        // Устанавливаем начальное значение
+        $('body').attr('data-nav-right', Lampa.Storage.get('logo_nav_right'));
+
         // Переопределяем метод получения пути к изображению
         var originalImageFunction = Lampa.TMDB.image;
         Lampa.TMDB.image = function(url) {
@@ -255,46 +305,6 @@
             }
             return originalImageFunction(url);
         };
-
-        // Функция для пересчета высоты скролла
-        function updateScrollHeight() {
-            let windowHeight = window.innerHeight;
-            
-            // Применяем только к основным элементам интерфейса
-            if (Lampa.Storage.get('logo_nav_right')) {
-                $('.scroll--mask').filter(function() {
-                    // Ищем только элементы основного интерфейса
-                    return $(this).closest('.activity--active').length > 0 && 
-                           $(this).closest('.activity__body').length > 0;
-                }).css('height', windowHeight + 'px');
-            }
-        }
-
-        // Слушаем изменение ориентации
-        window.addEventListener('orientationchange', function() {
-            setTimeout(updateScrollHeight, 100); // Небольшая задержка для уверенности, что DOM обновился
-        });
-
-        // Также обновляем при изменении размера окна
-        window.addEventListener('resize', function() {
-            updateScrollHeight();
-        });
-
-        // Инициализируем при загрузке
-        setTimeout(updateScrollHeight, 100);
-
-        // Обновляем высоту при открытии настроек
-        Lampa.Settings.listener.follow('open', updateScrollHeight);
-
-        // Следим за изменением настройки навигационной панели
-        Lampa.Storage.listener.follow('change', function (event) {
-            if (event.name == 'logo_nav_right') {
-                $('body').attr('data-nav-right', event.value);
-            }
-        });
-
-        // Устанавливаем начальное значение
-        $('body').attr('data-nav-right', Lampa.Storage.get('logo_nav_right'));
 
         Lampa.Listener.follow("full", function(e) {
             if (e.type == "complite") {
