@@ -35,6 +35,8 @@
                         .navigation-bar .navigation-bar__body {
                             flex-direction: row !important;
                             width: 100% !important;
+                            backdrop-filter: none !important;
+                            -webkit-backdrop-filter: none !important;
                         }
                     }
                 </style>
