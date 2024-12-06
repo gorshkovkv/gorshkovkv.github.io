@@ -60,6 +60,19 @@
         }
     }
 
+    // Простая реализация debounce
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
     // Обновляем режим при изменении настройки
     Lampa.Storage.listener.follow('change', function(event) {
         if (event.name == 'force_mobile_mode') {
@@ -68,7 +81,7 @@
     });
 
     // Обновляем режим при изменении размера окна
-    $(window).on('resize', _.debounce(updateMobileMode, 200));
+    $(window).on('resize', debounce(updateMobileMode, 200));
 
     // Инициализация при старте
     updateMobileMode();
