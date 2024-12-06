@@ -41,9 +41,18 @@
             }
         }
 
-        // Добавляем слушатель смены активности
+        // Слушаем события для пересоздания скролла
         Lampa.Listener.follow('activity', function(e){
             if(e.type == 'start') setTimeout(initScroll, 50);
+        });
+
+        // Слушаем события для обновления скролла при изменении контента
+        Lampa.Listener.follow('content', function(e){
+            if(e.type == 'update' || e.type == 'render') {
+                setTimeout(function() {
+                    if(mainScroll) mainScroll.reset();
+                }, 10);
+            }
         });
 
         // Добавляем стили для навигации справа
