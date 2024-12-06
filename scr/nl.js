@@ -24,7 +24,7 @@
             const style = `
                 <style id="nav-landscape-style">
                     @media screen and (orientation: landscape) {
-                        .navigation-bar {
+                        body:not(.true--mobile) .navigation-bar {
                             left: 25% !important;
                             right: 25% !important;
                             top: auto !important;
@@ -32,31 +32,27 @@
                             padding: 0 !important;
                             background: none !important;
                             box-shadow: none !important;
-                            z-index: 999 !important;
                         }
                         
-                        .navigation-bar .navigation-bar__body {
+                        body:not(.true--mobile) .navigation-bar .navigation-bar__body {
                             flex-direction: row !important;
                             width: 100% !important;
-                            background: none !important;
-                            box-shadow: none !important;
                             backdrop-filter: none !important;
                             -webkit-backdrop-filter: none !important;
+                            background-color: rgba(0,0,0,0.3) !important;
+                            box-shadow: 0 0 1em rgba(0,0,0,0.3) !important;
                         }
 
-                        .navigation-bar:after,
-                        .navigation-bar:before,
-                        .navigation-bar .navigation-bar__body:after,
-                        .navigation-bar .navigation-bar__body:before {
-                            display: none !important;
+                        body.true--mobile .navigation-bar {
+                            width: 5em;
+                            right: 0 !important;
+                            background: none !important;
+                            box-shadow: none !important;
                         }
 
-                        .navigation-bar__item {
-                            background-color: rgba(0,0,0,0.5) !important;
-                            backdrop-filter: blur(10px) !important;
-                            -webkit-backdrop-filter: blur(10px) !important;
-                            border-radius: 1em !important;
-                            margin: 0 0.3em !important;
+                        body.true--mobile .navigation-bar .navigation-bar__body {
+                            background-color: rgba(0,0,0,0.3) !important;
+                            box-shadow: 0 0 1em rgba(0,0,0,0.3) !important;
                         }
                     }
                 </style>
