@@ -19,10 +19,9 @@
 
         // Инициализация Scroll для основного интерфейса
         let mainScroll;
+        let pluginScrolls = {};
         
         function initScroll() {
-            if (mainScroll) mainScroll.destroy();
-            
             // Конфигурация скролла
             let scrollConfig = {
                 mask: true,
@@ -30,14 +29,28 @@
             };
             
             if (Lampa.Storage.get('logo_nav_right')) {
-                // Если включена правая навигация, создаем новый скролл
-                mainScroll = new Lampa.Scroll(scrollConfig);
+                // Уничтожаем старые скроллы
+                if (mainScroll) mainScroll.destroy();
+                Object.values(pluginScrolls).forEach(scroll => scroll.destroy());
+                pluginScrolls = {};
                 
-                // Находим основной контейнер
+                // Создаем скролл для основного контейнера
+                mainScroll = new Lampa.Scroll(scrollConfig);
                 let mainContainer = $('.activity--active .activity__body');
                 if (mainContainer.length) {
                     mainScroll.render().appendTo(mainContainer);
                 }
+                
+                // Создаем скроллы для контейнеров плагинов
+                $('.activity--active .scroll-wrapper').each(function() {
+                    let container = $(this);
+                    let containerId = container.attr('data-scroll-id') || 'scroll_' + Math.random();
+                    container.attr('data-scroll-id', containerId);
+                    
+                    let scroll = new Lampa.Scroll(scrollConfig);
+                    scroll.render().appendTo(container);
+                    pluginScrolls[containerId] = scroll;
+                });
             }
         }
 
@@ -51,6 +64,25 @@
             if(e.type == 'update' || e.type == 'render') {
                 setTimeout(function() {
                     if(mainScroll) mainScroll.reset();
+                    Object.values(pluginScrolls).forEach(scroll => scroll.reset());
+                    
+                    // Проверяем новые контейнеры
+                    $('.activity--active .scroll-wrapper').each(function() {
+                        let container = $(this);
+                        let containerId = container.attr('data-scroll-id');
+                        
+                        if (!containerId || !pluginScrolls[containerId]) {
+                            containerId = 'scroll_' + Math.random();
+                            container.attr('data-scroll-id', containerId);
+                            
+                            let scroll = new Lampa.Scroll({
+                                mask: true,
+                                over: true
+                            });
+                            scroll.render().appendTo(container);
+                            pluginScrolls[containerId] = scroll;
+                        }
+                    });
                 }, 10);
             }
         });
