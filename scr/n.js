@@ -29,29 +29,45 @@
                     over: true
                 };
 
-                // Ищем корневой контейнер активного плагина
-                let rootContainer = $('.activity--active .activity__body');
-                
-                if (!rootContainer.length) {
-                    rootContainer = $('.activity--active .scroll-wrapper');
-                }
-                
-                if (!rootContainer.length) {
-                    rootContainer = $('.activity--active .scroll--mask');
-                }
-                
-                if (!rootContainer.length) {
-                    rootContainer = $('.activity--active');
+                // Создаем основной скролл
+                mainScroll = new Lampa.Scroll(scrollConfig);
+                let mainContainer = $('.activity--active .activity__body');
+                if (mainContainer.length) {
+                    mainScroll.render().appendTo(mainContainer);
                 }
 
-                if (rootContainer.length) {
-                    mainScroll = new Lampa.Scroll(scrollConfig);
-                    mainScroll.render().appendTo(rootContainer.first());
-                    
-                    // Добавляем стили для корректного отображения скролла
-                    rootContainer.first().css({
-                        'position': 'relative',
-                        'overflow': 'hidden'
+                // Находим все существующие скроллы в плагинах
+                let pluginScrolls = $('.activity--active .scroll--mask');
+                
+                if (pluginScrolls.length) {
+                    // Подписываемся на события скролла плагинов
+                    pluginScrolls.each(function() {
+                        let pluginScroll = $(this);
+                        
+                        // Наблюдаем за изменениями стилей
+                        let observer = new MutationObserver(function(mutations) {
+                            mutations.forEach(function(mutation) {
+                                if (mutation.attributeName === 'style') {
+                                    let transform = pluginScroll.css('transform');
+                                    if (transform && transform !== 'none') {
+                                        // Извлекаем значение translateY из transform
+                                        let matrix = transform.match(/matrix.*\((.*)\)/)[1].split(',');
+                                        let translateY = parseFloat(matrix[5]);
+                                        
+                                        // Применяем то же смещение к нашему скроллу
+                                        if (mainScroll && mainScroll.update) {
+                                            mainScroll.update(Math.abs(translateY));
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                        
+                        // Следим за изменениями стилей
+                        observer.observe(pluginScroll[0], {
+                            attributes: true,
+                            attributeFilter: ['style']
+                        });
                     });
                 }
             }
