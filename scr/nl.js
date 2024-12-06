@@ -43,6 +43,9 @@
                             margin: 0 !important;
                             padding: 1em !important;
                         }
+                        .scroll {
+                            padding-bottom: 5em !important;
+                        }
                     }
                 </style>
             `;
