@@ -33,8 +33,8 @@
                 // Если включена правая навигация, создаем новый скролл
                 mainScroll = new Lampa.Scroll(scrollConfig);
                 
-                // Находим основной контейнер
-                let mainContainer = $('.activity--active .activity__body');
+                // Находим основной контейнер, исключая контейнеры плагинов
+                let mainContainer = $('.activity--active .activity__body').not('.activity--plugin .activity__body');
                 if (mainContainer.length) {
                     mainScroll.render().appendTo(mainContainer);
                 }
