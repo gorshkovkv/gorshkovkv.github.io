@@ -136,24 +136,6 @@
             `);
         }
 
-        if (!$('#logo-scroll-style').length) {
-            $('head').append(`
-                <style id="logo-scroll-style">
-                    .scroll--mask {
-                        height: 100% !important;
-                    }
-                    .settings__body .scroll--mask {
-                        height: calc(100vh - 6em) !important;
-                    }
-                    @media screen and (orientation: landscape) {
-                        .settings__body .scroll--mask {
-                            height: calc(100vh - 4em) !important;
-                        }
-                    }
-                </style>
-            `);
-        }
-
         if (!$('#logo-common-style').length && Lampa.Storage.field('logo_common_style')) {
             $('head').append(`
                 <style id="logo-common-style">
