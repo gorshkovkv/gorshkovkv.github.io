@@ -26,56 +26,44 @@
         if (forceMobileMode && isLandscape) {
             $('body').addClass('true--mobile');
             $('body').addClass('orientation--landscape');
-            
-            // Пересчитываем все скроллы
-            $('.scroll').each(function() {
-                const scroll = $(this).data('scroll');
-                if (scroll) {
-                    // Сначала сбрасываем стили трансформации
-                    $(this).find('.scroll__body').addClass('notransition');
-                    scroll.reset();
-                    
-                    // Принудительно вызываем reflow
-                    $(this)[0].offsetHeight;
-                    
-                    // Убираем класс notransition и обновляем скролл
-                    $(this).find('.scroll__body').removeClass('notransition');
-                    scroll.update();
-
-                    // Если это маскированный скролл, обновляем его размеры
-                    if ($(this).hasClass('scroll--mask')) {
-                        scroll.updateSize(true);
-                    }
-                }
-            });
         } else {
             if (!Lampa.Platform.is('mobile')) {
                 $('body').removeClass('true--mobile');
                 $('body').removeClass('orientation--landscape');
-                
-                // Пересчитываем все скроллы
-                $('.scroll').each(function() {
-                    const scroll = $(this).data('scroll');
-                    if (scroll) {
-                        // Сначала сбрасываем стили трансформации
-                        $(this).find('.scroll__body').addClass('notransition');
-                        scroll.reset();
-                        
-                        // Принудительно вызываем reflow
-                        $(this)[0].offsetHeight;
-                        
-                        // Убираем класс notransition и обновляем скролл
-                        $(this).find('.scroll__body').removeClass('notransition');
-                        scroll.update();
-
-                        // Если это маскированный скролл, обновляем его размеры
-                        if ($(this).hasClass('scroll--mask')) {
-                            scroll.updateSize(true);
-                        }
-                    }
-                });
             }
         }
+
+        // Даем время на применение стилей
+        setTimeout(() => {
+            // Пересчитываем все скроллы
+            $('.scroll').each(function() {
+                const scroll = $(this).data('scroll');
+                if (scroll) {
+                    scroll.destroy();
+                    scroll.reset();
+                    scroll.update();
+                }
+            });
+
+            // Обновляем маски скроллов
+            $('.scroll--mask').each(function() {
+                const scroll = $(this).data('scroll');
+                if (scroll) {
+                    scroll.destroy();
+                    scroll.updateSize();
+                }
+            });
+
+            // Принудительно обновляем текущий активный скролл
+            if (Lampa.Activity.active()) {
+                const activity = Lampa.Activity.active().activity;
+                if (activity.scroll) {
+                    activity.scroll.destroy();
+                    activity.scroll.reset();
+                    activity.scroll.update();
+                }
+            }
+        }, 100);
     }
 
     // Простая реализация debounce
@@ -101,6 +89,11 @@
     // Обновляем режим при изменении размера окна
     $(window).on('resize', debounce(updateMobileMode, 200));
 
-    // Инициализация при старте
-    updateMobileMode();
+    // Ждем полной инициализации приложения
+    Lampa.Listener.follow('app', function(e) {
+        if (e.type == 'ready') {
+            // Инициализация при старте
+            updateMobileMode();
+        }
+    });
 }();
