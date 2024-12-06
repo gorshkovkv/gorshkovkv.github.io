@@ -30,21 +30,11 @@
                             top: auto !important;
                             bottom: 2em !important;
                             padding: 0 !important;
-                            background: none !important;
-                            z-index: 12 !important;
                         }
                         
                         .navigation-bar .navigation-bar__body {
                             flex-direction: row !important;
                             width: 100% !important;
-                            background-color: rgba(38, 40, 41, 0.9) !important;
-                            backdrop-filter: none !important;
-                            -webkit-backdrop-filter: none !important;
-                            margin: 0 !important;
-                            padding: 1em !important;
-                        }
-                        .scroll {
-                            padding-bottom: 5em !important;
                         }
                     }
                 </style>
