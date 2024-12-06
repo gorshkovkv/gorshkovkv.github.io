@@ -40,8 +40,9 @@
                             background-color: rgba(0,0,0,0.3) !important;
                         }
 
-                        .layer--height {
+                        .wrap {
                             height: 120vh !important;
+                            min-height: 120vh !important;
                         }
                     }
                 </style>
