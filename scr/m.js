@@ -1,121 +1,75 @@
 !function() {
-    "use strict";
-    
+    'use strict';
+
     // Добавляем настройку для мобильного режима
     Lampa.SettingsApi.addParam({
-        component: "interface",
+        component: 'interface',
         param: {
-            name: "force_mobile_mode",
-            type: "trigger",
+            name: 'force_mobile_mode',
+            type: 'trigger',
             default: false
         },
         field: {
-            name: "Мобильный режим",
-            description: "Принудительно включает мобильный режим в ландшафтной ориентации"
+            name: 'Принудительный мобильный режим',
+            description: 'Включает мобильный режим интерфейса в ландшафтной ориентации'
         }
     });
 
-    function checkMobileMode() {
+    function updateMobileMode() {
         // Проверяем ориентацию экрана
-        const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+        const isLandscape = window.innerWidth > window.innerHeight;
         
-        // Проверяем настройку мобильного режима
-        const forceMobileMode = Lampa.Storage.field('force_mobile_mode');
-        
-        // Получаем элемент body
-        const body = document.body;
-        
-        // Если включен принудительный мобильный режим и ориентация ландшафтная
+        // Проверяем настройку
+        const forceMobileMode = Lampa.Storage.get('force_mobile_mode');
+
+        // Добавляем или удаляем классы для мобильного режима
         if (forceMobileMode && isLandscape) {
-            body.classList.add('true--mobile');
-            body.classList.add('orientation--landscape');
-        } else if (forceMobileMode) {
-            // Если только мобильный режим без ландшафтной ориентации
-            body.classList.add('true--mobile');
-            body.classList.remove('orientation--landscape');
+            $('body').addClass('true--mobile');
+            $('body').addClass('orientation--landscape');
+            
+            // Пересчитываем все скроллы
+            $('.scroll').each(function() {
+                const scroll = $(this).data('scroll');
+                if (scroll) {
+                    scroll.reset();
+                    scroll.update();
+                }
+            });
+
+            // Обновляем маски скроллов
+            $('.scroll--mask').each(function() {
+                const scroll = $(this).data('scroll');
+                if (scroll) {
+                    scroll.updateSize();
+                }
+            });
         } else {
-            // Если мобильный режим выключен, удаляем все классы
-            body.classList.remove('true--mobile');
-            body.classList.remove('orientation--landscape');
+            if (!Lampa.Platform.is('mobile')) {
+                $('body').removeClass('true--mobile');
+                $('body').removeClass('orientation--landscape');
+                
+                // Пересчитываем все скроллы
+                $('.scroll').each(function() {
+                    const scroll = $(this).data('scroll');
+                    if (scroll) {
+                        scroll.reset();
+                        scroll.update();
+                    }
+                });
+            }
         }
-
-        // Обновляем скроллы
-        updateScrolls();
     }
 
-    function updateScrolls() {
-        // Находим все элементы с масками скролла
-        const scrollMasks = document.querySelectorAll('.scroll--mask');
-        const horizontalScrollMasks = document.querySelectorAll('.scroll--horizontal.scroll--mask');
-        
-        // Обновляем стили в зависимости от ширины экрана
-        const isMobileWidth = window.innerWidth <= 400;
-        
-        scrollMasks.forEach(mask => {
-            const content = mask.querySelector('.scroll__content');
-            if (content) {
-                content.style.padding = isMobileWidth ? '1.5em 0' : '2.5em 0';
-            }
-        });
-
-        horizontalScrollMasks.forEach(mask => {
-            const content = mask.querySelector('.scroll__content');
-            if (content) {
-                content.style.padding = isMobileWidth ? '0 1.5em' : '0 2.5em';
-            }
-        });
-    }
-
-    // Добавляем стили для корректной работы скроллов
-    if (!$('#mobile-mode-style').length) {
-        $('head').append(`
-            <style id="mobile-mode-style">
-                body.true--mobile.orientation--landscape .scroll__content {
-                    padding: 1em 0;
-                }
-                
-                body.true--mobile.orientation--landscape .scroll--mask .scroll__content {
-                    padding: 1.5em 0;
-                }
-                
-                body.true--mobile.orientation--landscape .scroll--horizontal.scroll--mask .scroll__content {
-                    padding: 0 1.5em;
-                }
-                
-                @media screen and (max-width: 400px) {
-                    .scroll__content {
-                        padding: 1em 0;
-                    }
-                    
-                    .scroll--mask .scroll__content {
-                        padding: 1.5em 0;
-                    }
-                    
-                    .scroll--horizontal.scroll--mask .scroll__content {
-                        padding: 0 1.5em;
-                    }
-                }
-            </style>
-        `);
-    }
-
-    // Слушаем изменение ориентации экрана
-    window.addEventListener('orientationchange', checkMobileMode);
-    
-    // Слушаем изменение размера окна
-    window.addEventListener('resize', checkMobileMode);
-    
-    // Слушаем изменение настроек
+    // Обновляем режим при изменении настройки
     Lampa.Storage.listener.follow('change', function(event) {
-        if (event.name === 'force_mobile_mode') {
-            checkMobileMode();
+        if (event.name == 'force_mobile_mode') {
+            updateMobileMode();
         }
     });
 
-    // Инициализация при загрузке
-    Lampa.Listener.follow('app', function(e) {
-        if (e.type === 'ready') {
-            checkMobileMode();
-        }
-    });
+    // Обновляем режим при изменении размера окна
+    $(window).on('resize', _.debounce(updateMobileMode, 200));
+
+    // Инициализация при старте
+    updateMobileMode();
 }();
