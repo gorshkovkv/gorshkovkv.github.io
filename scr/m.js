@@ -5,13 +5,13 @@
     Lampa.SettingsApi.addParam({
         component: "interface",
         param: {
-            name: "mobile_mode",
+            name: "force_mobile_mode",
             type: "trigger",
             default: false
         },
         field: {
             name: "Мобильный режим",
-            description: "Включить мобильный режим интерфейса (только для ландшафтной ориентации)"
+            description: "Включить мобильный режим интерфейса (работает только в ландшафтной ориентации)"
         }
     });
 
@@ -19,27 +19,32 @@
         // Проверяем ориентацию экрана
         var isLandscape = window.innerWidth > window.innerHeight;
         
-        // Проверяем включена ли настройка
-        var mobileEnabled = Lampa.Storage.field('mobile_mode');
-
-        // Добавляем или удаляем класс для мобильного режима
-        if (mobileEnabled && isLandscape) {
-            $('body').addClass('true--mobile');
-        } else {
-            $('body').removeClass('true--mobile');
+        // Получаем текущее состояние настройки
+        var forceMobileMode = Lampa.Storage.field('force_mobile_mode');
+        
+        // Удаляем предыдущие классы мобильного режима
+        document.body.classList.remove('true--mobile');
+        
+        // Если включен принудительный мобильный режим и ориентация ландшафтная
+        if (forceMobileMode && isLandscape) {
+            document.body.classList.add('true--mobile');
+            
+            // Добавляем класс ориентации
+            document.body.classList.remove('orientation--portrait');
+            document.body.classList.add('orientation--landscape');
         }
     }
 
-    // Следим за изменением ориентации экрана
+    // Слушаем изменение размера окна для обновления режима
     window.addEventListener('resize', checkMobileMode);
 
-    // Следим за изменением настройки
-    Lampa.Storage.listener.follow('change', function (event) {
-        if (event.name == 'mobile_mode') {
+    // Слушаем изменение настройки
+    Lampa.Storage.listener.follow('change', function(event) {
+        if (event.name == 'force_mobile_mode') {
             checkMobileMode();
         }
     });
 
-    // Инициализация при запуске
-    setTimeout(checkMobileMode, 1000);
+    // Инициализация при загрузке
+    checkMobileMode();
 }();
