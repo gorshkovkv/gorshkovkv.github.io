@@ -30,6 +30,8 @@
                             top: auto !important;
                             bottom: 2em !important;
                             padding: 0 !important;
+                            background: none !important;
+                            box-shadow: none !important;
                         }
                         
                         .navigation-bar .navigation-bar__body {
@@ -37,7 +39,8 @@
                             width: 100% !important;
                             backdrop-filter: none !important;
                             -webkit-backdrop-filter: none !important;
-                            background-color: transparent !important;
+                            background-color: rgba(0,0,0,0.3) !important;
+                            box-shadow: 0 0 1em rgba(0,0,0,0.3) !important;
                         }
 
                         .background {
