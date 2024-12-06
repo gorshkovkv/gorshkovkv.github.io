@@ -31,16 +31,21 @@
             $('.scroll').each(function() {
                 const scroll = $(this).data('scroll');
                 if (scroll) {
+                    // Сначала сбрасываем стили трансформации
+                    $(this).find('.scroll__body').addClass('notransition');
                     scroll.reset();
+                    
+                    // Принудительно вызываем reflow
+                    $(this)[0].offsetHeight;
+                    
+                    // Убираем класс notransition и обновляем скролл
+                    $(this).find('.scroll__body').removeClass('notransition');
                     scroll.update();
-                }
-            });
 
-            // Обновляем маски скроллов
-            $('.scroll--mask').each(function() {
-                const scroll = $(this).data('scroll');
-                if (scroll) {
-                    scroll.updateSize();
+                    // Если это маскированный скролл, обновляем его размеры
+                    if ($(this).hasClass('scroll--mask')) {
+                        scroll.updateSize(true);
+                    }
                 }
             });
         } else {
@@ -52,8 +57,21 @@
                 $('.scroll').each(function() {
                     const scroll = $(this).data('scroll');
                     if (scroll) {
+                        // Сначала сбрасываем стили трансформации
+                        $(this).find('.scroll__body').addClass('notransition');
                         scroll.reset();
+                        
+                        // Принудительно вызываем reflow
+                        $(this)[0].offsetHeight;
+                        
+                        // Убираем класс notransition и обновляем скролл
+                        $(this).find('.scroll__body').removeClass('notransition');
                         scroll.update();
+
+                        // Если это маскированный скролл, обновляем его размеры
+                        if ($(this).hasClass('scroll--mask')) {
+                            scroll.updateSize(true);
+                        }
                     }
                 });
             }
