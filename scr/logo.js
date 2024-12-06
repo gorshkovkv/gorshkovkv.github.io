@@ -199,42 +199,6 @@
             `);
         }
 
-        // Инициализация Scroll для основного интерфейса
-        let mainScroll;
-        
-        function initScroll() {
-            if (mainScroll) mainScroll.destroy();
-            
-            // Конфигурация скролла
-            let scrollConfig = {
-                mask: true,
-                over: true
-            };
-            
-            mainScroll = new Lampa.Scroll(scrollConfig);
-            
-            // Находим основной контейнер
-            let mainContainer = $('.activity--active .activity__body');
-            if (mainContainer.length) {
-                mainScroll.render().appendTo(mainContainer);
-            }
-        }
-        
-        // Вызываем initScroll вместо updateScrollHeight
-        window.addEventListener('orientationchange', function() {
-            setTimeout(initScroll, 100);
-        });
-        
-        window.addEventListener('resize', function() {
-            initScroll();
-        });
-        
-        // Инициализируем при загрузке
-        setTimeout(initScroll, 100);
-        
-        // Обновляем при открытии настроек
-        Lampa.Settings.listener.follow('open', initScroll);
-
         // Сохраняем оригинальную функцию
         var originalImageFunction = Lampa.TMDB.image;
 
