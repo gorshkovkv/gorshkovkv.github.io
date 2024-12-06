@@ -259,7 +259,22 @@
         // Функция для пересчета высоты скролла
         function updateScrollHeight() {
             let windowHeight = window.innerHeight;
-            $('.scroll--mask').css('height', windowHeight + 'px');
+            
+            // Применяем только к основным элементам scroll--mask, исключая те, что в других модулях
+            $('.scroll--mask').each(function() {
+                let $this = $(this);
+                
+                // Проверяем, не принадлежит ли элемент к другим модулям
+                if (!$this.closest('.layer--width').length && 
+                    !$this.closest('.player').length && 
+                    !$this.closest('.modal').length) {
+                    
+                    // Если включена правая навигация, учитываем это
+                    if (Lampa.Storage.get('logo_nav_right')) {
+                        $this.css('height', windowHeight + 'px');
+                    }
+                }
+            });
         }
 
         // Слушаем изменение ориентации
