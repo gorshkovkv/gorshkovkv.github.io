@@ -40,8 +40,8 @@
                             background-color: rgba(0,0,0,0.3) !important;
                         }
 
-                        .layer--height {
-                            min-height: 110vh !important;
+                        .activity__body {
+                            height: 120vh !important;
                         }
                     }
                 </style>
