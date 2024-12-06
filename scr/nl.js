@@ -40,7 +40,7 @@
                             background-color: rgba(0,0,0,0.3) !important;
                         }
 
-                        .activity__body {
+                        .layer--height {
                             height: 120vh !important;
                         }
                     }
