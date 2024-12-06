@@ -40,8 +40,8 @@
                             background-color: rgba(0,0,0,0.3) !important;
                         }
 
-                        .wrap__content.layer--height.layer--width {
-                            padding-bottom: 8em !important;
+                        .layer--height {
+                            height: calc(100% + 4em) !important;
                         }
                     }
                 </style>
