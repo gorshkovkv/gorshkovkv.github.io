@@ -1,31 +1,39 @@
 !function() {
     'use strict';
 
-    // Создаем уникальный ID для стилей
-    var styleId = 'nav-landscape-style';
+    // Добавляем настройку для центрированной навигации в ландшафтном режиме
+    Lampa.SettingsApi.addParam({
+        component: 'interface',
+        param: {
+            name: 'centered_landscape_nav',
+            type: 'trigger',
+            default: true
+        },
+        field: {
+            name: 'Центрированная навигация',
+            description: 'Центрирует навигационную панель в ландшафтном режиме'
+        }
+    });
 
-    // Функция для добавления стилей
-    function addStyles() {
-        // Проверяем, не добавлены ли уже стили
-        if (!$('#' + styleId).length) {
-            var style = `
-                <style id="${styleId}">
+    function updateNavigationStyles() {
+        // Удаляем старые стили, если они есть
+        $('#nav-landscape-style').remove();
+
+        // Добавляем новые стили только если настройка включена
+        if (Lampa.Storage.get('centered_landscape_nav')) {
+            const style = `
+                <style id="nav-landscape-style">
                     body.true--mobile.orientation--landscape .navigation-bar {
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
-                        width: 50%;
-                        padding: 1.5em;
+                        left: 25% !important;
+                        right: 25% !important;
+                        top: auto !important;
+                        bottom: 2em !important;
+                        padding: 0 !important;
                     }
+                    
                     body.true--mobile.orientation--landscape .navigation-bar .navigation-bar__body {
-                        flex-direction: row;
-                        justify-content: space-between;
-                        width: 100%;
-                    }
-                    body.true--mobile.orientation--landscape .navigation-bar__item {
-                        flex: 1;
-                        text-align: center;
-                        margin: 0 0.5em;
+                        flex-direction: row !important;
+                        width: 100% !important;
                     }
                 </style>
             `;
@@ -33,38 +41,14 @@
         }
     }
 
-    // Функция для удаления стилей
-    function removeStyles() {
-        $('#' + styleId).remove();
-    }
-
-    // Добавляем настройку для включения/выключения модификации
-    Lampa.SettingsApi.addParam({
-        component: 'interface',
-        param: {
-            name: 'nav_landscape_mode',
-            type: 'trigger',
-            default: false
-        },
-        field: {
-            name: 'Навигация по центру в ландшафте',
-            description: 'Отображает навигационную панель по центру экрана в ландшафтном режиме'
-        }
-    });
-
-    // Следим за изменением настройки
+    // Обновляем стили при изменении настройки
     Lampa.Storage.listener.follow('change', function(event) {
-        if (event.name == 'nav_landscape_mode') {
-            if (Lampa.Storage.get('nav_landscape_mode')) {
-                addStyles();
-            } else {
-                removeStyles();
-            }
+        if (event.name === 'centered_landscape_nav') {
+            updateNavigationStyles();
         }
     });
 
-    // Инициализация при запуске
-    if (Lampa.Storage.get('nav_landscape_mode')) {
-        addStyles();
-    }
+    // Применяем стили при загрузке
+    updateNavigationStyles();
+
 }();
