@@ -30,13 +30,15 @@
             };
             
             if (Lampa.Storage.get('logo_nav_right')) {
-                // Если включена правая навигация, создаем новый скролл
-                mainScroll = new Lampa.Scroll(scrollConfig);
+                let currentActivity = $('.activity--active');
                 
-                // Находим основной контейнер, исключая контейнеры плагинов
-                let mainContainer = $('.activity--active .activity__body').not('.activity--plugin .activity__body');
-                if (mainContainer.length) {
-                    mainScroll.render().appendTo(mainContainer);
+                // Не создаем скролл для плагинов
+                if (!currentActivity.hasClass('activity--plugin')) {
+                    mainScroll = new Lampa.Scroll(scrollConfig);
+                    let mainContainer = currentActivity.find('.activity__body');
+                    if (mainContainer.length) {
+                        mainScroll.render().appendTo(mainContainer);
+                    }
                 }
             }
         }
@@ -90,6 +92,13 @@
                 </style>
             `);
         }
+
+        // Инициализируем скролл при смене активностей
+        Lampa.Listener.follow('activity', function(e) {
+            if(e.type == 'start') {
+                setTimeout(initScroll, 50);
+            }
+        });
 
         // Вызываем initScroll при изменении ориентации
         window.addEventListener('orientationchange', function() {
