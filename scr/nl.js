@@ -30,6 +30,8 @@
                             top: auto !important;
                             bottom: 2em !important;
                             padding: 0 !important;
+                            background: none !important;
+                            z-index: auto !important;
                         }
                         
                         .navigation-bar .navigation-bar__body {
