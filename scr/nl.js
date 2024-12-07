@@ -49,12 +49,12 @@
 
                         .scroll--mask {
                             min-height: 95vh !important;
-                            margin-bottom: 8em !important;
+                            padding-bottom: 1em !important;
                         }
 
                         .scroll__content {
                             min-height: calc(95vh - 8em) !important;
-                            margin-bottom: 8em !important;
+                            padding-bottom: 1em !important;
                         }
 
                         .explorer {
