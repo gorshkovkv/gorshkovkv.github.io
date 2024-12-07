@@ -48,12 +48,10 @@
                         }
 
                         .scroll--mask {
-                            min-height: 95vh !important;
                             padding-bottom: 1em !important;
                         }
 
                         .scroll__content {
-                            min-height: calc(95vh - 8em) !important;
                             padding-bottom: 1em !important;
                         }
 
