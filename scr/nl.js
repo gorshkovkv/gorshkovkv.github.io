@@ -25,8 +25,8 @@
                 <style id="nav-landscape-style">
                     @media screen and (orientation: landscape) {
                         .navigation-bar {
-                            left: 25% !important;
-                            right: 25% !important;
+                            left: 30% !important;
+                            right: 30% !important;
                             top: auto !important;
                             bottom: 2em !important;
                             padding: 0 !important;
@@ -37,7 +37,6 @@
                             width: 100% !important;
                             backdrop-filter: none !important;
                             -webkit-backdrop-filter: none !important;
-                            background-color: rgba(0,0,0,0.3) !important;
                         }
 
                         .layer--width {
