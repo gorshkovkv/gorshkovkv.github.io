@@ -39,7 +39,7 @@
                             -webkit-backdrop-filter: none !important;
                         }
 
-                        .layer--width {
+                        .wrap:not(.activity) > .layer--width {
                             min-height: 95vh !important;
                         }
 
@@ -48,20 +48,7 @@
                         }
 
                         .scroll--mask {
-                            padding-bottom: 1em !important;
-                        }
-
-                        .scroll__content {
-                            padding-bottom: 1em !important;
-                        }
-
-                        .explorer {
-                            height: calc(50vh - 8em) !important;
-                            margin-bottom: 18em !important;
-                        }
-
-                        .explorer .scroll--mask {
-                            height: 100% !important;
+                            min-height: 95vh !important;
                         }
                     }
                 </style>
