@@ -52,7 +52,7 @@
                         }
 
                         .explorer__files {
-                            margin-bottom: 8em !important;
+                            margin-bottom: 18em !important;
                         }
                     }
                 </style>
