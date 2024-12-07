@@ -40,16 +40,16 @@
                             background-color: rgba(0,0,0,0.3) !important;
                         }
 
-                        .activity {
+                        .layer--width {
                             min-height: 120vh !important;
                         }
 
-                        .activity > div {
-                            min-height: inherit !important;
+                        .layer--wheight {
+                            min-height: 120vh !important;
                         }
 
-                        .activity__body {
-                            min-height: inherit !important;
+                        .scroll--mask {
+                            min-height: 120vh !important;
                         }
                     }
                 </style>
