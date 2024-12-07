@@ -51,8 +51,13 @@
                             min-height: 95vh !important;
                         }
 
-                        .explorer__files {
-                            margin-bottom: 18em !important;
+                        .explorer {
+                            height: calc(95vh - 8em) !important;
+                            margin-bottom: 8em !important;
+                        }
+
+                        .explorer .scroll--mask {
+                            height: 100% !important;
                         }
                     }
                 </style>
