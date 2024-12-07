@@ -16,9 +16,12 @@
     });
 
     function updateNavigationStyles() {
-        const styleElement = document.getElementById('nav-landscape-style');
-        if (!styleElement) {
-            document.head.insertAdjacentHTML('beforeend', `
+        // Удаляем старые стили, если они есть
+        $('#nav-landscape-style').remove();
+
+        // Добавляем новые стили только если настройка включена
+        if (Lampa.Storage.get('centered_landscape_nav')) {
+            const style = `
                 <style id="nav-landscape-style">
                     @media screen and (orientation: landscape) {
                         .navigation-bar {
@@ -27,7 +30,6 @@
                             top: auto !important;
                             bottom: 2em !important;
                             padding: 0 !important;
-                            transition: opacity 0.3s ease-in-out !important;
                         }
                         
                         .navigation-bar .navigation-bar__body {
@@ -35,11 +37,6 @@
                             width: 100% !important;
                             backdrop-filter: none !important;
                             -webkit-backdrop-filter: none !important;
-                        }
-
-                        .navigation-bar.hide-nav {
-                            opacity: 0 !important;
-                            pointer-events: none !important;
                         }
 
                         .layer--width {
@@ -53,30 +50,15 @@
                         .scroll--mask {
                             min-height: 95vh !important;
                         }
+
+                        .explorer__files {
+                            padding-bottom: 6em !important;
+                        }
                     }
                 </style>
-            `);
+            `;
+            $('head').append(style);
         }
-
-        let hideTimeout;
-        const navBar = document.querySelector('.navigation-bar');
-
-        function showNavigation() {
-            if (navBar) {
-                navBar.classList.remove('hide-nav');
-                clearTimeout(hideTimeout);
-                hideTimeout = setTimeout(() => {
-                    navBar.classList.add('hide-nav');
-                }, 3000);
-            }
-        }
-
-        // Показываем панель при движении мыши или касании
-        document.addEventListener('mousemove', showNavigation);
-        document.addEventListener('touchstart', showNavigation);
-        
-        // Инициируем таймер при загрузке
-        showNavigation();
     }
 
     // Обновляем стили при изменении настройки
