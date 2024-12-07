@@ -56,8 +56,8 @@
                         }
 
                         .explorer {
-                            height: calc(95vh - 8em) !important;
-                            margin-bottom: 8em !important;
+                            height: calc(50vh - 8em) !important;
+                            margin-bottom: 18em !important;
                         }
 
                         .explorer .scroll--mask {
