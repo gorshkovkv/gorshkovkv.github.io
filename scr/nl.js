@@ -52,7 +52,7 @@
                         }
 
                         .explorer .scroll__content {
-                            min-height: 95vh !important;
+                            padding-bottom: 8em !important;
                         }
                     }
                 </style>
