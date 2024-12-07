@@ -27,7 +27,7 @@
                             top: auto !important;
                             bottom: 2em !important;
                             padding: 0 !important;
-                            transition: opacity 0.3s ease !important;
+                            transition: opacity 0.3s ease-in-out !important;
                         }
                         
                         .navigation-bar .navigation-bar__body {
@@ -37,47 +37,46 @@
                             -webkit-backdrop-filter: none !important;
                         }
 
+                        .navigation-bar.hide-nav {
+                            opacity: 0 !important;
+                            pointer-events: none !important;
+                        }
+
                         .layer--width {
-                            min-height: 90vh !important;
+                            min-height: 95vh !important;
                         }
 
                         .layer--wheight {
-                            min-height: 90vh !important;
+                            min-height: 95vh !important;
                         }
 
                         .scroll--mask {
-                            min-height: 90vh !important;
-                        }
-
-                        .navigation-bar--hidden {
-                            opacity: 0 !important;
-                            pointer-events: none !important;
+                            min-height: 95vh !important;
                         }
                     }
                 </style>
             `);
         }
 
-        let timeout;
+        let hideTimeout;
         const navBar = document.querySelector('.navigation-bar');
-        
-        function showNavBar() {
+
+        function showNavigation() {
             if (navBar) {
-                navBar.classList.remove('navigation-bar--hidden');
-                clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    navBar.classList.add('navigation-bar--hidden');
+                navBar.classList.remove('hide-nav');
+                clearTimeout(hideTimeout);
+                hideTimeout = setTimeout(() => {
+                    navBar.classList.add('hide-nav');
                 }, 3000);
             }
         }
 
         // Показываем панель при движении мыши или касании
-        document.addEventListener('mousemove', showNavBar);
-        document.addEventListener('touchstart', showNavBar);
-        document.addEventListener('touchmove', showNavBar);
-
-        // Инициализация: скрыть панель через 3 секунды после загрузки
-        showNavBar();
+        document.addEventListener('mousemove', showNavigation);
+        document.addEventListener('touchstart', showNavigation);
+        
+        // Инициируем таймер при загрузке
+        showNavigation();
     }
 
     // Обновляем стили при изменении настройки
