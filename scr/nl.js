@@ -48,7 +48,12 @@
                         }
 
                         .explorer {
+                            height: calc(50vh - 8em) !important;
                             margin-bottom: 18em !important;
+                        }
+
+                        .explorer .scroll--mask {
+                            height: 100% !important;
                         }
 
                         .scroll--mask {
