@@ -28,36 +28,13 @@
                             left: 30% !important;
                             right: 30% !important;
                             top: auto !important;
-                            bottom: 2em !important;
+                            bottom: 1em !important;
                             padding: 0 !important;
                         }
                         
                         .navigation-bar .navigation-bar__body {
                             flex-direction: row !important;
                             width: 100% !important;
-                            backdrop-filter: none !important;
-                            -webkit-backdrop-filter: none !important;
-                        }
-
-                        .wrap:not(.activity) > .layer--width {
-                            min-height: 95vh !important;
-                        }
-
-                        .layer--wheight {
-                            min-height: 95vh !important;
-                        }
-
-                        .explorer {
-                            height: calc(50vh - 8em) !important;
-                            margin-bottom: 18em !important;
-                        }
-
-                        .explorer .scroll--mask {
-                            height: 100% !important;
-                        }
-
-                        .scroll--mask {
-                            min-height: 95vh !important;
                         }
                     }
                 </style>
