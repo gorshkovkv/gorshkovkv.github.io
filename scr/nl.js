@@ -52,7 +52,15 @@
                         }
 
                         .explorer__files {
-                            padding-bottom: 6em !important;
+                            min-height: 95vh !important;
+                        }
+
+                        .scroll__content {
+                            min-height: 95vh !important;
+                        }
+
+                        .scroll__body {
+                            min-height: 95vh !important;
                         }
                     }
                 </style>
