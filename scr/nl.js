@@ -51,7 +51,7 @@
                             min-height: 95vh !important;
                         }
 
-                        .scroll__content {
+                        .explorer .scroll__content {
                             min-height: 95vh !important;
                         }
                     }
