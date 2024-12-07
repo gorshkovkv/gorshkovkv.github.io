@@ -54,10 +54,6 @@
                         .scroll__content {
                             min-height: 95vh !important;
                         }
-
-                        .scroll__body {
-                            min-height: 95vh !important;
-                        }
                     }
                 </style>
             `;
