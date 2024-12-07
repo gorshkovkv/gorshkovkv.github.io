@@ -52,7 +52,7 @@
                         }
 
                         .explorer .scroll__content {
-                            padding-bottom: 8em !important;
+                            padding-top: 8em !important;
                         }
                     }
                 </style>
