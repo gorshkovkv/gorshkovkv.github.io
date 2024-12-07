@@ -47,6 +47,10 @@
                             min-height: 95vh !important;
                         }
 
+                        .explorer {
+                            margin-bottom: 18em !important;
+                        }
+
                         .scroll--mask {
                             min-height: 95vh !important;
                         }
