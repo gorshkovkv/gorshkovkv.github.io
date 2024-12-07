@@ -40,15 +40,15 @@
                         }
 
                         .layer--width {
-                            min-height: 110vh !important;
+                            min-height: 100vh !important;
                         }
 
                         .layer--wheight {
-                            min-height: 110vh !important;
+                            min-height: 100vh !important;
                         }
 
                         .scroll--mask {
-                            min-height: 110vh !important;
+                            min-height: 100vh !important;
                         }
                     }
                 </style>
