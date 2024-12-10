@@ -80,170 +80,19 @@
       return url;
     }
     function showAuthModal() {
-        var isCodeObtained = false; // Ensure isCodeObtained is defined.
-        var attempts = 0;
-        var maxAuthAttempts = 10;
-        var maxCodeAttempts = 10;
-        var codeAttempts = 0;
-        var modalObserverInterval;
-        var subscribeModalObserverInterval;
-
-        function startModalObserver() {
-        modalObserverInterval = setInterval(function() {
-            if (!isCodeObtained && $('.modal').length === 0) {
-                    showModal();
-                }
-            }, 1000);
-        }
-
-        function startSubscribeModalObserver() {
-            subscribeModalObserverInterval = setInterval(function() {
-                if (!isCodeObtained && $('.modal').length === 0) {
-                    showSubscribeChannelModal();
-                } else {
-                    if (!document.querySelector('.modal__button.selector.focus')) {
-                        Lampa.Controller.toggle('modal');
-                    }
-                }
-
-            }, 1000);
-        }
-
-        function stopModalObservers() {
-            clearInterval(modalObserverInterval);
-            clearInterval(subscribeModalObserverInterval);
-        }
-
-        function checkAuthorization() {
-            // Skip authorization check and set as authorized
-            isCodeObtained = true;
-            var data = {
-                success: true,
-                email: 'premium@user.com',
-                status: 'active',
-                time: Date.now(),
-                token: 'premium_token'
-            };
-            Lampa.Storage.set('showy', data);
-            return Promise.resolve(data);
-        }
-
-        function showModal() {
-            if (isCodeObtained) return;
-
-            startModalObserver();
-
-            function getRandomCode() {
-                if (codeAttempts >= maxCodeAttempts) {
-                    isCodeObtained = true;
-                    $('.modal').remove();
-                    Lampa.Controller.toggle('content');
-                    stopModalObservers();
-                    return;
-                }
-
-                codeAttempts++;
-
-                return $.ajax({
-                    url: 'http://89.110.72.185:8001/get_code/',
-                    method: 'POST',
-                    dataType: 'json',
-                    success: function(data) {
-                        var randomCode = data.code;
-                        Lampa.Storage.set('random_code', randomCode);
-                        updateModalContent(randomCode);
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        setTimeout(getRandomCode, 1000);
-                    }
-                });
-            }
-
-            getRandomCode();
-
-            var modalHtml = '<div>' +
-                            '<img id="qrCodeImage"/>' +
-                            '<p>Р”Р»СЏ РїСЂРѕСЃРјРѕС‚СЂР° С‡РµСЂРµР· РѕРЅР»Р°Р№РЅ РїР»Р°РіРёРЅ Showy С‚СЂРµР±СѓРµС‚СЃСЏ Р°РІС‚РѕСЂРёР·Р°С†РёСЏ, РїРѕР¶Р°Р»СѓР№СЃС‚Р° РѕС‚СЃРєР°РЅРёСЂСѓР№С‚Рµ QR РёР»Рё РІРІРµРґРёС‚Рµ РєРѕРґ РІ С‚РµР»РµРіСЂР°Рј-Р±РѕС‚Рµ @showybot РёР»Рё РїРѕ СЃСЃС‹Р»РєРµ t.me/showybot</p>' +
-                            '<p><strong id="randomCodeDisplay"></strong></p>' +
-                            '<p id="notification" style="display: none; background-color: #4caf50; color: white; padding: 10px; border-radius: 5px; margin-top: 10px;"></p>' +
-                            '</div>';
-
-            if ($('.modal').length) {
-                $('.modal').remove();
-            }
-
-            Lampa.Modal.open({
-                title: '',
-                align: 'center',
-                zIndex: 300,
-                html: $(modalHtml),
-                onBack: function() {
-                    window.location.href = '/';
-                }
-            });
-
-            autoCheckCode();
-        }
-
-        function autoCheckCode() {
-            var checkAttempts = 0;
-            var maxCheckAttempts = 100;
-            var checkCodeInterval = setInterval(function() {
-                if (checkAttempts >= maxCheckAttempts || isCodeObtained) {
-                    clearInterval(checkCodeInterval);
-                    if (checkAttempts >= maxCheckAttempts) {
-                        window.location.href = '/';
-                    }
-                    return;
-                }
-
-                checkAttempts++;
-                checkCode();
-            }, 3000);
-        }
-
-        function checkCode() {
-            if (isCodeObtained) return;
-            Lampa.Controller.toggle('modal__content');
-            var randomCode = document.getElementById('randomCodeDisplay').innerText;
-
-            $.ajax({
-                url: 'http://89.110.72.185:8001/check_code/',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    code: randomCode
-                }),
-                success: function(response) {
-                    if (response.status === 'success') {
-                        Lampa.Storage.set('showy_token', response.token);
-                        isCodeObtained = true;
-                        Lampa.Modal.close();
-                        Lampa.Controller.toggle('content');
-                        stopModalObservers();
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("Check Code Error: ", error);
-                    handleFailedAttempts();
-                    }
-                });
-            }
-
-            function handleFailedAttempts() {
-                attempts++;
-                if (attempts < maxAuthAttempts) {
-                    setTimeout(checkCode, 10000);
-                } else {
-                    console.error('Max attempts reached.');
-                }
-            }
-
-            checkAuthorization();
+        isCodeObtained = true;
+        var data = {
+            success: true,
+            email: 'premium@user.com',
+            status: 'active',
+            time: Date.now(),
+            token: 'premium_token'
+        };
+        Lampa.Storage.set('showy', data);
+        return Promise.resolve(data);
     }
 
     function checkPremium(callback) {
-        // Force premium status
         var data = {
             success: true,
             status: 'active',
@@ -256,7 +105,6 @@
     }
 
     function checkPremiumStatus() {
-        // Always return active premium status
         return {
             success: true,
             status: 'active',
@@ -265,10 +113,7 @@
     }
 
     if (!isCodeObtained) {
-        // Force successful authentication
         isCodeObtained = true;
-        
-        // Simulate active subscription
         Lampa.Storage.set('showy', {
             success: true,
             email: 'premium@user.com',
@@ -276,31 +121,23 @@
             time: Date.now(),
             token: 'premium_token'
         });
-        
         return Promise.resolve();
     }
 
-
-
-    function balanserName(j) {
-      var bals = j.balanser;
-      var name = j.name.split(' ')[0];
-      return (bals || name).toLowerCase();
-    }
     this.create = function() {
-      // Принудительно устанавливаем успешную авторизацию
-      isCodeObtained = true;
-      Lampa.Storage.set('showy', {
-          success: true,
-          status: 'active',
-          time: Date.now(),
-          token: 'premium_token'
-      });
+        isCodeObtained = true;
+        Lampa.Storage.set('showy', {
+            success: true,
+            email: 'premium@user.com',
+            status: 'active',
+            time: Date.now(),
+            token: 'premium_token'
+        });
 
-      this.activity.loader(true);
-      this.activity.toggle();
+        this.activity.loader(true);
+        this.activity.toggle();
 
-      return this.render();
+        return this.render();
     };
 
     this.onStart = function() {
@@ -423,29 +260,12 @@
     };
     this.startSource = function(json) {
       return new Promise(function(resolve, reject) {
-        json.forEach(function(j) {
-          var name = balanserName(j);
-          sources[name] = {
-            url: j.url,
-            name: j.name,
-            show: typeof j.show == 'undefined' ? true : j.show
-          };
-        });
-        filter_sources = Lampa.Arrays.getKeys(sources);
-        if (filter_sources.length) {
-          var last_select_balanser = Lampa.Storage.cache('online_last_balanser', 3000, {});
-          if (last_select_balanser[object.movie.id]) {
-            balanser = last_select_balanser[object.movie.id];
-          } else {
-            balanser = Lampa.Storage.get('online_balanser', filter_sources[0]);
-          }
-          if (!sources[balanser]) balanser = filter_sources[0];
-          if (!sources[balanser].show && !object.lampac_custom_select) balanser = filter_sources[0];
-          source = sources[balanser].url;
-          resolve(json);
-        } else {
-          reject();
-        }
+        var name = balanserName(j);
+        sources[name] = {
+          url: j.url,
+          name: j.name,
+          show: typeof j.show == 'undefined' ? true : j.show
+        };
       });
     };
     this.lifeSource = function() {
@@ -1523,7 +1343,7 @@
           'РўРѕСЂРјРѕР·РёС‚ РІРёРґРµРѕ? РќРµС‚ РёСЃС‚РѕС‡РЅРёРєРѕРІ РІ 4Рљ Рё 1080? РџРѕРїСЂРѕР±СѓР№ РїРѕРґРїРёСЃРєСѓ SHOWY PRO! Р—Р°Р№РґРё РІ Р±РѕС‚ Рё РїРѕР»СѓС‡Рё РґРѕСЃС‚СѓРї Рє Filmix 4K, Zetflix Рё ShowyTOR РЅР° РІС‹СЃРѕРєРѕР№ СЃРєРѕСЂРѕСЃС‚Рё!' +
           '</div><div class="ad-server__label">' + 
           '@showybot' +
-          '</div><img src="http://showy.online/qrcode.png" class="ad-server__qr"></div>')
+          '</div><img src="http://showy.online111/qrcode.png" class="ad-server__qr"></div>')
 
           Lampa.Storage.listener.follow('change', function (event) {
               if (event.name == 'activity') {
