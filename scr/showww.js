@@ -4,7 +4,7 @@
   if (window.location.protocol === 'https:') {
     var Defined = {
         api: 'lampac',
-        localhost: 'https://showy.online/',
+        localhost: 'https://lampa.mx/',
         apn: 'https://apn.watch/',
         enable_api: false,
         use_api: false
@@ -12,7 +12,7 @@
   } else {
      var Defined = {
          api: 'lampac',
-         localhost: 'http://showy.online/',
+         localhost: 'http://lampa.mx/',
          apn: 'https://apn.watch/',
          enable_api: false,
          use_api: false
