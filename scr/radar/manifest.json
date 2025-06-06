@@ -1,7 +1,8 @@
 {
   "name": "Mind Radar",
   "short_name": "MindRadar",
-  "start_url": "/",
+  "start_url": "/scr/radar/",
+  "scope": "/scr/radar/",
   "display": "standalone",
   "background_color": "#1e293b",
   "theme_color": "#1e293b",

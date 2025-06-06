@@ -5,12 +5,12 @@ Service Worker Mind Radar
 */
 const CACHE_NAME = 'mindradar-shell-v1';
 const SHELL_ASSETS = [
-  '/',
-  '/index.html',
-  '/app.js',
-  '/app.css',
-  '/manifest.json',
-  'https://cdn.jsdelivr.net/npm/sentiment@5.0.2/dist/sentiment.min.js'
+  '/scr/radar/',
+  '/scr/radar/index.html',
+  '/scr/radar/app.js',
+  '/scr/radar/app.css',
+  '/scr/radar/manifest.json',
+  '/scr/radar/sentiment.min.js'
 ];
 self.addEventListener('install', event => {
   event.waitUntil(
