@@ -1,0 +1,40 @@
+<!--
+Mind Radar
+Главная страница PWA-приложения для захвата мыслей с контекстом.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mind Radar</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="app.css" />
+  <meta name="theme-color" content="#1e293b" />
+</head>
+<body>
+  <main id="app">
+    <header>
+      <h1>Mind Radar</h1>
+    </header>
+    <section id="input-section">
+      <form id="thought-form">
+        <input id="thought-input" type="text" maxlength="300" placeholder="Что у вас на уме прямо сейчас?" autocomplete="off" required />
+        <button type="submit">Захватить</button>
+      </form>
+    </section>
+    <section id="tagcloud"></section>
+    <section id="filters">
+      <div class="pill-filters" id="pill-filters"></div>
+    </section>
+    <section id="entries">
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+    </section>
+  </main>
+  <!-- Сначала локальный Sentiment.js, затем app.js. Не используем type="module" -->
+  <script src="sentiment.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
