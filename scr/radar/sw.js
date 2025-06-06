@@ -18,7 +18,17 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    (async () => {
+      // Удаляем все старые кэши, кроме актуального
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.filter(name => name !== CACHE_NAME && name !== 'mindradar-weather-v1').map(name => caches.delete(name))
+      );
+      await self.clients.claim();
+      await self.skipWaiting();
+    })()
+  );
 });
 self.addEventListener('fetch', event => {
   const url = event.request.url;
