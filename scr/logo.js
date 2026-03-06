@@ -187,12 +187,21 @@ var originalImageFunction = Lampa.TMDB.image;
 // Переопределяем функцию
 Lampa.TMDB.image = function(url) {
     if (Lampa.Storage.field('logo_high_quality') && url) {
-        // Выцепляем только имя файла (например, /hqjL17...x.jpg)
-        var fileName = url.substring(url.lastIndexOf('/'));
         
-        // Отдаем прямую ссылку на сервера TMDB, минуя прокси Лампы
-        return 'https://image.tmdb.org/t/p/original' + fileName;
+        // Повышаем качество только для мелкого "мыла"
+        // Используем else if для защиты от каскадного бака (эффекта домино)
+        if (url.includes('t/p/w200')) {
+            url = url.replace('t/p/w200', 't/p/w500');
+        } else if (url.includes('t/p/w300') || url.includes('t/p/w342')) {
+            url = url.replace(/t\/p\/w(300|342)/, 't/p/w500');
+        } else if (url.includes('t/p/w500')) {
+            url = url.replace('t/p/w500', 't/p/w780'); 
+        }
+        
+        // Размеры w780 и w1280 мы намеренно НЕ трогаем и не превращаем в original!
+        // Это спасет от лесенок при сжатии и сохранит работу размытого фона.
     }
+    
     return originalImageFunction(url);
 };
 
