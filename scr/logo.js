@@ -186,26 +186,21 @@ var originalImageFunction = Lampa.TMDB.image;
 
 // Переопределяем функцию
 Lampa.TMDB.image = function(url) {
-    var full_url = originalImageFunction(url);
-    
-    if (!full_url) return full_url;
-
-    // 1. Жёсткий фикс для логотипов: SVG отдаются только в original
-    if (full_url.includes('.svg')) {
-        return full_url.replace(/\/w\d+/, '/original');
+    if (Lampa.Storage.field('logo_high_quality') && url) {
+        // Используем else if, чтобы избежать каскадной замены (эффект домино)
+        if (url.includes('t/p/w200')) {
+            url = url.replace('t/p/w200', 't/p/w500');
+        } else if (url.includes('t/p/w300')) {
+            url = url.replace('t/p/w300', 't/p/w500');
+        } else if (url.includes('t/p/w342')) {
+            url = url.replace('t/p/w342', 't/p/w500');
+        } else if (url.includes('t/p/w500')) {
+            url = url.replace('t/p/w500', 't/p/w780'); 
+        } else if (url.includes('t/p/w780') || url.includes('t/p/w1280')) {
+            url = url.replace(/t\/p\/w(780|1280)/, 't/p/original');
+        }
     }
-
-    // 2. Фикс качества: перехватываем все популярные пресеты Lampa
-    if (Lampa.Storage.field('logo_high_quality')) {
-        full_url = full_url.replace('/w1280', '/original')
-                           .replace('/w780', '/original')
-                           .replace('/w500', '/w780')
-                           .replace('/w342', '/w500')
-                           .replace('/w300', '/w500')
-                           .replace('/w200', '/w342');
-    }
-    
-    return full_url;
+    return originalImageFunction(url);
 };
 
         Lampa.Listener.follow("full", function(e) {
@@ -370,7 +365,7 @@ Lampa.TMDB.image = function(url) {
                     // Если включена настройка логотипов, пробуем найти и отобразить логотип
                     if (Lampa.Storage.get("logo_glav")) {
 // Создаем контейнер для логотипа (чистый вызов без хардкода расширений)
-var imgElement = $('<img style="max-height: 2em;" src="' + Lampa.TMDB.image(path) + '" />');
+var imgElement = $('<img style="max-height: 2em;" src="' + Lampa.TMDB.image("/t/p/w500" + path.replace(".svg", ".png")) + '" />');
                         //var imgElement = $('<img style="margin-top: 5px; margin-left: 0; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
