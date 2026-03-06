@@ -187,18 +187,8 @@ var originalImageFunction = Lampa.TMDB.image;
 // Переопределяем функцию
 Lampa.TMDB.image = function(url) {
     if (Lampa.Storage.field('logo_high_quality') && url) {
-        // Используем else if, чтобы избежать каскадной замены (эффект домино)
-        if (url.includes('t/p/w200')) {
-            url = url.replace('t/p/w200', 't/p/w500');
-        } else if (url.includes('t/p/w300')) {
-            url = url.replace('t/p/w300', 't/p/w500');
-        } else if (url.includes('t/p/w342')) {
-            url = url.replace('t/p/w342', 't/p/w500');
-        } else if (url.includes('t/p/w500')) {
-            url = url.replace('t/p/w500', 't/p/w780'); 
-        } else if (url.includes('t/p/w780') || url.includes('t/p/w1280')) {
-            url = url.replace(/t\/p\/w(780|1280)/, 't/p/original');
-        }
+        // Жестко находим любой размер папки (w200, w300, w500, w780, w1280) и ставим original
+        url = url.replace(/t\/p\/w\d+/, 't/p/original');
     }
     return originalImageFunction(url);
 };
