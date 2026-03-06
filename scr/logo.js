@@ -31,12 +31,6 @@
         field: { name: "Стили", description: "Применять стили для адаптивного отображения, на телевизоре лучше отключить" }
     });
 
-    Lampa.SettingsApi.addParam({
-        component: "interface",
-        param: { name: "logo_show_average_time", type: "trigger", default: false },
-        field: { name: "Показывать среднее время серии", description: "Отображает среднее время серии в карточке сериала" }
-    });
-
     if (!window.logoplugin) {
         window.logoplugin = true;
 
@@ -106,12 +100,10 @@
             `);
         }
 
-        // НОВЫЙ БЛОК: Защита верстки для iOS
         if (!$('#logo-ios-fix').length && Lampa.Storage.field('logo_high_quality')) {
             $('head').append(`
                 <style id="logo-ios-fix">
                     @media screen and (orientation: portrait) {
-                        /* Жесткий градиент, скрывающий вылезающий фон */
                         .full-bg::after {
                             content: '';
                             position: absolute;
@@ -120,7 +112,6 @@
                             z-index: 1;
                             pointer-events: none;
                         }
-                        /* Принудительное сглаживание от лесенок */
                         .full-bg img, .full-start-new__head img {
                             image-rendering: high-quality !important;
                             -webkit-transform: translateZ(0);
@@ -132,7 +123,6 @@
 
         var originalImageFunction = Lampa.TMDB.image;
 
-        // ПРАВКА ЛОГИКИ: Умеренное повышение качества без срыва башни
         Lampa.TMDB.image = function(url) {
             if (Lampa.Storage.field('logo_high_quality') && url) {
                 if (url.includes('t/p/w200')) {
@@ -277,7 +267,6 @@
                     }
 
                     if (Lampa.Storage.get("logo_glav") && path) {
-                        // Оставляем твой оригинальный рабочий вариант с PNG
                         var imgElement = $('<img style="max-height: 2em;" src="' + Lampa.TMDB.image("/t/p/w500" + path.replace(".svg", ".png")) + '" />');
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
@@ -287,36 +276,6 @@
                 }
 
                 findLogo();
-            }
-        });
-
-        Lampa.Listener.follow("full", function(cardData) {
-            if (!Lampa.Storage.field('logo_show_average_time')) return;
-            
-            if (cardData.type === "complite") {
-                var imdbId = cardData.data.movie.imdb_id;
-                if (imdbId) {
-                    $.ajax({
-                        url: "https://api.tvmaze.com/lookup/shows?imdb=".concat(imdbId),
-                        method: "GET",
-                        success: function success(response) {
-                            var averageRuntime = response.averageRuntime;
-                            var hours = Math.floor(averageRuntime / 60);
-                            var minutes = averageRuntime % 60;
-                            var formattedRuntime = "".concat(hours.toString().padStart(2, '0'), ":").concat(minutes.toString().padStart(2, '0'));
-
-                            var runtimeSpan = $("<span>", { id: "averageRuntime", text: formattedRuntime });
-                            var splitSpan = $("<span>", { "class": "full-start-new__split", text: "●" });
-
-                            cardData.object.activity.render().find('.full-start-new__details').prepend(runtimeSpan, splitSpan);
-                        },
-                        error: function error(_error) {
-                            console.error("Ошибка при выполнении запроса:", _error);
-                        }
-                    });
-                } else {
-                    console.warn("IMDB ID отсутствует в данных фильма.");
-                }
             }
         });
     }
