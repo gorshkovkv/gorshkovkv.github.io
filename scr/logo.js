@@ -181,20 +181,25 @@
             `);
         }
 
-        // Сохраняем оригинальную функцию
-        var originalImageFunction = Lampa.TMDB.image;
+// Сохраняем оригинальную функцию
+var originalImageFunction = Lampa.TMDB.image;
 
-        // Переопределяем функцию для изменения качества изображений
-        Lampa.TMDB.image = function(url) {
-            // Если включена настройка высокого качества, заменяем путь
-            if (Lampa.Storage.field('logo_high_quality')) {
-                url = url.replace('t/p/w780', 't/p/original');
-                url = url.replace('t/p/w1280', 't/p/original');
-                url = url.replace('t/p/w200', 't/p/w500');
-                url = url.replace('t/p/w500', 't/p/w780');
-            }
-            return originalImageFunction(url);
-        };
+// Переопределяем функцию для изменения качества ВСЕХ изображений
+Lampa.TMDB.image = function(url) {
+    // Получаем уже сформированный полный URL от Lampa
+    var full_url = originalImageFunction(url);
+    
+    // Если включена настройка высокого качества, заменяем пути в финальной строке
+    if (full_url && Lampa.Storage.field('logo_high_quality')) {
+        // Идем от большего к меньшему во избежание каскадной замены
+        full_url = full_url.replace('/w1280', '/original')
+                           .replace('/w780', '/original')
+                           .replace('/w500', '/w780')
+                           .replace('/w200', '/w500');
+    }
+    return full_url;
+};
+
 
         Lampa.Listener.follow("full", function(e) {
             if (e.type == "complite") {
@@ -357,8 +362,8 @@
 
                     // Если включена настройка логотипов, пробуем найти и отобразить логотип
                     if (Lampa.Storage.get("logo_glav")) {
-                        // Создаем контейнер для логотипа
-                        var imgElement = $('<img style="max-height: 2em;" src="' + Lampa.TMDB.image("/t/p/w500" + path.replace(".svg", ".png")) + '" />');
+// Создаем контейнер для логотипа (чистый вызов без хардкода расширений)
+var imgElement = $('<img style="max-height: 2em;" src="' + Lampa.TMDB.image(path) + '" />');
                         //var imgElement = $('<img style="margin-top: 5px; margin-left: 0; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
