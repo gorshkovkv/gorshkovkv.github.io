@@ -184,22 +184,29 @@
 // Сохраняем оригинальную функцию
 var originalImageFunction = Lampa.TMDB.image;
 
-// Переопределяем функцию для изменения качества ВСЕХ изображений
+// Переопределяем функцию
 Lampa.TMDB.image = function(url) {
-    // Получаем уже сформированный полный URL от Lampa
     var full_url = originalImageFunction(url);
     
-    // Если включена настройка высокого качества, заменяем пути в финальной строке
-    if (full_url && Lampa.Storage.field('logo_high_quality')) {
-        // Идем от большего к меньшему во избежание каскадной замены
+    if (!full_url) return full_url;
+
+    // 1. Жёсткий фикс для логотипов: SVG отдаются только в original
+    if (full_url.includes('.svg')) {
+        return full_url.replace(/\/w\d+/, '/original');
+    }
+
+    // 2. Фикс качества: перехватываем все популярные пресеты Lampa
+    if (Lampa.Storage.field('logo_high_quality')) {
         full_url = full_url.replace('/w1280', '/original')
                            .replace('/w780', '/original')
                            .replace('/w500', '/w780')
-                           .replace('/w200', '/w500');
+                           .replace('/w342', '/w500')
+                           .replace('/w300', '/w500')
+                           .replace('/w200', '/w342');
     }
+    
     return full_url;
 };
-
 
         Lampa.Listener.follow("full", function(e) {
             if (e.type == "complite") {
@@ -364,7 +371,6 @@ Lampa.TMDB.image = function(url) {
                     if (Lampa.Storage.get("logo_glav")) {
 // Создаем контейнер для логотипа (чистый вызов без хардкода расширений)
 var imgElement = $('<img style="max-height: 2em;" src="' + Lampa.TMDB.image(path) + '" />');
-
                         //var imgElement = $('<img style="margin-top: 5px; margin-left: 0; width: auto; height: auto; object-fit: contain; display: block;" src="' + Lampa.TMDB.image("/t/p/w300" + path.replace(".svg", ".png")) + '" />');
                         imgElement.on('error', function() {
                             $(".full-start-new__title").html(movie.title || movie.name);
