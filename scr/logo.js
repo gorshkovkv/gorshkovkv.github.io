@@ -187,8 +187,11 @@ var originalImageFunction = Lampa.TMDB.image;
 // Переопределяем функцию
 Lampa.TMDB.image = function(url) {
     if (Lampa.Storage.field('logo_high_quality') && url) {
-        // Жестко находим любой размер папки (w200, w300, w500, w780, w1280) и ставим original
-        url = url.replace(/t\/p\/w\d+/, 't/p/original');
+        // Выцепляем только имя файла (например, /hqjL17...x.jpg)
+        var fileName = url.substring(url.lastIndexOf('/'));
+        
+        // Отдаем прямую ссылку на сервера TMDB, минуя прокси Лампы
+        return 'https://image.tmdb.org/t/p/original' + fileName;
     }
     return originalImageFunction(url);
 };
