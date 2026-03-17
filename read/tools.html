@@ -35,29 +35,34 @@
   .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%;
          background: #444; margin-right: 6px; vertical-align: middle; }
   .dot.on { background: #2f2; } .dot.er { background: #f44; }
-  canvas { max-width: 100%; border-radius: 6px; display: block; margin: 6px 0;
-           image-rendering: pixelated; }
+  #preview { max-width: 100%; border-radius: 6px; display: none; margin: 8px 0;
+             image-rendering: pixelated; }
   input[type=file] { display: none; }
   .lbl { font-size: 0.72rem; color: #555; display: block; margin-bottom: 4px; }
-  .gap { margin-top: 6px; }
+  .meta-box { background: #252525; border-radius: 8px; padding: 10px;
+              margin-bottom: 8px; font-size: 0.78rem; line-height: 1.6; }
+  .meta-box span { color: #7dd; }
+  .fname-box { background: #1a2a1a; border: 1px solid #2a4a2a; border-radius: 8px;
+               padding: 8px 10px; margin-bottom: 8px; font-size: 0.72rem;
+               font-family: 'Menlo', monospace; color: #9d9; word-break: break-all; }
 </style>
 </head>
 <body>
 <h1>🐙 SUMI Tools</h1>
 
-<!-- ═══ 1. КОНВЕРТЕР ════════════════════════════════════════════════════ -->
 <div class="card">
   <h2>1 · Конвертер EPUB</h2>
   <button class="btn btn-file" id="bfc" onclick="$('fileConv').click()">📁 Выбрать EPUB...</button>
   <input type="file" id="fileConv" accept=".epub">
+  <div id="metaBox" style="display:none" class="meta-box"></div>
+  <div id="fnameBox" style="display:none" class="fname-box"></div>
   <button class="btn btn-purple" id="bConv" disabled>⚙️ Конвертировать изображения</button>
   <div class="pw"><div class="pb" id="cp"></div></div>
   <div class="pl" id="cl"></div>
-  <canvas id="preview" style="display:none"></canvas>
+  <canvas id="preview"></canvas>
   <button class="btn btn-green" id="bDl" disabled>💾 Скачать обработанный EPUB</button>
 </div>
 
-<!-- ═══ 2. BLUETOOTH ═════════════════════════════════════════════════════ -->
 <div class="card">
   <h2>2 · Bluetooth</h2>
   <span class="dot" id="dot"></span><span id="bst">Не подключено</span>
@@ -66,25 +71,22 @@
   <button class="btn btn-red"  id="bDisc" disabled>✖ Отключить</button>
 </div>
 
-<!-- ═══ 3. ОТПРАВИТЬ ════════════════════════════════════════════════════ -->
 <div class="card">
   <h2>3 · Отправить на устройство</h2>
   <span class="lbl">Папка на устройстве</span>
   <input type="text" id="folder" value="books">
   <button class="btn btn-send" id="bSendConv" disabled>🚀 Отправить сконвертированный EPUB</button>
-  <div style="margin: 6px 0; font-size: 0.7rem; color: #444; text-align:center">— или —</div>
-  <button class="btn btn-file gap" id="bfs" onclick="$('fileSend').click()">📁 Выбрать готовый файл...</button>
+  <div style="margin: 6px 0; font-size: 0.7rem; color: #444; text-align:center">— или выбрать готовый файл —</div>
+  <button class="btn btn-file" id="bfs" onclick="$('fileSend').click()">📁 Выбрать файл...</button>
   <input type="file" id="fileSend">
   <button class="btn btn-send" id="bSendFile" disabled>🚀 Отправить файл</button>
   <div class="pw"><div class="pb" id="sp"></div></div>
   <div class="pl" id="sl"></div>
 </div>
 
-<!-- ═══ LOG ══════════════════════════════════════════════════════════════ -->
 <div class="card"><div class="log" id="log"></div></div>
 
 <script>
-// ── utils ─────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 const enc = new TextEncoder(), dec = new TextDecoder();
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -96,7 +98,71 @@ function log(msg, cls) {
   el.appendChild(d); el.scrollTop = el.scrollHeight;
 }
 
-// ── DITHERER — точный порт SumiDitherer (ditherer-3.py) ──────────────────
+// ── EPUB METADATA ─────────────────────────────────────────────────────────
+function parseEpubMeta(opf) {
+  // Title
+  const titleM = opf.match(/<dc:title[^>]*>([^<]+)<\/dc:title>/i);
+  const title = titleM ? titleM[1].trim() : '';
+
+  // Author: prefer opf:file-as="Last, First", fallback to dc:creator text
+  let author = '';
+  const creatorTag = opf.match(/<dc:creator([^>]*)>([^<]+)<\/dc:creator>/i);
+  if (creatorTag) {
+    const attrs = creatorTag[1];
+    const fileAs = attrs.match(/(?:opf:file-as|file-as)="([^"]+)"/i);
+    if (fileAs) {
+      // "Лукьяненко, Сергей" → "Лукьяненко Сергей"
+      author = fileAs[1].replace(',', '').replace(/\s+/, ' ').trim();
+    } else {
+      // "Сергей Лукьяненко" → "Лукьяненко Сергей" (reverse words)
+      const parts = creatorTag[2].trim().split(/\s+/);
+      author = parts.length >= 2 ? parts.slice(1).join(' ') + ' ' + parts[0] : parts[0];
+    }
+  }
+
+  // Series — Calibre style (most common in RU-books)
+  const seriesM   = opf.match(/<meta\s[^>]*name="calibre:series"\s[^>]*content="([^"]+)"/i)
+                 || opf.match(/<meta\s[^>]*content="([^"]+)"\s[^>]*name="calibre:series"/i);
+  const seriesIdxM = opf.match(/<meta\s[^>]*name="calibre:series_index"\s[^>]*content="([^"]+)"/i)
+                  || opf.match(/<meta\s[^>]*content="([^"]+)"\s[^>]*name="calibre:series_index"/i);
+
+  // EPUB3 collection fallback
+  const collM = !seriesM && opf.match(/<meta\s[^>]*property="belongs-to-collection"[^>]*>([^<]+)<\/meta>/i);
+
+  const series    = seriesM    ? seriesM[1].trim()    : (collM ? collM[1].trim() : '');
+  const seriesIdx = seriesIdxM ? seriesIdxM[1].trim() : '';
+
+  return { title, author, series, seriesIdx };
+}
+
+function formatSeriesIdx(raw) {
+  if (!raw) return '';
+  const n = parseFloat(raw);
+  if (isNaN(n)) return raw;
+  // 1.0 → "1", 1.5 → "1.5"
+  return n % 1 === 0 ? String(Math.round(n)) : String(n);
+}
+
+function buildFilename(meta) {
+  const { title, author, series, seriesIdx } = meta;
+  const t = title  || 'Unknown';
+  const a = author || 'Unknown';
+
+  let seriesPart = '';
+  if (series) {
+    const idx = formatSeriesIdx(seriesIdx);
+    seriesPart = idx ? ' - [' + series + ' #' + idx + ']' : ' - [' + series + ']';
+  }
+
+  // Автор - [Серия #N] - Название.epub
+  return sanitizeFilename(a + seriesPart + ' - ' + t + '.epub');
+}
+
+function sanitizeFilename(name) {
+  return name.replace(/[\\/*?:"<>|]/g, '_').replace(/\s+/g, ' ').trim();
+}
+
+// ── DITHERER ──────────────────────────────────────────────────────────────
 const THRESH   = [30, 50, 140];
 const QVAL     = [15, 30, 80, 210];
 const PAL_BGRA = [0x00,0x00,0x00,0x00, 0x55,0x55,0x55,0x00,
@@ -132,31 +198,25 @@ function make2BitBMP(idx, w, h) {
   const iSz = bpr * h;
   const hSz = 14 + 40 + 16;
   const fSz = hSz + iSz;
-  const buf  = new ArrayBuffer(fSz);
-  const dv   = new DataView(buf);
-  const u8   = new Uint8Array(buf);
-  // File header
+  const buf = new ArrayBuffer(fSz);
+  const dv  = new DataView(buf);
+  const u8  = new Uint8Array(buf);
   u8[0] = 0x42; u8[1] = 0x4D;
   dv.setUint32(2,  fSz, true);
   dv.setUint32(10, hSz, true);
-  // DIB header
   dv.setUint32(14, 40,  true);
   dv.setInt32 (18, w,   true);
-  dv.setInt32 (22, h,   true);
+  dv.setInt32 (22, -h,  true); // top-down
   dv.setUint16(26, 1,   true);
   dv.setUint16(28, 2,   true);
   dv.setUint32(34, iSz, true);
   dv.setUint32(46, 4,   true);
   dv.setUint32(50, 4,   true);
-  // Palette
   for (let i = 0; i < 4; i++) u8.set(PAL_BGRA.slice(i*4, i*4+4), 54 + i*4);
-  // Pixels (top-down, MSB first, 2bpp)
   for (let y = 0; y < h; y++) {
     const ro = hSz + y * bpr;
     for (let x = 0; x < w; x++) {
-      const bo = ro + Math.floor(x * 2 / 8);
-      const bs = 6 - (x * 2) % 8;
-      u8[bo] |= (idx[y * w + x] << bs);
+      u8[ro + Math.floor(x * 2 / 8)] |= (idx[y * w + x] << (6 - (x * 2) % 8));
     }
   }
   return buf;
@@ -181,34 +241,58 @@ function loadImageRGBA(data) {
 // ── EPUB PROCESSOR ────────────────────────────────────────────────────────
 const IMG_MIME = ['image/jpeg','image/png','image/gif','image/webp'];
 
+function findCoverId(opf) {
+  return (opf.match(/<item\s[^>]*properties="[^"]*cover-image[^"]*"[^>]*id="([^"]+)"/)?.[1])
+      || (opf.match(/<item\s[^>]*id="([^"]+)"[^>]*properties="[^"]*cover-image[^"]*"/)?.[1])
+      || (opf.match(/<meta\s[^>]*name="cover"[^>]*content="([^"]+)"/)?.[1])
+      || (opf.match(/<meta\s[^>]*content="([^"]+)"[^>]*name="cover"/)?.[1])
+      || null;
+}
+
+function findHrefById(opf, id) {
+  const safe = id.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  return opf.match(new RegExp('<item\\s[^>]*id="' + safe + '"[^>]*href="([^"]+)"'))?.[1] || null;
+}
+
 async function processEpub(epubBuf, onProg) {
   const zip = await JSZip.loadAsync(epubBuf);
-
   const containerXml = await zip.file('META-INF/container.xml').async('string');
   const opfPath = containerXml.match(/full-path="([^"]+\.opf)"/)?.[1];
-  if (!opfPath) throw new Error('OPF не найден в container.xml');
+  if (!opfPath) throw new Error('OPF не найден');
 
   let opf = await zip.file(opfPath).async('string');
   const opfDir = opfPath.includes('/') ? opfPath.slice(0, opfPath.lastIndexOf('/') + 1) : '';
 
+  // Метаданные и имя файла
+  const meta = parseEpubMeta(opf);
+  const outName = buildFilename(meta);
+  log('📖 ' + (meta.author || '?') + ' — ' + (meta.title || '?'));
+  if (meta.series) log('📚 Серия: ' + meta.series + (meta.seriesIdx ? ' #' + formatSeriesIdx(meta.seriesIdx) : ''));
+  log('💾 Имя файла: ' + outName);
+
+  // Обложка
+  const coverId   = findCoverId(opf);
+  const coverHref = coverId ? findHrefById(opf, coverId) : null;
+
+  const seen = new Set();
   const imgs = [];
+  if (coverHref) { imgs.push({ hr: coverHref }); seen.add(coverHref); }
+
   const rx = /<item\s[^>]*>/g;
   let m;
   while ((m = rx.exec(opf)) !== null) {
     const tag = m[0];
     const mt  = tag.match(/media-type="([^"]+)"/)?.[1];
     const hr  = tag.match(/href="([^"]+)"/)?.[1];
-    if (mt && hr && IMG_MIME.includes(mt)) imgs.push({ mt, hr });
+    if (mt && hr && IMG_MIME.includes(mt) && !seen.has(hr)) { imgs.push({ hr, mt }); seen.add(hr); }
   }
+  log('🖼 Изображений: ' + imgs.length);
 
-  log('📚 Изображений: ' + imgs.length);
-  let done = 0, firstIdx = null, firstW = 0, firstH = 0;
-
+  let done = 0, previewShown = false;
   for (const img of imgs) {
     const fullPath = opfDir + img.hr;
     const f = zip.file(fullPath);
     if (!f) { log('⚠ Не найден: ' + fullPath, 'w'); continue; }
-
     let imgData;
     try { imgData = await loadImageRGBA(await f.async('arraybuffer')); }
     catch (e) { log('⚠ Пропуск ' + img.hr + ': ' + e.message, 'w'); continue; }
@@ -224,8 +308,8 @@ async function processEpub(epubBuf, onProg) {
 
     zip.remove(fullPath);
     zip.file(newFull, bmp);
-
-    opf = opf.split(img.hr).join(newHr).split(img.mt).join('image/bmp');
+    opf = opf.split(img.hr).join(newHr);
+    if (img.mt) opf = opf.split(img.mt).join('image/bmp');
 
     for (const name of Object.keys(zip.files)) {
       if (!/\.(html|xhtml|htm)$/i.test(name)) continue;
@@ -233,24 +317,21 @@ async function processEpub(epubBuf, onProg) {
       if (html.includes(oldBase)) zip.file(name, html.split(oldBase).join(newBase));
     }
 
-    if (firstIdx === null) { firstIdx = idx; firstW = imgData.width; firstH = imgData.height; }
-    done++;
-    onProg(done, imgs.length);
+    if (!previewShown) { showPreview(idx, imgData.width, imgData.height); previewShown = true; }
+    done++; onProg(done, imgs.length);
   }
 
   zip.file(opfPath, opf);
-  if (firstIdx) showPreview(firstIdx, firstW, firstH);
-  return zip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE' });
+  return { buf: await zip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE' }),
+           name: outName, meta };
 }
 
 function showPreview(idx, w, h) {
   const cnv = $('preview');
-  const maxW = 300;
-  const scale = Math.min(1, maxW / w);
+  const scale = Math.min(1, 300 / w);
   cnv.width  = Math.round(w * scale);
   cnv.height = Math.round(h * scale);
   cnv.style.display = 'block';
-  const ctx = cnv.getContext('2d');
   const tmp = document.createElement('canvas');
   tmp.width = w; tmp.height = h;
   const id  = tmp.getContext('2d').createImageData(w, h);
@@ -260,21 +341,47 @@ function showPreview(idx, w, h) {
     id.data[i*4]=c[0]; id.data[i*4+1]=c[1]; id.data[i*4+2]=c[2]; id.data[i*4+3]=255;
   }
   tmp.getContext('2d').putImageData(id, 0, 0);
-  ctx.drawImage(tmp, 0, 0, cnv.width, cnv.height);
+  cnv.getContext('2d').drawImage(tmp, 0, 0, cnv.width, cnv.height);
 }
 
-// ── UI — CONVERTER ────────────────────────────────────────────────────────
+// ── UI ────────────────────────────────────────────────────────────────────
 let procBuf = null, procName = '';
 
-$('fileConv').onchange = e => {
+async function peekMeta(file) {
+  try {
+    const zip = await JSZip.loadAsync(await file.arrayBuffer());
+    const c   = await zip.file('META-INF/container.xml').async('string');
+    const op  = c.match(/full-path="([^"]+\.opf)"/)?.[1];
+    if (!op) return;
+    const opf = await zip.file(op).async('string');
+    const meta = parseEpubMeta(opf);
+    const fname = buildFilename(meta);
+    const parts = [];
+    if (meta.author) parts.push('<b>Автор:</b> <span>' + esc(meta.author) + '</span>');
+    if (meta.title)  parts.push('<b>Название:</b> <span>' + esc(meta.title) + '</span>');
+    if (meta.series) {
+      const idx = formatSeriesIdx(meta.seriesIdx);
+      parts.push('<b>Серия:</b> <span>' + esc(meta.series) + (idx ? ' #' + idx : '') + '</span>');
+    }
+    $('metaBox').innerHTML = parts.join('<br>');
+    $('metaBox').style.display = parts.length ? 'block' : 'none';
+    $('fnameBox').textContent = '→ ' + fname;
+    $('fnameBox').style.display = 'block';
+  } catch(e) {}
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+$('fileConv').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
   $('bfc').textContent = '📄 ' + f.name;
   $('bfc').classList.add('ok');
   $('bConv').disabled = false;
-  $('bDl').disabled = true;
-  $('bSendConv').disabled = true;
+  $('bDl').disabled = true; $('bSendConv').disabled = true;
   $('preview').style.display = 'none';
+  $('metaBox').style.display = 'none'; $('fnameBox').style.display = 'none';
   procBuf = null;
+  await peekMeta(f);
 };
 
 $('bConv').onclick = async () => {
@@ -285,14 +392,15 @@ $('bConv').onclick = async () => {
   log('▶ Конвертирую: ' + f.name);
   try {
     const raw = await f.arrayBuffer();
-    const out = await processEpub(raw, (done, total) => {
+    const result = await processEpub(raw, (done, total) => {
       const pct = Math.round(done / total * 100);
       $('cp').style.width = pct + '%';
       $('cl').textContent = done + ' / ' + total + ' изображений (' + pct + '%)';
     });
-    procBuf  = out;
-    procName = f.name.replace('.epub', '') + '-sumi.epub';
+    procBuf  = result.buf;
+    procName = result.name;
     log('✅ Готово: ' + procName);
+    $('fnameBox').textContent = '→ ' + procName;
     $('bDl').disabled = false;
     if (bleConnected) $('bSendConv').disabled = false;
   } catch (e) {
@@ -311,36 +419,34 @@ $('bDl').onclick = () => {
 
 // ── BLE ───────────────────────────────────────────────────────────────────
 const SVC  = '19b10000-e8f2-537e-4f6c-d104768a1214';
-const META = '19b10001-e8f2-537e-4f6c-d104768a1214';
-const DATA = '19b10002-e8f2-537e-4f6c-d104768a1214';
-const STAT = '19b10003-e8f2-537e-4f6c-d104768a1214';
+const META_C = '19b10001-e8f2-537e-4f6c-d104768a1214';
+const DATA_C = '19b10002-e8f2-537e-4f6c-d104768a1214';
+const STAT_C = '19b10003-e8f2-537e-4f6c-d104768a1214';
 
 let bleDevice = null, bleServer = null;
 let metaChar = null, dataChar = null, statChar = null;
-let bleConnected = false;
-let mtu = 20, ackInterval = 4096;
+let bleConnected = false, mtu = 20, ackInterval = 4096;
 let stateResolvers = {}, lastStatus = null;
 
-function setConnState(connected) {
-  bleConnected = connected;
-  $('dot').className = 'dot' + (connected ? ' on' : '');
-  $('bst').textContent = connected ? (bleDevice && bleDevice.name) || 'SUMI' : 'Не подключено';
-  $('bConn').disabled = connected;
-  $('bDisc').disabled = !connected;
-  if (connected && procBuf) $('bSendConv').disabled = false;
-  if (!connected) { $('bSendConv').disabled = true; $('bSendFile').disabled = true; }
+function setConnState(on) {
+  bleConnected = on;
+  $('dot').className = 'dot' + (on ? ' on' : '');
+  $('bst').textContent = on ? ((bleDevice && bleDevice.name) || 'SUMI') : 'Не подключено';
+  $('bConn').disabled = on; $('bDisc').disabled = !on;
+  if (on && procBuf) $('bSendConv').disabled = false;
+  if (!on) { $('bSendConv').disabled = true; $('bSendFile').disabled = true; }
+  if (on && $('fileSend').files[0]) $('bSendFile').disabled = false;
 }
 
 function onStatusNotify(event) {
-  let status;
-  try { status = JSON.parse(dec.decode(event.target.value)); } catch { return; }
-  log('← ' + JSON.stringify(status), status.state === 'error' ? 'e' : '');
-  lastStatus = status;
-  const fn = stateResolvers[status.state];
-  if (fn) { delete stateResolvers[status.state]; fn(status); }
-  if (status.state === 'error' || status.state === 'cancelled') {
-    const err = new Error(status.msg || status.state);
-    Object.values(stateResolvers).forEach(f => f({ state: 'error', _err: err }));
+  let s; try { s = JSON.parse(dec.decode(event.target.value)); } catch { return; }
+  log('← ' + JSON.stringify(s), s.state === 'error' ? 'e' : '');
+  lastStatus = s;
+  const fn = stateResolvers[s.state];
+  if (fn) { delete stateResolvers[s.state]; fn(s); }
+  if (s.state === 'error' || s.state === 'cancelled') {
+    const err = new Error(s.msg || s.state);
+    Object.values(stateResolvers).forEach(f => f({ _err: err }));
     stateResolvers = {};
   }
 }
@@ -349,10 +455,7 @@ function waitForState(state, ms = 15000) {
   return new Promise((res, rej) => {
     if (lastStatus && lastStatus.state === state) { const s = lastStatus; lastStatus = null; return res(s); }
     const t = setTimeout(() => { delete stateResolvers[state]; rej(new Error('Timeout: ' + state)); }, ms);
-    stateResolvers[state] = s => {
-      clearTimeout(t);
-      s._err ? rej(s._err) : res(s);
-    };
+    stateResolvers[state] = s => { clearTimeout(t); s._err ? rej(s._err) : res(s); };
   });
 }
 
@@ -361,113 +464,83 @@ $('bConn').onclick = async () => {
   try {
     log('🔍 Сканирую...');
     bleDevice = await navigator.bluetooth.requestDevice({
-      filters: [{ namePrefix: 'SUMI' }],
-      optionalServices: [SVC]
+      filters: [{ namePrefix: 'SUMI' }], optionalServices: [SVC]
     });
     bleDevice.addEventListener('gattserverdisconnected', () => {
-      setConnState(false);
-      log('⚠ Устройство отключилось', 'w');
+      setConnState(false); log('⚠ Устройство отключилось', 'w');
     });
     bleServer = await bleDevice.gatt.connect();
     const svc = await bleServer.getPrimaryService(SVC);
-    metaChar = await svc.getCharacteristic(META);
-    dataChar = await svc.getCharacteristic(DATA);
-    statChar = await svc.getCharacteristic(STAT);
+    metaChar = await svc.getCharacteristic(META_C);
+    dataChar = await svc.getCharacteristic(DATA_C);
+    statChar = await svc.getCharacteristic(STAT_C);
     await statChar.startNotifications();
     statChar.addEventListener('characteristicvaluechanged', onStatusNotify);
     setConnState(true);
     log('✅ Подключено: ' + bleDevice.name);
   } catch (e) {
-    log('❌ ' + e.message, 'e');
-    $('bConn').disabled = false;
+    log('❌ ' + e.message, 'e'); $('bConn').disabled = false;
   }
 };
 
-$('bDisc').onclick = () => {
-  if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect();
-};
+$('bDisc').onclick = () => { if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); };
 
-// ── FILE SEND ─────────────────────────────────────────────────────────────
 $('fileSend').onchange = e => {
   const f = e.target.files[0]; if (!f) return;
-  $('bfs').textContent = '📄 ' + f.name;
-  $('bfs').classList.add('ok');
+  $('bfs').textContent = '📄 ' + f.name; $('bfs').classList.add('ok');
   if (bleConnected) $('bSendFile').disabled = false;
 };
 
 async function doSend(buf, name) {
   if (!bleConnected) { log('❌ Нет подключения!', 'e'); return; }
   const folder = $('folder').value.trim() || 'books';
-
-  let safeName = name.replace(/[\\/*?:"<>|]/g, '_');
-  if (safeName.length > 48) {
-    const ext = safeName.lastIndexOf('.') > 0 ? safeName.slice(safeName.lastIndexOf('.')) : '';
-    safeName = safeName.slice(0, 44 - ext.length) + ext;
+  let safe = name.replace(/[\\/*?:"<>|]/g, '_');
+  if (safe.length > 48) {
+    const ext = safe.lastIndexOf('.') > 0 ? safe.slice(safe.lastIndexOf('.')) : '';
+    safe = safe.slice(0, 44 - ext.length) + ext;
   }
-
   lastStatus = null; stateResolvers = {};
   $('sp').style.width = '0%'; $('sl').textContent = '';
   await sleep(500);
 
-  // 1. Metadata
-  const meta = JSON.stringify({ name: safeName, size: buf.byteLength, folder });
+  const meta = JSON.stringify({ name: safe, size: buf.byteLength, folder });
   log('→ META: ' + meta);
   await metaChar.writeValueWithResponse(enc.encode(meta));
 
-  // 2. Ready
   const ready = await waitForState('ready', 12000);
   if (ready.mtu) mtu = ready.mtu;
   if (ready.ack) ackInterval = ready.ack;
-  log('✅ Ready — MTU:' + mtu + ' ACK_interval:' + ackInterval);
+  log('✅ Ready — MTU:' + mtu + ' ACK:' + ackInterval);
 
-  // 3. Data chunks
-  let sent = 0, bytesSinceAck = 0, chunkIdx = 0;
+  let sent = 0, sinceAck = 0, ci = 0;
   while (sent < buf.byteLength) {
     const chunk = buf.slice(sent, sent + mtu);
-    if (chunkIdx % 8 === 0) {
-      await dataChar.writeValueWithResponse(chunk);
-      await sleep(1);
-    } else {
-      await dataChar.writeValueWithoutResponse(chunk);
-      await sleep(5);
-    }
-    sent += chunk.byteLength; bytesSinceAck += chunk.byteLength; chunkIdx++;
+    if (ci % 8 === 0) { await dataChar.writeValueWithResponse(chunk); await sleep(1); }
+    else              { await dataChar.writeValueWithoutResponse(chunk); await sleep(5); }
+    sent += chunk.byteLength; sinceAck += chunk.byteLength; ci++;
     const pct = (sent / buf.byteLength * 100).toFixed(1);
     $('sp').style.width = pct + '%';
     $('sl').textContent = (sent/1024).toFixed(1) + ' / ' + (buf.byteLength/1024).toFixed(1) + ' KB (' + pct + '%)';
-    if (bytesSinceAck >= ackInterval) {
-      log('⏳ Жду ACK...');
-      await waitForState('ack', 15000);
-      bytesSinceAck = 0;
-    }
+    if (sinceAck >= ackInterval) { log('⏳ Жду ACK...'); await waitForState('ack', 15000); sinceAck = 0; }
   }
-
-  // 4. Completion
   log('→ Completion signal...');
   await sleep(300);
   await dataChar.writeValueWithResponse(new ArrayBuffer(0));
-
-  // 5. Done
   const done = await waitForState('done', 20000);
-  log('🎉 Передача завершена! ' + JSON.stringify(done));
+  log('🎉 Готово! ' + JSON.stringify(done));
   $('sp').style.width = '100%';
 }
 
 $('bSendConv').onclick = async () => {
-  if (!procBuf) return;
-  $('bSendConv').disabled = true;
+  if (!procBuf) return; $('bSendConv').disabled = true;
   try { await doSend(procBuf, procName); }
   catch (e) { log('❌ ' + e.message, 'e'); }
   finally { $('bSendConv').disabled = false; }
 };
-
 $('bSendFile').onclick = async () => {
-  const f = $('fileSend').files[0]; if (!f) return;
-  $('bSendFile').disabled = true;
-  try {
-    const buf = await f.arrayBuffer();
-    await doSend(buf, f.name);
-  } catch (e) { log('❌ ' + e.message, 'e'); }
+  const f = $('fileSend').files[0]; if (!f) return; $('bSendFile').disabled = true;
+  try { await doSend(await f.arrayBuffer(), f.name); }
+  catch (e) { log('❌ ' + e.message, 'e'); }
   finally { $('bSendFile').disabled = false; }
 };
 </script>
