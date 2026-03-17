@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUMI Transfer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, sans-serif;
+    background: #111; color: #eee;
+    padding: 16px; max-width: 480px; margin: 0 auto;
+  }
+  h1 { font-size: 1.2rem; margin-bottom: 16px; color: #7dd; }
+  .card {
+    background: #1e1e1e; border-radius: 12px;
+    padding: 16px; margin-bottom: 12px;
+  }
+  label { font-size: 0.8rem; color: #888; display: block; margin-bottom: 4px; }
+  input[type="text"] {
+    width: 100%; background: #2a2a2a; border: 1px solid #444;
+    border-radius: 8px; padding: 8px 12px; color: #eee; font-size: 1rem;
+  }
+  input[type="file"] { display: none; }
+  .file-btn, .btn {
+    display: block; width: 100%; padding: 12px;
+    border-radius: 10px; border: none; font-size: 1rem;
+    cursor: pointer; font-weight: 600; margin-bottom: 8px;
+    transition: opacity 0.15s;
+  }
+  .file-btn { background: #2a2a2a; color: #aaa; text-align: left; }
+  .file-btn.selected { color: #7dd; }
+  .btn-connect { background: #2d6a4f; color: #fff; }
+  .btn-send    { background: #2d4a8a; color: #fff; }
+  .btn-disconnect { background: #5a2d2d; color: #fff; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .progress-wrap {
+    background: #2a2a2a; border-radius: 8px;
+    height: 10px; overflow: hidden; margin: 8px 0;
+  }
+  .progress-bar {
+    height: 100%; background: #7dd; width: 0%;
+    transition: width 0.2s;
+  }
+  .progress-label { font-size: 0.8rem; color: #888; text-align: right; }
+  .log {
+    font-family: 'Menlo', monospace; font-size: 0.72rem;
+    background: #0a0a0a; border-radius: 8px; padding: 10px;
+    max-height: 200px; overflow-y: auto; color: #9f9;
+  }
+  .log .err { color: #f77; }
+  .log .warn { color: #fa0; }
+  .status-dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; background: #555; margin-right: 6px;
+  }
+  .status-dot.connected { background: #2f2; }
+  .status-dot.error { background: #f44; }
+</style>
+</head>
+<body>
+<h1>🐙 SUMI Transfer</h1>
+
+<div class="card">
+  <span class="status-dot" id="dot"></span>
+  <span id="statusText">Не подключено</span>
+  <br><br>
+  <button class="btn btn-connect" id="btnConnect">🔵 Подключить SUMI</button>
+  <button class="btn btn-disconnect" id="btnDisconnect" disabled>✖ Отключить</button>
+</div>
+
+<div class="card">
+  <label>Папка на устройстве</label>
+  <input type="text" id="folderInput" value="books">
+</div>
+
+<div class="card">
+  <button class="file-btn" id="fileBtn" onclick="document.getElementById('fileInput').click()">
+    📁 Выбрать файл...
+  </button>
+  <input type="file" id="fileInput">
+  <button class="btn btn-send" id="btnSend" disabled>🚀 Отправить</button>
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="progress-label" id="progressLabel"></div>
+</div>
+
+<div class="card">
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+// ── UUIDs (matches firmware) ──────────────────────────────────────────────
+const SVC  = '19b10000-e8f2-537e-4f6c-d104768a1214';
+const META = '19b10001-e8f2-537e-4f6c-d104768a1214';
+const DATA = '19b10002-e8f2-537e-4f6c-d104768a1214';
+const STAT = '19b10003-e8f2-537e-4f6c-d104768a1214';
+
+// ── State ─────────────────────────────────────────────────────────────────
+let device = null, server = null;
+let metaChar = null, dataChar = null, statChar = null;
+let mtu = 20, ackInterval = 4096;
+let stateResolvers = {};
+let lastStatus = null;
+
+// ── UI helpers ────────────────────────────────────────────────────────────
+const log = (msg, cls) => {
+  const el = document.getElementById('log');
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+};
+const setStatus = (text, state) => {
+  document.getElementById('statusText').textContent = text;
+  const dot = document.getElementById('dot');
+  dot.className = 'status-dot' + (state ? ' ' + state : '');
+};
+const setProgress = (sent, total) => {
+  const pct = total > 0 ? (sent / total * 100).toFixed(1) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent =
+    `${(sent/1024).toFixed(1)} / ${(total/1024).toFixed(1)} KB (${pct}%)`;
+};
+
+// ── BLE helpers ───────────────────────────────────────────────────────────
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+
+function waitForState(state, timeout = 15000) {
+  return new Promise((resolve, reject) => {
+    if (lastStatus && lastStatus.state === state) {
+      const s = lastStatus; lastStatus = null;
+      return resolve(s);
+    }
+    const timer = setTimeout(() => {
+      delete stateResolvers[state];
+      reject(new Error(`Timeout waiting for state: ${state}`));
+    }, timeout);
+    stateResolvers[state] = (s) => { clearTimeout(timer); resolve(s); };
+  });
+}
+
+function onStatusNotify(event) {
+  const raw = dec.decode(event.target.value);
+  let status;
+  try { status = JSON.parse(raw); } catch { return; }
+  log(`← ${raw}`, status.state === 'error' ? 'err' : '');
+  lastStatus = status;
+
+  const resolver = stateResolvers[status.state];
+  if (resolver) {
+    delete stateResolvers[status.state];
+    resolver(status);
+  }
+  if (status.state === 'error' || status.state === 'cancelled') {
+    // Reject all waiting resolvers
+    Object.entries(stateResolvers).forEach(([k, fn]) => {
+      fn({ state: 'error', msg: status.msg || status.state });
+    });
+    stateResolvers = {};
+  }
+}
+
+// ── Connect ───────────────────────────────────────────────────────────────
+document.getElementById('btnConnect').onclick = async () => {
+  try {
+    log('Сканирую...');
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ namePrefix: 'SUMI' }],
+      optionalServices: [SVC]
+    });
+    device.addEventListener('gattserverdisconnected', () => {
+      setStatus('Отключено', 'error');
+      log('Устройство отключилось', 'warn');
+      document.getElementById('btnConnect').disabled = false;
+      document.getElementById('btnDisconnect').disabled = true;
+      document.getElementById('btnSend').disabled = true;
+    });
+
+    log(`Подключаюсь к ${device.name}...`);
+    server = await device.gatt.connect();
+    const svc = await server.getPrimaryService(SVC);
+    metaChar = await svc.getCharacteristic(META);
+    dataChar = await svc.getCharacteristic(DATA);
+    statChar = await svc.getCharacteristic(STAT);
+
+    await statChar.startNotifications();
+    statChar.addEventListener('characteristicvaluechanged', onStatusNotify);
+
+    setStatus(`${device.name}`, 'connected');
+    log(`✅ Подключено: ${device.name}`);
+    document.getElementById('btnConnect').disabled = true;
+    document.getElementById('btnDisconnect').disabled = false;
+    document.getElementById('btnSend').disabled = false;
+  } catch (e) {
+    log(`❌ ${e.message}`, 'err');
+    setStatus('Ошибка подключения', 'error');
+  }
+};
+
+document.getElementById('btnDisconnect').onclick = () => {
+  if (device && device.gatt.connected) device.gatt.disconnect();
+};
+
+// ── File picker ───────────────────────────────────────────────────────────
+document.getElementById('fileInput').onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const btn = document.getElementById('fileBtn');
+  btn.textContent = `📄 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+  btn.classList.add('selected');
+};
+
+// ── Send ──────────────────────────────────────────────────────────────────
+document.getElementById('btnSend').onclick = async () => {
+  const file = document.getElementById('fileInput').files[0];
+  if (!file) { log('Сначала выбери файл!', 'warn'); return; }
+  if (!server || !server.connected) { log('Нет подключения!', 'err'); return; }
+
+  const folder = document.getElementById('folderInput').value.trim() || 'books';
+
+  // Sanitize name (max 48 chars)
+  let safeName = file.name.replace(/[\\/*?:"<>|]/g, '_');
+  if (safeName.length > 48) {
+    const ext = safeName.lastIndexOf('.') > 0 ? safeName.slice(safeName.lastIndexOf('.')) : '';
+    safeName = safeName.slice(0, 44 - ext.length) + ext;
+  }
+
+  document.getElementById('btnSend').disabled = true;
+  lastStatus = null;
+  stateResolvers = {};
+
+  try {
+    await sleep(500);
+
+    // 1. Metadata
+    const metadata = JSON.stringify({ name: safeName, size: file.size, folder });
+    log(`→ META: ${metadata}`);
+    await metaChar.writeValueWithResponse(enc.encode(metadata));
+
+    // 2. Wait for ready
+    const ready = await waitForState('ready', 12000);
+    if (ready.mtu)  mtu = ready.mtu;
+    if (ready.ack)  ackInterval = ready.ack;
+    log(`✅ Ready: MTU=${mtu}, ACK_interval=${ackInterval}`);
+
+    // 3. Send data chunks
+    const buf = await file.arrayBuffer();
+    let sent = 0, bytesSinceAck = 0, chunkIdx = 0;
+
+    while (sent < buf.byteLength) {
+      const chunk = buf.slice(sent, sent + mtu);
+      const useResponse = (chunkIdx % 8 === 0);
+
+      if (useResponse) {
+        await dataChar.writeValueWithResponse(chunk);
+        await sleep(1);
+      } else {
+        await dataChar.writeValueWithoutResponse(chunk);
+        await sleep(5);
+      }
+
+      sent += chunk.byteLength;
+      bytesSinceAck += chunk.byteLength;
+      chunkIdx++;
+      setProgress(sent, file.size);
+
+      if (bytesSinceAck >= ackInterval) {
+        log(`⏳ Жду ACK...`);
+        await waitForState('ack', 15000);
+        bytesSinceAck = 0;
+      }
+    }
+
+    // 4. Completion signal (empty write)
+    log('→ Completion signal...');
+    await sleep(300);
+    await dataChar.writeValueWithResponse(new ArrayBuffer(0));
+
+    // 5. Done
+    const done = await waitForState('done', 20000);
+    log(`🎉 Готово! ${JSON.stringify(done)}`);
+    setProgress(file.size, file.size);
+
+  } catch (e) {
+    log(`❌ ${e.message}`, 'err');
+  } finally {
+    document.getElementById('btnSend').disabled = false;
+  }
+};
+</script>
+</body>
+</html>
