@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUMI Tools</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, sans-serif; background: #111; color: #eee;
+         padding: 12px; max-width: 480px; margin: 0 auto; }
+  h1   { font-size: 1.1rem; color: #7dd; margin-bottom: 12px; }
+  .card { background: #1a1a1a; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .card h2 { font-size: 0.72rem; color: #555; text-transform: uppercase;
+             letter-spacing: 1px; margin-bottom: 10px; }
+  input[type=text] { width: 100%; background: #252525; border: 1px solid #444;
+                     border-radius: 8px; padding: 8px 12px; color: #eee;
+                     font-size: 0.95rem; margin-bottom: 6px; }
+  .btn { display: block; width: 100%; padding: 11px; border-radius: 10px; border: none;
+         font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-bottom: 7px; color: #fff; }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-file   { background: #252525; color: #777; text-align: left; font-weight: 400; }
+  .btn-file.ok { color: #7dd; }
+  .btn-purple { background: #4a2060; }
+  .btn-green  { background: #1a5c3a; }
+  .btn-blue   { background: #1a3a6e; }
+  .btn-red    { background: #5a1e1e; }
+  .btn-send   { background: #1e4a8a; }
+  .pw { background: #252525; border-radius: 6px; height: 6px; overflow: hidden; margin: 4px 0; }
+  .pb { height: 100%; background: #7dd; width: 0%; transition: width 0.1s; }
+  .pl { font-size: 0.7rem; color: #555; text-align: right; margin-bottom: 2px; }
+  .log { font-family: 'Menlo', monospace; font-size: 0.68rem; background: #080808;
+         border-radius: 8px; padding: 8px; max-height: 160px; overflow-y: auto; color: #8e8; }
+  .log .e { color: #f77; } .log .w { color: #fa4; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+         background: #444; margin-right: 6px; vertical-align: middle; }
+  .dot.on { background: #2f2; } .dot.er { background: #f44; }
+  canvas { max-width: 100%; border-radius: 6px; display: block; margin: 6px 0;
+           image-rendering: pixelated; }
+  input[type=file] { display: none; }
+  .lbl { font-size: 0.72rem; color: #555; display: block; margin-bottom: 4px; }
+  .gap { margin-top: 6px; }
+</style>
+</head>
+<body>
+<h1>🐙 SUMI Tools</h1>
+
+<!-- ═══ 1. КОНВЕРТЕР ════════════════════════════════════════════════════ -->
+<div class="card">
+  <h2>1 · Конвертер EPUB</h2>
+  <button class="btn btn-file" id="bfc" onclick="$('fileConv').click()">📁 Выбрать EPUB...</button>
+  <input type="file" id="fileConv" accept=".epub">
+  <button class="btn btn-purple" id="bConv" disabled>⚙️ Конвертировать изображения</button>
+  <div class="pw"><div class="pb" id="cp"></div></div>
+  <div class="pl" id="cl"></div>
+  <canvas id="preview" style="display:none"></canvas>
+  <button class="btn btn-green" id="bDl" disabled>💾 Скачать обработанный EPUB</button>
+</div>
+
+<!-- ═══ 2. BLUETOOTH ═════════════════════════════════════════════════════ -->
+<div class="card">
+  <h2>2 · Bluetooth</h2>
+  <span class="dot" id="dot"></span><span id="bst">Не подключено</span>
+  <div style="height:10px"></div>
+  <button class="btn btn-blue" id="bConn">🔵 Подключить SUMI</button>
+  <button class="btn btn-red"  id="bDisc" disabled>✖ Отключить</button>
+</div>
+
+<!-- ═══ 3. ОТПРАВИТЬ ════════════════════════════════════════════════════ -->
+<div class="card">
+  <h2>3 · Отправить на устройство</h2>
+  <span class="lbl">Папка на устройстве</span>
+  <input type="text" id="folder" value="books">
+  <button class="btn btn-send" id="bSendConv" disabled>🚀 Отправить сконвертированный EPUB</button>
+  <div style="margin: 6px 0; font-size: 0.7rem; color: #444; text-align:center">— или —</div>
+  <button class="btn btn-file gap" id="bfs" onclick="$('fileSend').click()">📁 Выбрать готовый файл...</button>
+  <input type="file" id="fileSend">
+  <button class="btn btn-send" id="bSendFile" disabled>🚀 Отправить файл</button>
+  <div class="pw"><div class="pb" id="sp"></div></div>
+  <div class="pl" id="sl"></div>
+</div>
+
+<!-- ═══ LOG ══════════════════════════════════════════════════════════════ -->
+<div class="card"><div class="log" id="log"></div></div>
+
+<script>
+// ── utils ─────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const enc = new TextEncoder(), dec = new TextDecoder();
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function log(msg, cls) {
+  const el = $('log'), d = document.createElement('div');
+  if (cls) d.className = cls;
+  d.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  el.appendChild(d); el.scrollTop = el.scrollHeight;
+}
+
+// ── DITHERER — точный порт SumiDitherer (ditherer-3.py) ──────────────────
+const THRESH   = [30, 50, 140];
+const QVAL     = [15, 30, 80, 210];
+const PAL_BGRA = [0x00,0x00,0x00,0x00, 0x55,0x55,0x55,0x00,
+                  0xAA,0xAA,0xAA,0x00, 0xFF,0xFF,0xFF,0x00];
+
+function atkinsonDither(rgba, w, h) {
+  const pad = 4, off = pad, aw = w + pad * 2;
+  let e0 = new Float32Array(aw), e1 = new Float32Array(aw), e2 = new Float32Array(aw);
+  const idx = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const p = (y * w + x) * 4;
+      const g = 0.299 * rgba[p] + 0.587 * rgba[p+1] + 0.114 * rgba[p+2];
+      const a = Math.min(255, Math.max(0, g + e0[x + off]));
+      let q, qv;
+      if      (a < THRESH[0]) { q = 0; qv = QVAL[0]; }
+      else if (a < THRESH[1]) { q = 1; qv = QVAL[1]; }
+      else if (a < THRESH[2]) { q = 2; qv = QVAL[2]; }
+      else                    { q = 3; qv = QVAL[3]; }
+      idx[y * w + x] = q;
+      const e = (a - qv) / 8;
+      e0[x+off+1] += e; e0[x+off+2] += e;
+      e1[x+off-1] += e; e1[x+off]   += e; e1[x+off+1] += e;
+      e2[x+off]   += e;
+    }
+    [e0, e1, e2] = [e1, e2, new Float32Array(aw)];
+  }
+  return idx;
+}
+
+function make2BitBMP(idx, w, h) {
+  const bpr = Math.floor((w * 2 + 31) / 32) * 4;
+  const iSz = bpr * h;
+  const hSz = 14 + 40 + 16;
+  const fSz = hSz + iSz;
+  const buf  = new ArrayBuffer(fSz);
+  const dv   = new DataView(buf);
+  const u8   = new Uint8Array(buf);
+  // File header
+  u8[0] = 0x42; u8[1] = 0x4D;
+  dv.setUint32(2,  fSz, true);
+  dv.setUint32(10, hSz, true);
+  // DIB header
+  dv.setUint32(14, 40,  true);
+  dv.setInt32 (18, w,   true);
+  dv.setInt32 (22, h,   true);
+  dv.setUint16(26, 1,   true);
+  dv.setUint16(28, 2,   true);
+  dv.setUint32(34, iSz, true);
+  dv.setUint32(46, 4,   true);
+  dv.setUint32(50, 4,   true);
+  // Palette
+  for (let i = 0; i < 4; i++) u8.set(PAL_BGRA.slice(i*4, i*4+4), 54 + i*4);
+  // Pixels (top-down, MSB first, 2bpp)
+  for (let y = 0; y < h; y++) {
+    const ro = hSz + y * bpr;
+    for (let x = 0; x < w; x++) {
+      const bo = ro + Math.floor(x * 2 / 8);
+      const bs = 6 - (x * 2) % 8;
+      u8[bo] |= (idx[y * w + x] << bs);
+    }
+  }
+  return buf;
+}
+
+function loadImageRGBA(data) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(new Blob([data]));
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      c.getContext('2d').drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      res(c.getContext('2d').getImageData(0, 0, img.width, img.height));
+    };
+    img.onerror = e => { URL.revokeObjectURL(url); rej(e); };
+    img.src = url;
+  });
+}
+
+// ── EPUB PROCESSOR ────────────────────────────────────────────────────────
+const IMG_MIME = ['image/jpeg','image/png','image/gif','image/webp'];
+
+async function processEpub(epubBuf, onProg) {
+  const zip = await JSZip.loadAsync(epubBuf);
+
+  const containerXml = await zip.file('META-INF/container.xml').async('string');
+  const opfPath = containerXml.match(/full-path="([^"]+\.opf)"/)?.[1];
+  if (!opfPath) throw new Error('OPF не найден в container.xml');
+
+  let opf = await zip.file(opfPath).async('string');
+  const opfDir = opfPath.includes('/') ? opfPath.slice(0, opfPath.lastIndexOf('/') + 1) : '';
+
+  const imgs = [];
+  const rx = /<item\s[^>]*>/g;
+  let m;
+  while ((m = rx.exec(opf)) !== null) {
+    const tag = m[0];
+    const mt  = tag.match(/media-type="([^"]+)"/)?.[1];
+    const hr  = tag.match(/href="([^"]+)"/)?.[1];
+    if (mt && hr && IMG_MIME.includes(mt)) imgs.push({ mt, hr });
+  }
+
+  log('📚 Изображений: ' + imgs.length);
+  let done = 0, firstIdx = null, firstW = 0, firstH = 0;
+
+  for (const img of imgs) {
+    const fullPath = opfDir + img.hr;
+    const f = zip.file(fullPath);
+    if (!f) { log('⚠ Не найден: ' + fullPath, 'w'); continue; }
+
+    let imgData;
+    try { imgData = await loadImageRGBA(await f.async('arraybuffer')); }
+    catch (e) { log('⚠ Пропуск ' + img.hr + ': ' + e.message, 'w'); continue; }
+
+    const idx = atkinsonDither(imgData.data, imgData.width, imgData.height);
+    const bmp = make2BitBMP(idx, imgData.width, imgData.height);
+
+    const dotPos  = img.hr.lastIndexOf('.');
+    const newHr   = img.hr.slice(0, dotPos) + '.bmp';
+    const newFull = opfDir + newHr;
+    const oldBase = img.hr.slice(img.hr.lastIndexOf('/') + 1);
+    const newBase = newHr.slice(newHr.lastIndexOf('/') + 1);
+
+    zip.remove(fullPath);
+    zip.file(newFull, bmp);
+
+    opf = opf.split(img.hr).join(newHr).split(img.mt).join('image/bmp');
+
+    for (const name of Object.keys(zip.files)) {
+      if (!/\.(html|xhtml|htm)$/i.test(name)) continue;
+      const html = await zip.file(name).async('string');
+      if (html.includes(oldBase)) zip.file(name, html.split(oldBase).join(newBase));
+    }
+
+    if (firstIdx === null) { firstIdx = idx; firstW = imgData.width; firstH = imgData.height; }
+    done++;
+    onProg(done, imgs.length);
+  }
+
+  zip.file(opfPath, opf);
+  if (firstIdx) showPreview(firstIdx, firstW, firstH);
+  return zip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE' });
+}
+
+function showPreview(idx, w, h) {
+  const cnv = $('preview');
+  const maxW = 300;
+  const scale = Math.min(1, maxW / w);
+  cnv.width  = Math.round(w * scale);
+  cnv.height = Math.round(h * scale);
+  cnv.style.display = 'block';
+  const ctx = cnv.getContext('2d');
+  const tmp = document.createElement('canvas');
+  tmp.width = w; tmp.height = h;
+  const id  = tmp.getContext('2d').createImageData(w, h);
+  const C   = [[0,0,0],[85,85,85],[170,170,170],[255,255,255]];
+  for (let i = 0; i < idx.length; i++) {
+    const c = C[idx[i]];
+    id.data[i*4]=c[0]; id.data[i*4+1]=c[1]; id.data[i*4+2]=c[2]; id.data[i*4+3]=255;
+  }
+  tmp.getContext('2d').putImageData(id, 0, 0);
+  ctx.drawImage(tmp, 0, 0, cnv.width, cnv.height);
+}
+
+// ── UI — CONVERTER ────────────────────────────────────────────────────────
+let procBuf = null, procName = '';
+
+$('fileConv').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  $('bfc').textContent = '📄 ' + f.name;
+  $('bfc').classList.add('ok');
+  $('bConv').disabled = false;
+  $('bDl').disabled = true;
+  $('bSendConv').disabled = true;
+  $('preview').style.display = 'none';
+  procBuf = null;
+};
+
+$('bConv').onclick = async () => {
+  const f = $('fileConv').files[0]; if (!f) return;
+  $('bConv').disabled = true;
+  $('cp').style.width = '0%'; $('cl').textContent = '';
+  $('preview').style.display = 'none';
+  log('▶ Конвертирую: ' + f.name);
+  try {
+    const raw = await f.arrayBuffer();
+    const out = await processEpub(raw, (done, total) => {
+      const pct = Math.round(done / total * 100);
+      $('cp').style.width = pct + '%';
+      $('cl').textContent = done + ' / ' + total + ' изображений (' + pct + '%)';
+    });
+    procBuf  = out;
+    procName = f.name.replace('.epub', '') + '-sumi.epub';
+    log('✅ Готово: ' + procName);
+    $('bDl').disabled = false;
+    if (bleConnected) $('bSendConv').disabled = false;
+  } catch (e) {
+    log('❌ ' + e.message, 'e');
+  } finally {
+    $('bConv').disabled = false;
+  }
+};
+
+$('bDl').onclick = () => {
+  if (!procBuf) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([procBuf], { type: 'application/epub+zip' }));
+  a.download = procName; a.click();
+};
+
+// ── BLE ───────────────────────────────────────────────────────────────────
+const SVC  = '19b10000-e8f2-537e-4f6c-d104768a1214';
+const META = '19b10001-e8f2-537e-4f6c-d104768a1214';
+const DATA = '19b10002-e8f2-537e-4f6c-d104768a1214';
+const STAT = '19b10003-e8f2-537e-4f6c-d104768a1214';
+
+let bleDevice = null, bleServer = null;
+let metaChar = null, dataChar = null, statChar = null;
+let bleConnected = false;
+let mtu = 20, ackInterval = 4096;
+let stateResolvers = {}, lastStatus = null;
+
+function setConnState(connected) {
+  bleConnected = connected;
+  $('dot').className = 'dot' + (connected ? ' on' : '');
+  $('bst').textContent = connected ? (bleDevice && bleDevice.name) || 'SUMI' : 'Не подключено';
+  $('bConn').disabled = connected;
+  $('bDisc').disabled = !connected;
+  if (connected && procBuf) $('bSendConv').disabled = false;
+  if (!connected) { $('bSendConv').disabled = true; $('bSendFile').disabled = true; }
+}
+
+function onStatusNotify(event) {
+  let status;
+  try { status = JSON.parse(dec.decode(event.target.value)); } catch { return; }
+  log('← ' + JSON.stringify(status), status.state === 'error' ? 'e' : '');
+  lastStatus = status;
+  const fn = stateResolvers[status.state];
+  if (fn) { delete stateResolvers[status.state]; fn(status); }
+  if (status.state === 'error' || status.state === 'cancelled') {
+    const err = new Error(status.msg || status.state);
+    Object.values(stateResolvers).forEach(f => f({ state: 'error', _err: err }));
+    stateResolvers = {};
+  }
+}
+
+function waitForState(state, ms = 15000) {
+  return new Promise((res, rej) => {
+    if (lastStatus && lastStatus.state === state) { const s = lastStatus; lastStatus = null; return res(s); }
+    const t = setTimeout(() => { delete stateResolvers[state]; rej(new Error('Timeout: ' + state)); }, ms);
+    stateResolvers[state] = s => {
+      clearTimeout(t);
+      s._err ? rej(s._err) : res(s);
+    };
+  });
+}
+
+$('bConn').onclick = async () => {
+  $('bConn').disabled = true;
+  try {
+    log('🔍 Сканирую...');
+    bleDevice = await navigator.bluetooth.requestDevice({
+      filters: [{ namePrefix: 'SUMI' }],
+      optionalServices: [SVC]
+    });
+    bleDevice.addEventListener('gattserverdisconnected', () => {
+      setConnState(false);
+      log('⚠ Устройство отключилось', 'w');
+    });
+    bleServer = await bleDevice.gatt.connect();
+    const svc = await bleServer.getPrimaryService(SVC);
+    metaChar = await svc.getCharacteristic(META);
+    dataChar = await svc.getCharacteristic(DATA);
+    statChar = await svc.getCharacteristic(STAT);
+    await statChar.startNotifications();
+    statChar.addEventListener('characteristicvaluechanged', onStatusNotify);
+    setConnState(true);
+    log('✅ Подключено: ' + bleDevice.name);
+  } catch (e) {
+    log('❌ ' + e.message, 'e');
+    $('bConn').disabled = false;
+  }
+};
+
+$('bDisc').onclick = () => {
+  if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect();
+};
+
+// ── FILE SEND ─────────────────────────────────────────────────────────────
+$('fileSend').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  $('bfs').textContent = '📄 ' + f.name;
+  $('bfs').classList.add('ok');
+  if (bleConnected) $('bSendFile').disabled = false;
+};
+
+async function doSend(buf, name) {
+  if (!bleConnected) { log('❌ Нет подключения!', 'e'); return; }
+  const folder = $('folder').value.trim() || 'books';
+
+  let safeName = name.replace(/[\\/*?:"<>|]/g, '_');
+  if (safeName.length > 48) {
+    const ext = safeName.lastIndexOf('.') > 0 ? safeName.slice(safeName.lastIndexOf('.')) : '';
+    safeName = safeName.slice(0, 44 - ext.length) + ext;
+  }
+
+  lastStatus = null; stateResolvers = {};
+  $('sp').style.width = '0%'; $('sl').textContent = '';
+  await sleep(500);
+
+  // 1. Metadata
+  const meta = JSON.stringify({ name: safeName, size: buf.byteLength, folder });
+  log('→ META: ' + meta);
+  await metaChar.writeValueWithResponse(enc.encode(meta));
+
+  // 2. Ready
+  const ready = await waitForState('ready', 12000);
+  if (ready.mtu) mtu = ready.mtu;
+  if (ready.ack) ackInterval = ready.ack;
+  log('✅ Ready — MTU:' + mtu + ' ACK_interval:' + ackInterval);
+
+  // 3. Data chunks
+  let sent = 0, bytesSinceAck = 0, chunkIdx = 0;
+  while (sent < buf.byteLength) {
+    const chunk = buf.slice(sent, sent + mtu);
+    if (chunkIdx % 8 === 0) {
+      await dataChar.writeValueWithResponse(chunk);
+      await sleep(1);
+    } else {
+      await dataChar.writeValueWithoutResponse(chunk);
+      await sleep(5);
+    }
+    sent += chunk.byteLength; bytesSinceAck += chunk.byteLength; chunkIdx++;
+    const pct = (sent / buf.byteLength * 100).toFixed(1);
+    $('sp').style.width = pct + '%';
+    $('sl').textContent = (sent/1024).toFixed(1) + ' / ' + (buf.byteLength/1024).toFixed(1) + ' KB (' + pct + '%)';
+    if (bytesSinceAck >= ackInterval) {
+      log('⏳ Жду ACK...');
+      await waitForState('ack', 15000);
+      bytesSinceAck = 0;
+    }
+  }
+
+  // 4. Completion
+  log('→ Completion signal...');
+  await sleep(300);
+  await dataChar.writeValueWithResponse(new ArrayBuffer(0));
+
+  // 5. Done
+  const done = await waitForState('done', 20000);
+  log('🎉 Передача завершена! ' + JSON.stringify(done));
+  $('sp').style.width = '100%';
+}
+
+$('bSendConv').onclick = async () => {
+  if (!procBuf) return;
+  $('bSendConv').disabled = true;
+  try { await doSend(procBuf, procName); }
+  catch (e) { log('❌ ' + e.message, 'e'); }
+  finally { $('bSendConv').disabled = false; }
+};
+
+$('bSendFile').onclick = async () => {
+  const f = $('fileSend').files[0]; if (!f) return;
+  $('bSendFile').disabled = true;
+  try {
+    const buf = await f.arrayBuffer();
+    await doSend(buf, f.name);
+  } catch (e) { log('❌ ' + e.message, 'e'); }
+  finally { $('bSendFile').disabled = false; }
+};
+</script>
+</body>
+</html>
