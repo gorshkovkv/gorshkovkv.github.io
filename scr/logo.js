@@ -32,7 +32,105 @@
     });
 
     if (!window.logoplugin) {
-        window.logoplugin = true;
+        window.logoplugin = {};
+
+        var serialUi = {
+            getSeriesInfo: function(movie) {
+                if (!movie || !movie.name || !movie.number_of_episodes) return null;
+
+                var total = movie.number_of_episodes;
+                var aired = movie.last_episode_to_air && movie.last_episode_to_air.episode_number;
+                var parts = ['Сериал'];
+
+                if (movie.number_of_seasons) parts.push(movie.number_of_seasons + ' сезона');
+                parts.push(aired ? aired + ' из ' + total : total + ' серий');
+
+                return {
+                    text: parts.join(' · '),
+                    aired: aired || null,
+                    total: total
+                };
+            },
+            getStatusKind: function(status) {
+                if (status === 'Returning Series' || status === 'In Production') return 'ongoing';
+                if (status === 'Ended') return 'ended';
+                if (status === 'Canceled' || status === 'Cancelled') return 'cancelled';
+                return null;
+            },
+            appendSeriesInfo: function(movie, root) {
+                var info = this.getSeriesInfo(movie);
+                if (!info) return;
+
+                var details = root.find('.full-start-new__details');
+                var inline = '<span class="logo-series-info logo-series-info--inline"> · ' +
+                    (info.aired ? 'Вышло: ' + info.aired + ' из ' + info.total : info.total + ' серий') +
+                    '</span>';
+
+                details.find('.logo-series-info').remove();
+                root.find('.logo-series-info--chip').remove();
+                details.append(inline);
+
+                if (!root.hasClass('cardify')) {
+                    root.find('.full-start-new__body').append(
+                        '<div class="logo-series-info logo-series-info--chip">' + info.text + '</div>'
+                    );
+                }
+            },
+            replaceTvLabel: function(root) {
+                root.find('.full-start-new__head').find('*').each(function() {
+                    var label = $(this);
+                    if (!label.children().length && label.text().trim() === 'TV') label.text('Сериал');
+                });
+            },
+            applyStatusColor: function(movie, root) {
+                var status = root.find('.full-start__status');
+                var kind = this.getStatusKind(movie && movie.status);
+
+                status.removeClass('logo-series-status--ongoing logo-series-status--ended logo-series-status--cancelled');
+                if (kind) status.addClass('logo-series-status--' + kind);
+            }
+        };
+
+        window.logoplugin.ui = serialUi;
+
+        if (!$('#logo-series-style').length) {
+            $('head').append(`
+                <style id="logo-series-style">
+                    .logo-series-info--inline { display: none; }
+                    .full-start__status.logo-series-status--ongoing { background-color: #b57a00 !important; color: #1a1100 !important; }
+                    .full-start__status.logo-series-status--ended { background-color: #248c4a !important; color: #ffffff !important; }
+                    .full-start__status.logo-series-status--cancelled { background-color: #b73636 !important; color: #ffffff !important; }
+
+                    @media screen and (orientation: portrait) {
+                        .full-start-new:not(.cardify) .full-start-new__body { position: relative; }
+                        .full-start-new:not(.cardify) .logo-series-info--chip {
+                            position: absolute;
+                            top: 1.1em;
+                            left: 50%;
+                            z-index: 3;
+                            display: inline-block;
+                            max-width: calc(100% - 2em);
+                            padding: 0.35em 0.7em;
+                            transform: translateX(-50%);
+                            border-radius: 0.45em;
+                            background: rgba(0, 0, 0, 0.62);
+                            color: #ffffff;
+                            font-size: 0.9em;
+                            line-height: 1.2;
+                            text-align: center;
+                            white-space: nowrap;
+                        }
+                    }
+
+                    @media screen and (orientation: landscape) {
+                        .logo-series-info--chip { display: none !important; }
+                        .logo-series-info--inline { display: inline; }
+                    }
+
+                    .cardify .logo-series-info--inline { display: inline; }
+                </style>
+            `);
+        }
 
         if (!$('#logo-order-style').length && Lampa.Storage.get('logo_translations')) {
             $('head').append(`
@@ -139,6 +237,13 @@
         Lampa.Listener.follow("full", function(e) {
             if (e.type == "complite") {
                 var movie = e.data.movie;
+                var full = $('.full-start-new').last();
+
+                if (full.length) {
+                    serialUi.replaceTvLabel(full);
+                    serialUi.appendSeriesInfo(movie, full);
+                    serialUi.applyStatusColor(movie, full);
+                }
                 
                 async function tryGetLogo(lang) {
                     var url = Lampa.TMDB.api((movie.name ? "tv" : "movie") + "/" + movie.id + "/images?api_key=" + Lampa.TMDB.key() + (lang ? "&language=" + lang : ""));
