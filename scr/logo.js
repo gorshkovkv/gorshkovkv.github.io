@@ -95,10 +95,7 @@
                 }
             },
             replaceTvLabel: function(root) {
-                root.find('.full-start-new__head').find('*').each(function() {
-                    var label = $(this);
-                    if (!label.children().length && label.text().trim() === 'TV') label.text('Сериал');
-                });
+                root.find('.full-start-new__poster.card--tv .card__type').text('Сериал');
             },
             applyStatusColor: function(movie, root) {
                 var status = root.find('.full-start__status');

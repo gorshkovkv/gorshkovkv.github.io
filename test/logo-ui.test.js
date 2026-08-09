@@ -98,6 +98,24 @@ test('Cardify receives episode progress inside its existing details row', () => 
     assert.equal(details.appended, '<span class="logo-series-info logo-series-info--inline"> · Вышло: 18 из 24</span>');
 });
 
+test('the TV badge on the opened series poster becomes Сериал', () => {
+    const { ui } = loadPluginUi();
+    const badge = {
+        value: 'TV',
+        text(value) { this.value = value; }
+    };
+    const root = {
+        find(selector) {
+            assert.equal(selector, '.full-start-new__poster.card--tv .card__type');
+            return badge;
+        }
+    };
+
+    ui.replaceTvLabel(root);
+
+    assert.equal(badge.value, 'Сериал');
+});
+
 test('series features have independent interface settings enabled by default', () => {
     const { params } = loadPluginUi();
     const names = params.map((entry) => entry.param.name);
