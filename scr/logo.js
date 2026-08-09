@@ -87,12 +87,6 @@
                 details.find('.logo-series-info').remove();
                 root.find('.logo-series-info--chip').remove();
                 details.append(inline);
-
-                if (!root.hasClass('cardify')) {
-                    root.find('.full-start-new__body').append(
-                        '<div class="logo-series-info logo-series-info--chip">' + info.text + '</div>'
-                    );
-                }
             },
             replaceTvLabel: function(root) {
                 root.find('.full-start-new__poster.card--tv .card__type').text('Сериал');
@@ -111,38 +105,11 @@
         if (!$('#logo-series-style').length) {
             $('head').append(`
                 <style id="logo-series-style">
-                    .logo-series-info--inline { display: none; }
+                    .logo-series-info--inline { display: inline; }
+                    .full-start-new__poster.card--tv .card__type { background: #3f7897 !important; color: #ffffff !important; }
                     .full-start__status.logo-series-status--ongoing { background-color: #b57a00 !important; color: #1a1100 !important; }
                     .full-start__status.logo-series-status--ended { background-color: #248c4a !important; color: #ffffff !important; }
                     .full-start__status.logo-series-status--cancelled { background-color: #b73636 !important; color: #ffffff !important; }
-
-                    @media screen and (orientation: portrait) {
-                        .full-start-new:not(.cardify) .full-start-new__body { position: relative; }
-                        .full-start-new:not(.cardify) .logo-series-info--chip {
-                            position: absolute;
-                            top: 1.1em;
-                            left: 50%;
-                            z-index: 3;
-                            display: inline-block;
-                            max-width: calc(100% - 2em);
-                            padding: 0.35em 0.7em;
-                            transform: translateX(-50%);
-                            border-radius: 0.45em;
-                            background: rgba(0, 0, 0, 0.62);
-                            color: #ffffff;
-                            font-size: 0.9em;
-                            line-height: 1.2;
-                            text-align: center;
-                            white-space: nowrap;
-                        }
-                    }
-
-                    @media screen and (orientation: landscape) {
-                        .logo-series-info--chip { display: none !important; }
-                        .logo-series-info--inline { display: inline; }
-                    }
-
-                    .cardify .logo-series-info--inline { display: inline; }
                 </style>
             `);
         }

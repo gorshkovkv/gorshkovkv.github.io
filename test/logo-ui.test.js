@@ -98,6 +98,31 @@ test('Cardify receives episode progress inside its existing details row', () => 
     assert.equal(details.appended, '<span class="logo-series-info logo-series-info--inline"> · Вышло: 18 из 24</span>');
 });
 
+test('ordinary cards keep episode progress in the native details row instead of a poster chip', () => {
+    const { ui } = loadPluginUi();
+    const details = {
+        appended: null,
+        find() { return { remove() {} }; },
+        append(html) { this.appended = html; }
+    };
+    const root = {
+        hasClass() { return false; },
+        find(selector) {
+            if (selector === '.full-start-new__details') return details;
+            if (selector === '.logo-series-info--chip') return { remove() {} };
+            throw new Error('Poster chips must not be created: ' + selector);
+        }
+    };
+
+    ui.appendSeriesInfo({
+        name: 'Hell Mode',
+        number_of_episodes: 24,
+        last_episode_to_air: { episode_number: 6 }
+    }, root);
+
+    assert.equal(details.appended, '<span class="logo-series-info logo-series-info--inline"> · Вышло: 6 из 24</span>');
+});
+
 test('the TV badge on the opened series poster becomes Сериал', () => {
     const { ui } = loadPluginUi();
     const badge = {
