@@ -77,16 +77,17 @@
             },
             appendSeriesInfo: function(movie, root) {
                 var info = this.getSeriesInfo(movie);
-                if (!info) return;
+                if (!info || !info.aired) return;
 
                 var details = root.find('.full-start-new__details');
-                var inline = '<span class="logo-series-info logo-series-info--inline"> · ' +
-                    (info.aired ? 'Вышло: ' + info.aired + ' из ' + info.total : info.total + ' серий') +
-                    '</span>';
+                var inline = '<span class="logo-series-info logo-series-info--inline">Вышло: ' + info.aired +
+                    '</span><span class="full-start-new__split">●</span>';
+                var splits = details.find('.full-start-new__split');
 
                 details.find('.logo-series-info').remove();
                 root.find('.logo-series-info--chip').remove();
-                details.append(inline);
+                if (splits.length) splits.first().after(inline);
+                else details.append('<span class="logo-series-info logo-series-info--inline"> · Вышло: ' + info.aired + '</span>');
             },
             replaceTvLabel: function(root) {
                 root.find('.full-start-new__poster.card--tv .card__type').text('Сериал');
@@ -106,7 +107,7 @@
             $('head').append(`
                 <style id="logo-series-style">
                     .logo-series-info--inline { display: inline; }
-                    .full-start-new__poster.card--tv .card__type { background: #3f7897 !important; color: #ffffff !important; }
+                    .full-start-new__poster.card--tv .card__type { top: 1em !important; background: #3f7897 !important; color: #ffffff !important; }
                     .full-start__status.logo-series-status--ongoing { background-color: #b57a00 !important; color: #1a1100 !important; }
                     .full-start__status.logo-series-status--ended { background-color: #248c4a !important; color: #ffffff !important; }
                     .full-start__status.logo-series-status--cancelled { background-color: #b73636 !important; color: #ffffff !important; }

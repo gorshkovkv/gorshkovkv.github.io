@@ -70,13 +70,19 @@ test('Cardify receives episode progress inside its existing details row', () => 
     const { ui } = loadPluginUi();
     const details = {
         removedSelector: null,
-        appended: null,
+        inserted: null,
         find(selector) {
+            if (selector === '.full-start-new__split') {
+                return {
+                    length: 1,
+                    first: () => ({ after: (html) => { this.inserted = html; } })
+                };
+            }
             return {
                 remove: () => { this.removedSelector = selector; }
             };
         },
-        append(html) { this.appended = html; }
+        append() { throw new Error('Episode progress must be inserted before the series count'); }
     };
     const root = {
         hasClass(name) { return name === 'cardify'; },
@@ -95,15 +101,23 @@ test('Cardify receives episode progress inside its existing details row', () => 
     }, root);
 
     assert.equal(details.removedSelector, '.logo-series-info');
-    assert.equal(details.appended, '<span class="logo-series-info logo-series-info--inline"> · Вышло: 18 из 24</span>');
+    assert.equal(details.inserted, '<span class="logo-series-info logo-series-info--inline">Вышло: 18</span><span class="full-start-new__split">●</span>');
 });
 
 test('ordinary cards keep episode progress in the native details row instead of a poster chip', () => {
     const { ui } = loadPluginUi();
     const details = {
-        appended: null,
-        find() { return { remove() {} }; },
-        append(html) { this.appended = html; }
+        inserted: null,
+        find(selector) {
+            if (selector === '.full-start-new__split') {
+                return {
+                    length: 1,
+                    first: () => ({ after: (html) => { this.inserted = html; } })
+                };
+            }
+            return { remove() {} };
+        },
+        append() { throw new Error('Poster chips must not be created'); }
     };
     const root = {
         hasClass() { return false; },
@@ -120,7 +134,24 @@ test('ordinary cards keep episode progress in the native details row instead of 
         last_episode_to_air: { episode_number: 6 }
     }, root);
 
-    assert.equal(details.appended, '<span class="logo-series-info logo-series-info--inline"> · Вышло: 6 из 24</span>');
+    assert.equal(details.inserted, '<span class="logo-series-info logo-series-info--inline">Вышло: 6</span><span class="full-start-new__split">●</span>');
+});
+
+test('series without a known aired episode do not duplicate the native series count', () => {
+    const { ui } = loadPluginUi();
+    const details = {
+        find() { return { remove() {} }; },
+        append() { throw new Error('No extra series information should be rendered'); }
+    };
+    const root = {
+        find(selector) {
+            if (selector === '.full-start-new__details') return details;
+            if (selector === '.logo-series-info--chip') return { remove() {} };
+            throw new Error('Unexpected selector: ' + selector);
+        }
+    };
+
+    ui.appendSeriesInfo({ name: 'Unknown Series', number_of_episodes: 24 }, root);
 });
 
 test('the TV badge on the opened series poster becomes Сериал', () => {
