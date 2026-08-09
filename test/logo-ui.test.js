@@ -203,7 +203,9 @@ test('series features have independent interface settings enabled by default', (
 test('logo and series settings live in their own settings component', () => {
     const { params, components } = loadPluginUi();
 
-    assert.ok(components.some((component) => component.component === 'logo_plugin'));
+    const logoComponent = components.find((component) => component.component === 'logo_plugin');
+    assert.ok(logoComponent);
+    assert.equal(logoComponent.icon, '<svg><use xlink:href="#sprite-movie"></use></svg>');
     assert.ok(params.filter((entry) => entry.param.name.startsWith('logo_'))
         .every((entry) => entry.component === 'logo_plugin'));
 });

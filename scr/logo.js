@@ -4,7 +4,7 @@
     Lampa.SettingsApi.addComponent({
         component: "logo_plugin",
         name: "Карточка и логотипы",
-        icon: '<svg><use xlink:href="#sprite-card"></use></svg>'
+        icon: '<svg><use xlink:href="#sprite-movie"></use></svg>'
     });
     
     Lampa.SettingsApi.addParam({
