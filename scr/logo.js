@@ -90,7 +90,10 @@
                 else details.append('<span class="logo-series-info logo-series-info--inline"> · Вышло: ' + info.aired + '</span>');
             },
             replaceTvLabel: function(root) {
-                root.find('.full-start-new__poster.card--tv .card__type').text('Сериал');
+                root.find('.card--tv .card__type').each(function() {
+                    var label = $(this);
+                    if (label.text().trim() === 'TV') label.text('Сериал');
+                });
             },
             applyStatusColor: function(movie, root) {
                 var status = root.find('.full-start__status');
@@ -107,12 +110,23 @@
             $('head').append(`
                 <style id="logo-series-style">
                     .logo-series-info--inline { display: inline; }
-                    .full-start-new__poster.card--tv .card__type { top: 1em !important; background: #3f7897 !important; color: #ffffff !important; }
+                    .card--tv .card__type { background: #3f7897 !important; color: #ffffff !important; }
+                    .full-start-new__poster.card--tv .card__type { top: 1em !important; }
                     .full-start__status.logo-series-status--ongoing { background-color: #b57a00 !important; color: #1a1100 !important; }
                     .full-start__status.logo-series-status--ended { background-color: #248c4a !important; color: #ffffff !important; }
                     .full-start__status.logo-series-status--cancelled { background-color: #b73636 !important; color: #ffffff !important; }
                 </style>
             `);
+        }
+
+        if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined' && document.body) {
+            var replaceCatalogueLabels = function() {
+                if (Lampa.Storage.get('logo_series_label', true)) serialUi.replaceTvLabel($('body'));
+            };
+            var catalogueObserver = new MutationObserver(replaceCatalogueLabels);
+
+            catalogueObserver.observe(document.body, { childList: true, subtree: true });
+            replaceCatalogueLabels();
         }
 
         if (!$('#logo-order-style').length && Lampa.Storage.get('logo_translations')) {

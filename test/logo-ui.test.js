@@ -18,7 +18,7 @@ function loadPluginUi() {
     };
     const sandbox = {
         window: {},
-        $: () => Object.create(chain),
+        $: (value) => value && value.jqueryStub ? value.jqueryStub : Object.create(chain),
         Lampa: {
             Listener: { follow() {} },
             SettingsApi: { addParam(param) { params.push(param); } },
@@ -154,16 +154,20 @@ test('series without a known aired episode do not duplicate the native series co
     ui.appendSeriesInfo({ name: 'Unknown Series', number_of_episodes: 24 }, root);
 });
 
-test('the TV badge on the opened series poster becomes Сериал', () => {
+test('TV badges in opened and catalogue series cards become Сериал', () => {
     const { ui } = loadPluginUi();
     const badge = {
         value: 'TV',
-        text(value) { this.value = value; }
+        text(value) {
+            if (arguments.length) this.value = value;
+            return this.value;
+        }
     };
+    const badgeElement = { jqueryStub: badge };
     const root = {
         find(selector) {
-            assert.equal(selector, '.full-start-new__poster.card--tv .card__type');
-            return badge;
+            assert.equal(selector, '.card--tv .card__type');
+            return { each(callback) { callback.call(badgeElement); } };
         }
     };
 
