@@ -40,7 +40,7 @@
     Lampa.SettingsApi.addParam({
         component: "interface",
         param: { name: "logo_series_info", type: "trigger", default: true },
-        field: { name: "Информация о сериях", description: "Показывать вышедшие серии и количество сезонов" }
+        field: { name: "Информация о сериях", description: "Показывать последнюю вышедшую и общее число серий" }
     });
 
     Lampa.SettingsApi.addParam({
@@ -53,19 +53,21 @@
         window.logoplugin = {};
 
         var serialUi = {
-            getSeriesInfo: function(movie) {
-                if (!movie || !movie.name || !movie.number_of_episodes) return null;
+            getEpisodeInfo: function(movie) {
+                if (!movie || !movie.name || !movie.number_of_episodes || !movie.last_episode_to_air) return null;
 
                 var total = movie.number_of_episodes;
-                var aired = movie.last_episode_to_air && movie.last_episode_to_air.episode_number;
-                var parts = ['Сериал'];
+                var aired = movie.last_episode_to_air.episode_number;
+                var season = movie.last_episode_to_air.season_number || movie.number_of_seasons;
+                if (!season || !aired) return null;
 
-                if (movie.number_of_seasons) parts.push(movie.number_of_seasons + ' сезона');
-                parts.push(aired ? aired + ' из ' + total : total + ' серий');
+                var code = 'S' + String(season).padStart(2, '0') + ':E' + String(aired).padStart(2, '0');
+                var isOngoing = this.getStatusKind(movie.status) === 'ongoing';
 
                 return {
-                    text: parts.join(' · '),
-                    aired: aired || null,
+                    latest: (isOngoing ? 'Вышла серия: ' : 'Последняя серия: ') + code,
+                    totalText: (isOngoing ? 'Всего будет: ' : 'Всего: ') + total,
+                    aired: aired,
                     total: total
                 };
             },
@@ -76,18 +78,18 @@
                 return null;
             },
             appendSeriesInfo: function(movie, root) {
-                var info = this.getSeriesInfo(movie);
-                if (!info || !info.aired) return;
+                var info = this.getEpisodeInfo(movie);
+                if (!info) return;
 
                 var details = root.find('.full-start-new__details');
-                var inline = '<span class="logo-series-info logo-series-info--inline">Вышло: ' + info.aired +
-                    '</span><span class="full-start-new__split">●</span>';
-                var splits = details.find('.full-start-new__split');
+                var inline = '<span class="logo-series-info logo-series-info--inline">' + info.latest +
+                    '</span><span class="full-start-new__split">●</span><span class="logo-series-info logo-series-info--inline">' +
+                    info.totalText + '</span>';
 
                 details.find('.logo-series-info').remove();
                 root.find('.logo-series-info--chip').remove();
-                if (splits.length) splits.first().after(inline);
-                else details.append('<span class="logo-series-info logo-series-info--inline"> · Вышло: ' + info.aired + '</span>');
+                details.children().slice(0, 3).remove();
+                details.prepend(inline);
             },
             replaceTvLabel: function(root) {
                 root.find('.card--tv .card__type').each(function() {
