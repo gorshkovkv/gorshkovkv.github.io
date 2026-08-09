@@ -6,6 +6,7 @@ const vm = require('node:vm');
 
 function loadPluginUi() {
     const params = [];
+    const components = [];
     const chain = {
         length: 0,
         append() { return this; },
@@ -21,7 +22,10 @@ function loadPluginUi() {
         $: (value) => value && value.jqueryStub ? value.jqueryStub : Object.create(chain),
         Lampa: {
             Listener: { follow() {} },
-            SettingsApi: { addParam(param) { params.push(param); } },
+            SettingsApi: {
+                addComponent(component) { components.push(component); },
+                addParam(param) { params.push(param); }
+            },
             Storage: { field() { return false; }, get() { return false; } },
             TMDB: { image(url) { return url; } }
         }
@@ -32,7 +36,7 @@ function loadPluginUi() {
         sandbox
     );
 
-    return { ui: sandbox.window.logoplugin.ui, params };
+    return { ui: sandbox.window.logoplugin.ui, params, components };
 }
 
 test('ongoing series show the latest episode with an unambiguous season separator', () => {
@@ -194,4 +198,12 @@ test('series features have independent interface settings enabled by default', (
     );
     assert.ok(params.filter((entry) => entry.param.name.startsWith('logo_series_'))
         .every((entry) => entry.param.default === true));
+});
+
+test('logo and series settings live in their own settings component', () => {
+    const { params, components } = loadPluginUi();
+
+    assert.ok(components.some((component) => component.component === 'logo_plugin'));
+    assert.ok(params.filter((entry) => entry.param.name.startsWith('logo_'))
+        .every((entry) => entry.component === 'logo_plugin'));
 });

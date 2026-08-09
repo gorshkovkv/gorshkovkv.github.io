@@ -1,50 +1,56 @@
 !function() {
     "use strict";
+
+    Lampa.SettingsApi.addComponent({
+        component: "logo_plugin",
+        name: "Карточка и логотипы",
+        icon: '<svg><use xlink:href="#sprite-card"></use></svg>'
+    });
     
     Lampa.SettingsApi.addParam({
-        component: "interface",
+        component: "logo_plugin",
         param: { name: "logo_glav", type: "trigger", default: true },
         field: { name: "Логотипы вместо названий", description: "Отображает логотипы фильмов вместо текста" }
     });
 
     Lampa.SettingsApi.addParam({
-        component: "interface",
+        component: "logo_plugin",
         param: { name: "logo_translations", type: "trigger", default: true },
         field: { name: "Переводы названий", description: "Показывать названия на разных языках под названием или логотипом." }
     });
 
     Lampa.SettingsApi.addParam({
-        component: "interface",
+        component: "logo_plugin",
         param: { name: "logo_missing_desc", type: "trigger", default: true },
         field: { name: "Замена отсутствующего описания", description: "Заменять отсутствующее описание на описание на другом языке" }
     });
 
     Lampa.SettingsApi.addParam({
-        component: "interface",
+        component: "logo_plugin",
         param: { name: "logo_high_quality", type: "trigger", default: true },
         field: { name: "Высокое качество изображений", description: "Всегда использовать высокое качество изображений, даже на мобильных устройствах" }
     });
 
     Lampa.SettingsApi.addParam({
-        component: "interface",
+        component: "logo_plugin",
         param: { name: "logo_common_style", type: "trigger", default: true },
         field: { name: "Стили", description: "Применять стили для адаптивного отображения, на телевизоре лучше отключить" }
     });
 
     Lampa.SettingsApi.addParam({
-        component: "interface",
+        component: "logo_plugin",
         param: { name: "logo_series_label", type: "trigger", default: true },
         field: { name: "Сериал вместо TV", description: "Заменять метку TV на Сериал в карточке сериала" }
     });
 
     Lampa.SettingsApi.addParam({
-        component: "interface",
+        component: "logo_plugin",
         param: { name: "logo_series_info", type: "trigger", default: true },
         field: { name: "Информация о сериях", description: "Показывать последнюю вышедшую и общее число серий" }
     });
 
     Lampa.SettingsApi.addParam({
-        component: "interface",
+        component: "logo_plugin",
         param: { name: "logo_series_status", type: "trigger", default: true },
         field: { name: "Цвет статуса сериала", description: "Подсвечивать онгоинг, завершённые и отменённые сериалы" }
     });
