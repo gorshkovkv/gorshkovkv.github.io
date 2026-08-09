@@ -31,6 +31,24 @@
         field: { name: "Стили", description: "Применять стили для адаптивного отображения, на телевизоре лучше отключить" }
     });
 
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: { name: "logo_series_label", type: "trigger", default: true },
+        field: { name: "Сериал вместо TV", description: "Заменять метку TV на Сериал в карточке сериала" }
+    });
+
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: { name: "logo_series_info", type: "trigger", default: true },
+        field: { name: "Информация о сериях", description: "Показывать вышедшие серии и количество сезонов" }
+    });
+
+    Lampa.SettingsApi.addParam({
+        component: "interface",
+        param: { name: "logo_series_status", type: "trigger", default: true },
+        field: { name: "Цвет статуса сериала", description: "Подсвечивать онгоинг, завершённые и отменённые сериалы" }
+    });
+
     if (!window.logoplugin) {
         window.logoplugin = {};
 
@@ -240,9 +258,9 @@
                 var full = $('.full-start-new').last();
 
                 if (full.length) {
-                    serialUi.replaceTvLabel(full);
-                    serialUi.appendSeriesInfo(movie, full);
-                    serialUi.applyStatusColor(movie, full);
+                    if (Lampa.Storage.get('logo_series_label', true)) serialUi.replaceTvLabel(full);
+                    if (Lampa.Storage.get('logo_series_info', true)) serialUi.appendSeriesInfo(movie, full);
+                    if (Lampa.Storage.get('logo_series_status', true)) serialUi.applyStatusColor(movie, full);
                 }
                 
                 async function tryGetLogo(lang) {

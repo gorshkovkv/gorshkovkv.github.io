@@ -5,6 +5,7 @@ const test = require('node:test');
 const vm = require('node:vm');
 
 function loadPluginUi() {
+    const params = [];
     const chain = {
         length: 0,
         append() { return this; },
@@ -20,7 +21,7 @@ function loadPluginUi() {
         $: () => Object.create(chain),
         Lampa: {
             Listener: { follow() {} },
-            SettingsApi: { addParam() {} },
+            SettingsApi: { addParam(param) { params.push(param); } },
             Storage: { field() { return false; }, get() { return false; } },
             TMDB: { image(url) { return url; } }
         }
@@ -31,11 +32,11 @@ function loadPluginUi() {
         sandbox
     );
 
-    return sandbox.window.logoplugin.ui;
+    return { ui: sandbox.window.logoplugin.ui, params };
 }
 
 test('serial info shows aired episodes instead of a clipped poster label', () => {
-    const ui = loadPluginUi();
+    const { ui } = loadPluginUi();
 
     const info = ui.getSeriesInfo({
         name: 'Hell Mode',
@@ -50,14 +51,14 @@ test('serial info shows aired episodes instead of a clipped poster label', () =>
 });
 
 test('serial info is not rendered for films or without episode data', () => {
-    const ui = loadPluginUi();
+    const { ui } = loadPluginUi();
 
     assert.equal(ui.getSeriesInfo({ title: 'A Film', number_of_episodes: 120 }), null);
     assert.equal(ui.getSeriesInfo({ name: 'Unknown Series' }), null);
 });
 
 test('known TMDB series statuses map to a visual state', () => {
-    const ui = loadPluginUi();
+    const { ui } = loadPluginUi();
 
     assert.equal(ui.getStatusKind('Returning Series'), 'ongoing');
     assert.equal(ui.getStatusKind('Ended'), 'ended');
@@ -66,7 +67,7 @@ test('known TMDB series statuses map to a visual state', () => {
 });
 
 test('Cardify receives episode progress inside its existing details row', () => {
-    const ui = loadPluginUi();
+    const { ui } = loadPluginUi();
     const details = {
         removedSelector: null,
         appended: null,
@@ -95,4 +96,16 @@ test('Cardify receives episode progress inside its existing details row', () => 
 
     assert.equal(details.removedSelector, '.logo-series-info');
     assert.equal(details.appended, '<span class="logo-series-info logo-series-info--inline"> · Вышло: 18 из 24</span>');
+});
+
+test('series features have independent interface settings enabled by default', () => {
+    const { params } = loadPluginUi();
+    const names = params.map((entry) => entry.param.name);
+
+    assert.deepEqual(
+        names.filter((name) => name.startsWith('logo_series_')),
+        ['logo_series_label', 'logo_series_info', 'logo_series_status']
+    );
+    assert.ok(params.filter((entry) => entry.param.name.startsWith('logo_series_'))
+        .every((entry) => entry.param.default === true));
 });
